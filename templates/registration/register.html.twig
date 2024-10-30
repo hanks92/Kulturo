@@ -7,17 +7,33 @@
         <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
     {% endfor %}
 
-    <h1>Register</h1>
+    <h1 class="text-2xl font-bold text-center mb-6 text-gray-800 dark:text-white">Créer un compte</h1>
 
-    {{ form_errors(registrationForm) }}
+    {{ form_start(registrationForm, {'attr': {'class': 'max-w-md mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md'}}) }}
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.email) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
-        {{ form_row(registrationForm.agreeTerms) }}
+        <div class="mb-5">
+            {{ form_label(registrationForm.email, "Email", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
+            {{ form_widget(registrationForm.email, {'attr': {'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white'}}) }}
+            {{ form_errors(registrationForm.email) }}
+        </div>
 
-        <button type="submit" class="btn">Register</button>
+        <div class="mb-5">
+            {{ form_label(registrationForm.plainPassword, "Mot de passe", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
+            {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white'}}) }}
+            {{ form_errors(registrationForm.plainPassword) }}
+        </div>
+
+        <div class="flex items-start mb-5">
+            <div class="flex items-center h-5">
+                {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800'}}) }}
+            </div>
+            {{ form_label(registrationForm.agreeTerms, 'Se souvenir de moi', {'label_attr': {'class': 'ml-2 text-sm font-medium text-gray-900 dark:text-gray-300'}}) }}
+            {{ form_errors(registrationForm.agreeTerms) }}
+        </div>
+
+        <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-700 dark:hover:bg-blue-800 dark:focus:ring-blue-900">
+            Créer un compte
+        </button>
+
     {{ form_end(registrationForm) }}
 {% endblock %}
