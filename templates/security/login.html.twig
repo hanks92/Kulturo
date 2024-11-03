@@ -1,37 +1,48 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% block title %}Connexion{% endblock %}
 
 {% block body %}
-<form method="post">
+<form method="post" class="max-w-md mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
     {% if error %}
-        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-    {% endif %}
-
-    {% if app.user %}
-        <div class="mb-3">
-            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a>
+        <div class="mb-4 p-4 text-red-700 bg-red-100 rounded-lg" role="alert">
+            {{ error.messageKey|trans(error.messageData, 'security') }}
         </div>
     {% endif %}
 
-    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-    <label for="inputEmail">Email</label>
-    <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" required autofocus>
-    <label for="inputPassword">Password</label>
-    <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
+    {% if app.user %}
+        <div class="mb-3 text-center text-gray-800 dark:text-white">
+            Vous êtes connecté en tant que {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}" class="text-blue-600 hover:underline">Déconnexion</a>
+        </div>
+    {% endif %}
 
-    <input type="hidden" name="_csrf_token"
-           value="{{ csrf_token('authenticate') }}"
-    >
+    <!-- Réduire la marge supérieure pour remonter le titre -->
+    <h1 class="text-2xl font-bold text-center mb-6 mt-6 text-gray-800 dark:text-white">Connexion</h1>
 
-    <div class="checkbox mb-3">
-        <label>
-            <input type="checkbox" name="_remember_me"> Remember me
-        </label>
+    <!-- Email -->
+    <div class="mb-5">
+        <label for="inputEmail" class="block text-sm font-medium text-gray-900 dark:text-white">Email</label>
+        <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" autocomplete="email" required autofocus>
     </div>
 
-    <button class="btn btn-lg btn-primary" type="submit">
-        Sign in
+    <!-- Password -->
+    <div class="mb-5">
+        <label for="inputPassword" class="block text-sm font-medium text-gray-900 dark:text-white">Mot de passe</label>
+        <input type="password" name="password" id="inputPassword" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" autocomplete="current-password" required>
+    </div>
+
+    <!-- CSRF Token -->
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+    <!-- Remember Me -->
+    <div class="flex items-start mb-5">
+        <input type="checkbox" name="_remember_me" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600">
+        <label for="_remember_me" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Se souvenir de moi</label>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-700 dark:hover:bg-blue-800 dark:focus:ring-blue-900">
+        Connexion
     </button>
 </form>
 {% endblock %}
