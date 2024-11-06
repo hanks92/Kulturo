@@ -13,12 +13,8 @@
     </head>
     <body>
         {% block header %}
-            {# Vérifie si l'utilisateur est connecté pour afficher la bonne navbar #}
-            {% if app.user %}
-                {% include "base/_navbar_connected.html.twig" %}
-            {% else %}
-                {% include "base/_navbar.html.twig" %}
-            {% endif %}
+            {# Inclusion de la navbar combinée pour gérer l'affichage en fonction de l'état de connexion #}
+            {% include "base/_navbar.html.twig" %}
         {% endblock %}
         
         {% block body %}
