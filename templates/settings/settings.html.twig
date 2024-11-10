@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier les paramètres{% endblock %}
+
+{% block body %}
+    <h1 class="text-2xl font-bold text-center mb-6 mt-10 text-gray-800 dark:text-white">Modifier vos paramètres</h1>
+
+    {{ form_start(settingsForm, {'attr': {'class': 'max-w-md mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md'}}) }}
+
+        <div class="mb-5">
+            {{ form_label(settingsForm.username, "Nom d'utilisateur", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
+            {{ form_widget(settingsForm.username) }}
+            {{ form_errors(settingsForm.username) }}
+        </div>
+
+        <div class="mb-5">
+            {{ form_label(settingsForm.plainPassword, "Mot de passe", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
+            {{ form_widget(settingsForm.plainPassword) }}
+            {{ form_errors(settingsForm.plainPassword) }}
+        </div>
+
+        <div class="mb-5">
+            {{ form_label(settingsForm.profileImage, "Photo de profil", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
+            {{ form_widget(settingsForm.profileImage) }}
+            {{ form_errors(settingsForm.profileImage) }}
+        </div>
+
+        <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-700 dark:hover:bg-blue-800 dark:focus:ring-blue-900">
+            Enregistrer les modifications
+        </button>
+
+    {{ form_end(settingsForm) }}
+{% endblock %}
