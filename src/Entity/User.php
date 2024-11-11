@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -42,6 +44,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 25, nullable: true)]
     private ?string $username = null;
+
+    /**
+     * @var Collection<int, Deck>
+     */
+    #[ORM\OneToMany(targetEntity: Deck::class, mappedBy: 'owner')]
+    private Collection $decks;
+
+    public function __construct()
+    {
+        $this->decks = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -150,6 +163,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(?string $username): static
     {
         $this->username = $username;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Deck>
+     */
+    public function getDecks(): Collection
+    {
+        return $this->decks;
+    }
+
+    public function addDeck(Deck $deck): static
+    {
+        if (!$this->decks->contains($deck)) {
+            $this->decks->add($deck);
+            $deck->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDeck(Deck $deck): static
+    {
+        if ($this->decks->removeElement($deck)) {
+            // set the owning side to null (unless already changed)
+            if ($deck->getOwner() === $this) {
+                $deck->setOwner(null);
+            }
+        }
 
         return $this;
     }
