@@ -34,16 +34,9 @@ class Deck
     #[ORM\OneToMany(targetEntity: Flashcard::class, mappedBy: 'deck')]
     private Collection $flashcards;
 
-    /**
-     * @var Collection<int, RevisionSession>
-     */
-    #[ORM\OneToMany(targetEntity: RevisionSession::class, mappedBy: 'deck')]
-    private Collection $revisionSessions;
-
     public function __construct()
     {
         $this->flashcards = new ArrayCollection();
-        $this->revisionSessions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -123,36 +116,6 @@ class Deck
             // set the owning side to null (unless already changed)
             if ($flashcard->getDeck() === $this) {
                 $flashcard->setDeck(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, RevisionSession>
-     */
-    public function getRevisionSessions(): Collection
-    {
-        return $this->revisionSessions;
-    }
-
-    public function addRevisionSession(RevisionSession $revisionSession): static
-    {
-        if (!$this->revisionSessions->contains($revisionSession)) {
-            $this->revisionSessions->add($revisionSession);
-            $revisionSession->setDeck($this);
-        }
-
-        return $this;
-    }
-
-    public function removeRevisionSession(RevisionSession $revisionSession): static
-    {
-        if ($this->revisionSessions->removeElement($revisionSession)) {
-            // set the owning side to null (unless already changed)
-            if ($revisionSession->getDeck() === $this) {
-                $revisionSession->setDeck(null);
             }
         }
 

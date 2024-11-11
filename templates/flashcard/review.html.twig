@@ -1,0 +1,9 @@
+<h2>{{ flashcard.question }}</h2>
+<button onclick="document.getElementById('answer').style.display = 'block'">Show Answer</button>
+<div id="answer" style="display: none;">
+  <p>{{ flashcard.answer }}</p>
+</div>
+<form method="post" action="{{ path('flashcard_update_progress', { id: flashcard.id }) }}">
+  <button name="result" value="known">Known</button>
+  <button name="result" value="review">Review</button>
+</form>
