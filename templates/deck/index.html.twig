@@ -1,13 +1,28 @@
-<h1>My Decks</h1>
+{% extends 'base.html.twig' %}
 
-<a href="{{ path('deck_create') }}" class="btn btn-primary">Créer un deck</a>
+{% block title %}My Decks{% endblock %}
 
-<ul>
-    {% for deck in decks %}
-        <li>
-            <a href="{{ path('deck_show', { id: deck.id }) }}">{{ deck.title }}</a>
-        </li>
-    {% else %}
-        <li>No decks found.</li>
-    {% endfor %}
-</ul>
+{% block body %}
+    <div style="display: flex; flex-direction: column; align-items: center; text-align: center; min-height: 80vh;">
+
+        <h1 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 1.5rem;">My Decks</h1>
+
+        <ul style="list-style: none; padding: 0; width: 100%; max-width: 600px;">
+            {% for deck in decks %}
+                <li style="margin: 1rem 0;">
+                    <a href="{{ path('deck_show', { id: deck.id }) }}" class="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800" style="display: block; width: 100%; text-decoration: none;">
+                        {{ deck.title }}
+                    </a>
+                </li>
+            {% else %}
+                <li style="font-size: 1.25rem; color: #888;">No decks found.</li>
+            {% endfor %}
+        </ul>
+
+        <div style="margin-top: auto;">
+            <a href="{{ path('deck_create') }}" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                Créer un deck
+            </a>
+        </div>
+    </div>
+{% endblock %}
