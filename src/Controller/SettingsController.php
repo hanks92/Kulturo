@@ -32,21 +32,10 @@ class SettingsController extends AbstractController
                 $user->setPassword($encodedPassword);
             }
 
-            // Gestion du téléchargement de la photo de profil
-            /** @var UploadedFile $profileImageFile */
-            $profileImageFile = $form->get('profileImage')->getData();
-            if ($profileImageFile) {
-                $newFilename = uniqid() . '.' . $profileImageFile->guessExtension();
-
-                try {
-                    $profileImageFile->move(
-                        $this->getParameter('profile_images_directory'),
-                        $newFilename
-                    );
-                    $user->setProfileImage($newFilename);
-                } catch (FileException $e) {
-                    $this->addFlash('error', 'Erreur lors de l\'upload de l\'image de profil.');
-                }
+            // Gestion du choix de l'avatar (pas d'upload, mais un chemin prédéfini)
+            $selectedAvatar = $form->get('profileImage')->getData();
+            if ($selectedAvatar) {
+                $user->setProfileImage($selectedAvatar);
             }
 
             // Enregistrer les modifications dans la base de données

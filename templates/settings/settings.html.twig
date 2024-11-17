@@ -20,8 +20,15 @@
         </div>
 
         <div class="mb-5">
-            {{ form_label(settingsForm.profileImage, "Photo de profil", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
-            {{ form_widget(settingsForm.profileImage) }}
+            {{ form_label(settingsForm.profileImage, "Choisissez un avatar", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
+            <div class="grid grid-cols-4 gap-4">
+                {% for choice in settingsForm.profileImage %}
+                    <label class="block text-center">
+                        {{ form_widget(choice, {'attr': {'class': 'hidden'}}) }}
+                        <img src="{{ choice.vars.value }}" alt="{{ choice.vars.label }}" class="cursor-pointer w-20 h-20 rounded-full border-2 border-gray-300 hover:border-blue-500">
+                    </label>
+                {% endfor %}
+            </div>
             {{ form_errors(settingsForm.profileImage) }}
         </div>
 
