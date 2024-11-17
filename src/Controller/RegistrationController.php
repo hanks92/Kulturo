@@ -29,8 +29,8 @@ class RegistrationController extends AbstractController
         Request $request, 
         UserPasswordHasherInterface $userPasswordHasher, 
         EntityManagerInterface $entityManager,
-        UserAuthenticatorInterface $userAuthenticator,  // Ajout de UserAuthenticatorInterface
-        AppAuthenticator $authenticator // Ajout de AppAuthenticator
+        UserAuthenticatorInterface $userAuthenticator, 
+        AppAuthenticator $authenticator 
     ): Response {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -40,13 +40,26 @@ class RegistrationController extends AbstractController
             /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
 
-            // encode the plain password
+            // Encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
+            // Set the username
+            $username = $form->get('username')->getData();
+            if ($username) {
+                $user->setUsername($username);
+            }
+
+            // Set the selected avatar
+            $profileImage = $form->get('profileImage')->getData();
+            if ($profileImage) {
+                $user->setProfileImage($profileImage);
+            }
+
+            // Persist the user in the database
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // generate a signed url and email it to the user
+            // Generate a signed URL and email it to the user
             $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
                 (new TemplatedEmail())
                     ->from(new Address('flint@flint.com', 'Bot'))
@@ -55,7 +68,7 @@ class RegistrationController extends AbstractController
                     ->htmlTemplate('registration/confirmation_email.html.twig')
             );
 
-            // Connexion automatique de l'utilisateur après l'inscription
+            // Auto-login the user after registration
             return $userAuthenticator->authenticateUser(
                 $user,
                 $authenticator,
@@ -73,7 +86,6 @@ class RegistrationController extends AbstractController
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-        // validate email confirmation link, sets User::isVerified=true and persists
         try {
             /** @var User $user */
             $user = $this->getUser();
@@ -84,7 +96,6 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_register');
         }
 
-        // @TODO Change the redirect on success and handle or remove the flash message in your templates
         $this->addFlash('success', 'Your email address has been verified.');
 
         return $this->redirectToRoute('app_home');

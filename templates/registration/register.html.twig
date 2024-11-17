@@ -19,6 +19,25 @@
         </div>
 
         <div class="mb-5">
+            {{ form_label(registrationForm.username, "Nom d'utilisateur", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
+            {{ form_widget(registrationForm.username, {'attr': {'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white'}}) }}
+            {{ form_errors(registrationForm.username) }}
+        </div>
+
+        <div class="mb-5">
+            <label for="profileImage" class="block text-sm font-medium text-gray-900 dark:text-white">Choisissez un avatar</label>
+            <div class="grid grid-cols-4 gap-4 mt-2">
+                {% for choice in registrationForm.profileImage %}
+                    <label class="cursor-pointer">
+                        {{ form_widget(choice) }}
+                        <img src="{{ asset(choice.vars.value) }}" alt="Avatar" class="w-16 h-16 rounded-full border border-gray-300">
+                    </label>
+                {% endfor %}
+            </div>
+            {{ form_errors(registrationForm.profileImage) }}
+        </div>
+
+        <div class="mb-5">
             {{ form_label(registrationForm.plainPassword, "Mot de passe", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
             {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white'}}) }}
             {{ form_errors(registrationForm.plainPassword) }}
