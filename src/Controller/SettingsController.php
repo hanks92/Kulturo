@@ -18,6 +18,10 @@ class SettingsController extends AbstractController
     {
         $user = $this->getUser();
 
+        // Vérification explicite pour éviter les erreurs
+        if (!$user instanceof \App\Entity\User) {
+            throw $this->createAccessDeniedException('Vous devez être connecté pour accéder à cette page.');
+        }
         // Créer le formulaire et lier les données de l'utilisateur
         $form = $this->createForm(SettingsType::class, $user);
 
