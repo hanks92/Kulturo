@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Deck;
 use App\Entity\Flashcard;
+use App\Entity\Revision;
 use App\Form\FlashcardType;
 use App\Repository\FlashcardRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -47,9 +48,24 @@ class FlashcardController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Persist la flashcard
             $entityManager->persist($flashcard);
+
+            // Crée une révision associée
+            $revision = new Revision();
+            $revision->setFlashcard($flashcard);
+            $revision->setReviewDate(new \DateTime()); // Initialiser à aujourd'hui
+            $revision->setInterval(1); // Intervalle initial
+            $revision->setEaseFactor(2.5); // Facteur initial
+            $revision->setStatus('ready'); // Statut initial
+
+            // Persist la révision
+            $entityManager->persist($revision);
+
+            // Sauvegarde les deux entités
             $entityManager->flush();
 
+            // Redirige vers la page du deck
             return $this->redirectToRoute('deck_show', ['id' => $deck->getId()]);
         }
 

@@ -6,7 +6,7 @@
     <div style="display: flex; flex-direction: column; align-items: center; text-align: center; min-height: 80vh;">
         <h1 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 1.5rem;">{{ deck.title }}</h1>
 
-        <a href="{{ path('flashcard_review', { id: deck.id }) }}" 
+        <a href="{{ path('app_review_start') }}" 
            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-4 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
             Start Review
         </a>
