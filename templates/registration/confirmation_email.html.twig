@@ -1,11 +1,78 @@
-<h1>Hi! Please confirm your email!</h1>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation de votre email</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1e40af;
+        }
+        p {
+            line-height: 1.6;
+        }
+        .cta-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3b82f6;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .cta-button:hover {
+            background-color: #2563eb;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #666666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bienvenue dans Flint !</h1>
 
-<p>
-    Please confirm your email address by clicking the following link: <br><br>
-    <a href="{{ signedUrl|raw }}">Confirm my Email</a>.
-    This link will expire in {{ expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle') }}.
-</p>
+        <p>
+            Bonjour,<br><br>
+            Merci de rejoindre <strong>Flint</strong>, l'application qui vous aide à maîtriser vos connaissances grâce à des flashcards intelligentes basées sur la mémorisation espacée !
+        </p>
 
-<p>
-    Cheers!
-</p>
+        <p>
+            Avant de commencer, veuillez confirmer votre adresse email en cliquant sur le bouton ci-dessous :
+        </p>
+
+        <a href="{{ signedUrl|raw }}" class="cta-button">Confirmer mon email</a>
+
+        <p>
+            Ce lien est valide jusqu'à {{ expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle') }}. Après cela, vous devrez en demander un nouveau.
+        </p>
+
+        <p>
+            À très vite pour vos premières révisions efficaces ! 🚀
+        </p>
+
+        <p class="footer">
+            L'équipe Flint ❤️
+        </p>
+    </div>
+</body>
+</html>
