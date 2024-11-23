@@ -65,8 +65,8 @@ class FlashcardController extends AbstractController
             // Sauvegarde les deux entités
             $entityManager->flush();
 
-            // Redirige vers la page du deck
-            return $this->redirectToRoute('deck_show', ['id' => $deck->getId()]);
+            // Redirige vers la page de création pour ajouter une nouvelle flashcard
+            return $this->redirectToRoute('flashcard_create', ['id' => $deck->getId()]);
         }
 
         return $this->render('flashcard/create.html.twig', [
