@@ -1,33 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
 <div class="max-w-xl mx-auto mt-10 p-4 bg-white shadow rounded">
     <h2 class="text-lg font-bold mb-4">Réviser la carte</h2>
 
     <div class="bg-gray-100 p-4 rounded mb-4">
-        <p>{{ flashcard.question }}</p>
+        {% if flashcard %}
+            <p>{{ flashcard.question }}</p>
+        {% else %}
+            <p class="text-red-500 font-bold">Aucune carte disponible pour le moment.</p>
+        {% endif %}
     </div>
 
+    {% if flashcard %}
     <form id="review-form" class="space-y-4" method="post" action="{{ path('app_review_session', { 'id': revision.id }) }}">
         <input type="hidden" name="response" id="response" value="">
 
         <div class="flex justify-between">
             <button type="button" 
-                class="bg-red-500 text-white px-4 py-2 rounded"
+                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
                 onclick="submitResponse('a_revoir')">À revoir</button>
             <button type="button" 
-                class="bg-yellow-500 text-white px-4 py-2 rounded"
+                class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition"
                 onclick="submitResponse('difficile')">Difficile</button>
             <button type="button" 
-                class="bg-blue-500 text-white px-4 py-2 rounded"
+                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
                 onclick="submitResponse('correct')">Correct</button>
             <button type="button" 
-                class="bg-green-500 text-white px-4 py-2 rounded"
+                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
                 onclick="submitResponse('facile')">Facile</button>
         </div>
     </form>
+    {% endif %}
 </div>
 
 <script>
     function submitResponse(response) {
+        // Définit la réponse dans l'input caché
         document.getElementById('response').value = response;
+
+        // Soumet le formulaire pour passer à la carte suivante
         document.getElementById('review-form').submit();
     }
 </script>
+{% endblock %}
