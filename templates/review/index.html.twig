@@ -6,7 +6,7 @@
 
     <div class="bg-gray-100 p-4 rounded mb-4">
         {% if flashcard %}
-            <p>{{ flashcard.question }}</p>
+            <p id="question-text">{{ flashcard.question }}</p>
         {% else %}
             <p class="text-red-500 font-bold">Aucune carte disponible pour le moment.</p>
         {% endif %}
@@ -16,7 +16,11 @@
     <form id="review-form" class="space-y-4" method="post" action="{{ path('app_review_session', { 'id': revision.id }) }}">
         <input type="hidden" name="response" id="response" value="">
 
-        <div class="flex justify-between">
+        <div id="answer-section" class="hidden bg-gray-100 p-4 rounded mb-4">
+            <p id="answer-text">{{ flashcard.answer }}</p>
+        </div>
+
+        <div id="buttons-section" class="hidden flex justify-between">
             <button type="button" 
                 class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
                 onclick="submitResponse('a_revoir')">À revoir</button>
@@ -30,11 +34,26 @@
                 class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
                 onclick="submitResponse('facile')">Facile</button>
         </div>
+
+        <div class="flex justify-center">
+            <button type="button" id="show-answer-button"
+                class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition"
+                onclick="showAnswer()">Afficher la réponse</button>
+        </div>
     </form>
     {% endif %}
 </div>
 
 <script>
+    function showAnswer() {
+        // Affiche la section réponse et les boutons
+        document.getElementById('answer-section').classList.remove('hidden');
+        document.getElementById('buttons-section').classList.remove('hidden');
+
+        // Cache le bouton "Afficher la réponse"
+        document.getElementById('show-answer-button').classList.add('hidden');
+    }
+
     function submitResponse(response) {
         // Définit la réponse dans l'input caché
         document.getElementById('response').value = response;
