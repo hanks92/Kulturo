@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Deck;
 use App\Entity\Revision;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -17,31 +18,36 @@ class RevisionRepository extends ServiceEntityRepository
     }
 
     /**
-     * Récupérer la prochaine carte à réviser (si elle existe)
+     * Récupérer la prochaine carte à réviser pour un deck spécifique
      */
-    public function findNextFlashcardForToday(): ?Revision
+    public function findNextFlashcardForTodayByDeck(Deck $deck): ?Revision
     {
         return $this->createQueryBuilder('r')
-            ->where('r.reviewDate <= :today') // Date de révision due aujourd'hui ou avant
+            ->innerJoin('r.flashcard', 'f') // Jointure avec Flashcard
+            ->andWhere('f.deck = :deck') // Filtre par Deck
+            ->andWhere('r.reviewDate <= :today') // Filtre sur la date de révision
+            ->setParameter('deck', $deck)
             ->setParameter('today', new \DateTime()) // Date actuelle
-            ->orderBy('r.reviewDate', 'ASC') // Trier par la date de révision la plus ancienne
-            ->setMaxResults(1) // Récupérer une seule carte
+            ->orderBy('r.reviewDate', 'ASC') // Trier par la date de révision
+            ->setMaxResults(1) // Limiter à une révision
             ->getQuery()
-            ->getOneOrNullResult(); // Retourner un résultat ou null
+            ->getOneOrNullResult(); // Retourner une révision ou null
     }
 
     /**
-     * Récupérer toutes les cartes à réviser pour aujourd'hui
-     *
-     * @return Revision[] Retourne un tableau de révisions prêtes
+     * Récupérer toutes les cartes à réviser pour un deck spécifique
      */
-    public function findAllFlashcardsToReview(): array
+    public function findAllFlashcardsToReviewByDeck(Deck $deck): array
     {
         return $this->createQueryBuilder('r')
-            ->where('r.reviewDate <= :today') // Date de révision due aujourd'hui ou avant
+            ->innerJoin('r.flashcard', 'f') // Jointure avec Flashcard
+            ->andWhere('f.deck = :deck') // Filtre par Deck
+            ->andWhere('r.reviewDate <= :today') // Filtre sur la date de révision
+            ->setParameter('deck', $deck)
             ->setParameter('today', new \DateTime()) // Date actuelle
-            ->orderBy('r.reviewDate', 'ASC') // Trier par la date de révision la plus ancienne
+            ->orderBy('r.reviewDate', 'ASC') // Trier par la date de révision
             ->getQuery()
-            ->getResult(); // Retourner un tableau de résultats
+            ->getResult(); // Retourner un tableau de révisions
     }
 }
+

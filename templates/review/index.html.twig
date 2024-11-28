@@ -1,8 +1,10 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Révision : {{ revision.flashcard.deck.title }}{% endblock %}
+
 {% block body %}
 <div class="max-w-xl mx-auto mt-10 p-4 bg-white shadow rounded">
-    <h2 class="text-lg font-bold mb-4">Réviser la carte</h2>
+    <h2 class="text-lg font-bold mb-4">Réviser une carte pour le deck : {{ revision.flashcard.deck.title }}</h2>
 
     <div class="bg-gray-100 p-4 rounded mb-4">
         {% if flashcard %}
