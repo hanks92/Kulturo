@@ -10,13 +10,9 @@ class SM2Algorithm
         string $response, 
         array $learningSteps = [1, 10, 1440] // Étapes d'apprentissage en minutes (1m, 10m, 1j)
     ): array {
-        // Valeurs par défaut pour une nouvelle carte
-        if ($interval === null) {
-            $interval = 0; // Étape initiale d'apprentissage
-        }
-        if ($easeFactor === null) {
-            $easeFactor = 2.5; // Facteur d'aisance initial
-        }
+        // Initialisation des valeurs par défaut si null
+        $interval = $interval ?? 0; 
+        $easeFactor = $easeFactor ?? 2.5;
 
         // Mapper la réponse utilisateur à une qualité
         $quality = match ($response) {
@@ -29,15 +25,16 @@ class SM2Algorithm
 
         // Gestion des étapes d'apprentissage
         if ($interval === 0 || $interval < count($learningSteps)) {
-            // "Interval" agit comme un index pour les étapes d'apprentissage
-            $stepIndex = $interval; // Étape actuelle
+            $stepIndex = $interval;
+
+            // Réinitialisation en cas de mauvaise réponse
             if ($quality <= 2) {
-                $stepIndex = 0; // Réinitialisation en cas de mauvaise réponse
+                $stepIndex = 0;
             } else {
                 $stepIndex++; // Passer à l'étape suivante
             }
 
-            // Si encore dans les étapes d'apprentissage
+            // Si dans les étapes d'apprentissage
             if ($stepIndex < count($learningSteps)) {
                 $nextReviewDate = (new \DateTime())->modify("+" . $learningSteps[$stepIndex] . " minutes");
                 return [
@@ -47,8 +44,8 @@ class SM2Algorithm
                 ];
             }
 
-            // Si toutes les étapes d'apprentissage sont terminées
-            $interval = 1; // Première révision "apprise"
+            // Transition vers révision régulière
+            $interval = 1;
         }
 
         // Gestion des cartes apprises
@@ -62,11 +59,9 @@ class SM2Algorithm
             }
         }
 
-        // Calculer le nouveau facteur d'aisance
+        // Calcul du facteur d'aisance (ease factor)
         $easeFactor += (0.1 - (5 - $quality) * (0.08 + (5 - $quality) * 0.02));
-
-        // Assurer un facteur d'aisance minimum de 1.3
-        $easeFactor = max($easeFactor, 1.3);
+        $easeFactor = max($easeFactor, 1.3); // Assurer un minimum de 1.3
 
         // Calculer la date de la prochaine révision
         $nextReviewDate = (new \DateTime())->modify("+$interval days");
@@ -78,4 +73,3 @@ class SM2Algorithm
         ];
     }
 }
-
