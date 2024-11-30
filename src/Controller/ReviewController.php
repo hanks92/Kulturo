@@ -28,6 +28,7 @@ class ReviewController extends AbstractController
         // Récupérer le Deck
         $deck = $this->entityManager->getRepository(Deck::class)->find($deckId);
 
+        // Vérifier si le Deck existe et appartient à l'utilisateur
         if (!$deck || $deck->getOwner() !== $this->getUser()) {
             throw $this->createNotFoundException('Deck introuvable ou accès refusé.');
         }
@@ -37,6 +38,7 @@ class ReviewController extends AbstractController
             ->getRepository(Revision::class)
             ->findNextFlashcardForTodayByDeck($deck);
 
+        // Si aucune carte à réviser, afficher un message de fin
         if (!$flashcard) {
             return $this->render('review/finished.html.twig', [
                 'message' => 'Toutes les cartes ont été révisées pour ce deck aujourd\'hui !',
@@ -57,10 +59,12 @@ class ReviewController extends AbstractController
             throw $this->createNotFoundException('Révision non autorisée.');
         }
 
+        // Si une réponse est soumise (méthode POST)
         if ($request->isMethod('POST')) {
             // Récupérer la réponse utilisateur (facile, correct, difficile, à revoir)
             $response = $request->request->get('response');
 
+            // Vérifier la validité de la réponse
             if (!in_array($response, ['facile', 'correct', 'difficile', 'a_revoir'])) {
                 $this->addFlash('error', 'Réponse invalide.');
                 return $this->redirectToRoute('app_review_session', ['id' => $revision->getId()]);
@@ -78,7 +82,7 @@ class ReviewController extends AbstractController
             $revision->setInterval($result['interval']);
             $revision->setReviewDate($result['nextReviewDate']);
 
-            // Sauvegarder les changements
+            // Sauvegarder les changements dans la base de données
             $this->entityManager->persist($revision);
             $this->entityManager->flush();
 
@@ -87,6 +91,7 @@ class ReviewController extends AbstractController
                 ->getRepository(Revision::class)
                 ->findNextFlashcardForTodayByDeck($deck);
 
+            // Si aucune carte suivante, afficher un message de fin
             if (!$nextRevision) {
                 return $this->render('review/finished.html.twig', [
                     'message' => 'Toutes les cartes ont été révisées pour ce deck aujourd\'hui !',
@@ -111,6 +116,7 @@ class ReviewController extends AbstractController
         // Récupérer le Deck
         $deck = $this->entityManager->getRepository(Deck::class)->find($deckId);
 
+        // Vérifier si le Deck existe et appartient à l'utilisateur
         if (!$deck || $deck->getOwner() !== $this->getUser()) {
             throw $this->createNotFoundException('Deck introuvable ou accès refusé.');
         }
@@ -120,8 +126,8 @@ class ReviewController extends AbstractController
             ->getRepository(Revision::class)
             ->findNextFlashcardForTodayByDeck($deck);
 
+        // Si aucune carte à réviser, afficher un message de fin
         if (!$nextRevision) {
-            // Si aucune carte à réviser
             return $this->render('review/finished.html.twig', [
                 'message' => 'Toutes les cartes ont été révisées pour ce deck aujourd\'hui !',
                 'deck' => $deck, // Ajout de deck ici
@@ -146,6 +152,7 @@ class ReviewController extends AbstractController
         // Récupérer la réponse utilisateur (facile, correct, difficile, à revoir)
         $response = $request->request->get('response');
 
+        // Vérifier la validité de la réponse
         if (!in_array($response, ['facile', 'correct', 'difficile', 'a_revoir'])) {
             $this->addFlash('error', 'Réponse invalide.');
             return $this->redirectToRoute('app_review', ['deckId' => $deck->getId()]);

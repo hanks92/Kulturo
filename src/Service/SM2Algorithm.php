@@ -14,7 +14,7 @@ class SM2Algorithm
         $interval = $interval ?? 0; 
         $easeFactor = $easeFactor ?? 2.5;
 
-        // Mapper la réponse utilisateur à une qualité
+        // Mapper la réponse utilisateur à une qualité (de 0 à 5)
         $quality = match ($response) {
             'facile' => 5,
             'correct' => 4,
@@ -23,53 +23,56 @@ class SM2Algorithm
             default => throw new \InvalidArgumentException("Réponse invalide : $response"),
         };
 
-        // Gestion des étapes d'apprentissage
-        if ($interval === 0 || $interval < count($learningSteps)) {
-            $stepIndex = $interval;
-
-            // Réinitialisation en cas de mauvaise réponse
-            if ($quality <= 2) {
-                $stepIndex = 0;
-            } else {
-                $stepIndex++; // Passer à l'étape suivante
-            }
-
-            // Si dans les étapes d'apprentissage
-            if ($stepIndex < count($learningSteps)) {
-                $nextReviewDate = (new \DateTime())->modify("+" . $learningSteps[$stepIndex] . " minutes");
-                return [
-                    'nextReviewDate' => $nextReviewDate,
-                    'easeFactor' => $easeFactor,
-                    'interval' => $stepIndex,
-                ];
-            }
-
-            // Transition vers révision régulière
-            $interval = 1;
+        // Si qualité très basse, réinitialisation immédiate
+        if ($quality <= 2) {
+            $interval = 0; // Réinitialisation des étapes d'apprentissage
+            $easeFactor = max($easeFactor - 0.2, 1.3); // Réduction du facteur d'aisance
+            $nextReviewDate = (new \DateTime())->modify("+{$learningSteps[0]} minutes");
+            return [
+                'nextReviewDate' => $nextReviewDate,
+                'easeFactor' => $easeFactor,
+                'interval' => $interval,
+            ];
         }
 
-        // Gestion des cartes apprises
-        if ($quality <= 2) {
-            $interval = 1; // Réinitialisation en cas de mauvaise réponse
-        } else {
+        // Gestion des étapes d'apprentissage
+        if ($interval < count($learningSteps)) {
+            // Recalcul du facteur d'aisance
+            $easeFactor += (0.1 - (5 - $quality) * (0.08 + (5 - $quality) * 0.02));
+            $easeFactor = max($easeFactor, 1.3); // Assurer un minimum de 1.3
+
+            $nextInterval = $interval + 1; // Progression dans les étapes
+            $nextReviewDate = (new \DateTime())->modify("+" . $learningSteps[$nextInterval] . " minutes");
+            return [
+                'nextReviewDate' => $nextReviewDate,
+                'easeFactor' => $easeFactor,
+                'interval' => $nextInterval,
+            ];
+        }
+
+        // Gestion des révisions régulières pour les cartes apprises
+        if ($interval >= count($learningSteps)) {
+            // Calcul du nouvel intervalle
             if ($interval === 1) {
-                $interval = 6; // Première révision après apprentissage
+                $interval = 6; // Première révision
             } else {
                 $interval = (int) round($interval * $easeFactor);
             }
+
+            // Calcul du facteur d'aisance (ease factor)
+            $easeFactor += (0.1 - (5 - $quality) * (0.08 + (5 - $quality) * 0.02));
+            $easeFactor = max($easeFactor, 1.3); // Assurer un minimum de 1.3
+
+            // Calculer la date de la prochaine révision
+            $nextReviewDate = (new \DateTime())->modify("+$interval days");
+            return [
+                'nextReviewDate' => $nextReviewDate,
+                'easeFactor' => $easeFactor,
+                'interval' => $interval,
+            ];
         }
 
-        // Calcul du facteur d'aisance (ease factor)
-        $easeFactor += (0.1 - (5 - $quality) * (0.08 + (5 - $quality) * 0.02));
-        $easeFactor = max($easeFactor, 1.3); // Assurer un minimum de 1.3
-
-        // Calculer la date de la prochaine révision
-        $nextReviewDate = (new \DateTime())->modify("+$interval days");
-
-        return [
-            'nextReviewDate' => $nextReviewDate,
-            'easeFactor' => $easeFactor,
-            'interval' => $interval,
-        ];
+        // Cas par défaut si aucune règle ne s'applique
+        throw new \LogicException('Calcul SM2 inattendu.');
     }
 }
