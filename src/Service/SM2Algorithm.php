@@ -8,71 +8,79 @@ class SM2Algorithm
         ?float $easeFactor, 
         ?int $interval, 
         string $response, 
-        array $learningSteps = [1, 10, 1440] // Étapes d'apprentissage en minutes (1m, 10m, 1j)
+        ?float $stability = 1.0, 
+        ?float $retrievability = 0.9
     ): array {
-        // Initialisation des valeurs par défaut si null
-        $interval = $interval ?? 0; 
+        // Initialisation des valeurs par défaut si elles sont nulles
         $easeFactor = $easeFactor ?? 2.5;
+        $interval = $interval ?? 0;
+        $stability = $stability ?? 1.0;
+        $retrievability = $retrievability ?? 0.9;
 
-        // Mapper la réponse utilisateur à une qualité (de 0 à 5)
+        // Mapper la réponse utilisateur à une qualité entre 0 et 1
         $quality = match ($response) {
-            'facile' => 5,
-            'correct' => 4,
-            'difficile' => 3,
-            'a_revoir' => 1,
+            'facile' => 1.0,  // Réponse parfaite
+            'correct' => 0.8, // Bonne réponse
+            'difficile' => 0.6, // Réponse difficile
+            'a_revoir' => 0.0,  // À revoir (spécial)
             default => throw new \InvalidArgumentException("Réponse invalide : $response"),
         };
 
-        // Si qualité très basse, réinitialisation immédiate
-        if ($quality <= 2) {
-            $interval = 0; // Réinitialisation des étapes d'apprentissage
-            $easeFactor = max($easeFactor - 0.2, 1.3); // Réduction du facteur d'aisance
-            $nextReviewDate = (new \DateTime())->modify("+{$learningSteps[0]} minutes");
+        // Cas spécial : "À revoir"
+        if ($response === 'a_revoir') {
+            // Réinitialiser la carte pour la revoir rapidement
+            $stability = max($stability * 0.5, 0.1); // Réduire significativement la stabilité
+            $retrievability = 0.01; // Supposer un oubli quasi-total
+            $nextInterval = 1 / 1440; // Fixer à 1 minute (1/1440 jour)
+
+            // Assurer que l'intervalle est en minutes dans le retour
+            $nextIntervalMinutes = max(1, round($nextInterval * 1440)); // Minimum 1 minute
+
+            $nextReviewDate = (new \DateTime())->modify("+$nextIntervalMinutes minutes");
+
             return [
                 'nextReviewDate' => $nextReviewDate,
-                'easeFactor' => $easeFactor,
-                'interval' => $interval,
+                'easeFactor' => max($easeFactor - 0.2, 1.3), // Diminue légèrement le easeFactor
+                'interval' => $nextIntervalMinutes, // Intervalle en minutes
+                'stability' => $stability,
+                'retrievability' => $retrievability,
             ];
         }
 
-        // Gestion des étapes d'apprentissage
-        if ($interval < count($learningSteps)) {
-            // Recalcul du facteur d'aisance
-            $easeFactor += (0.1 - (5 - $quality) * (0.08 + (5 - $quality) * 0.02));
-            $easeFactor = max($easeFactor, 1.3); // Assurer un minimum de 1.3
-
-            $nextInterval = $interval + 1; // Progression dans les étapes
-            $nextReviewDate = (new \DateTime())->modify("+" . $learningSteps[$nextInterval] . " minutes");
-            return [
-                'nextReviewDate' => $nextReviewDate,
-                'easeFactor' => $easeFactor,
-                'interval' => $nextInterval,
-            ];
+        // Mise à jour de retrievability en fonction de la stabilité et de l'intervalle
+        if ($interval > 0) {
+            $retrievability = exp(-$interval / $stability);
         }
 
-        // Gestion des révisions régulières pour les cartes apprises
-        if ($interval >= count($learningSteps)) {
-            // Calcul du nouvel intervalle
-            if ($interval === 1) {
-                $interval = 6; // Première révision
-            } else {
-                $interval = (int) round($interval * $easeFactor);
-            }
+        // Calcul du multiplicateur de stabilité en fonction de la qualité
+        $stabilityMultiplier = match (true) {
+            $quality >= 0.9 => 1.2,  // Parfait : augmentation rapide
+            $quality >= 0.6 => 1.0,  // Correct : progression normale
+            $quality >= 0.3 => 0.8,  // Difficile : progression lente
+            default => 0.5,          // Oublié : réduction importante
+        };
 
-            // Calcul du facteur d'aisance (ease factor)
-            $easeFactor += (0.1 - (5 - $quality) * (0.08 + (5 - $quality) * 0.02));
-            $easeFactor = max($easeFactor, 1.3); // Assurer un minimum de 1.3
+        // Mise à jour de la stabilité
+        $stability *= $stabilityMultiplier;
 
-            // Calculer la date de la prochaine révision
-            $nextReviewDate = (new \DateTime())->modify("+$interval days");
-            return [
-                'nextReviewDate' => $nextReviewDate,
-                'easeFactor' => $easeFactor,
-                'interval' => $interval,
-            ];
-        }
+        // Ajustement du easeFactor en fonction de la réponse
+        $easeFactor = match ($response) {
+            'facile' => min($easeFactor + 0.15, 3.0), // Augmentation pour "facile"
+            'correct' => $easeFactor, // Inchangé pour "correct"
+            'difficile' => max($easeFactor - 0.15, 1.3), // Réduction pour "difficile"
+            default => $easeFactor,
+        };
 
-        // Cas par défaut si aucune règle ne s'applique
-        throw new \LogicException('Calcul SM2 inattendu.');
+        // Calcul de l'intervalle avec des limites pour éviter des valeurs extrêmes
+        $nextInterval = max(0.01, min($stability * log(1 / max($retrievability, 0.01)), 3650)); // Limité à 10 ans max
+        $nextReviewDate = (new \DateTime())->modify("+$nextInterval days");
+
+        return [
+            'nextReviewDate' => $nextReviewDate,
+            'easeFactor' => $easeFactor,  // EaseFactor mis à jour
+            'interval' => round($nextInterval, 5),  // Intervalle arrondi en jours
+            'stability' => $stability,  // Nouvelle stabilité
+            'retrievability' => $retrievability,  // Nouvelle probabilité de rappel
+        ];
     }
 }

@@ -42,7 +42,7 @@ class ReviewController extends AbstractController
         if (!$flashcard) {
             return $this->render('review/finished.html.twig', [
                 'message' => 'Toutes les cartes ont été révisées pour ce deck aujourd\'hui !',
-                'deck' => $deck, // Ajout de deck ici
+                'deck' => $deck,
             ]);
         }
 
@@ -59,7 +59,7 @@ class ReviewController extends AbstractController
             throw $this->createNotFoundException('Révision non autorisée.');
         }
 
-        // Calcul des intervalles (en jours ou minutes)
+        // Calcul des intervalles pour chaque réponse
         $nextReviewIntervals = [
             'facile' => $this->calculateInterval(
                 $revision->getReviewDate(),
@@ -97,7 +97,7 @@ class ReviewController extends AbstractController
 
         // Si une réponse est soumise (méthode POST)
         if ($request->isMethod('POST')) {
-            // Récupérer la réponse utilisateur (facile, correct, difficile, à revoir)
+            // Récupérer la réponse utilisateur
             $response = $request->request->get('response');
 
             // Vérifier la validité de la réponse
@@ -110,13 +110,17 @@ class ReviewController extends AbstractController
             $result = $this->sm2Algorithm->calculateNextReview(
                 $revision->getEaseFactor(),
                 $revision->getInterval(),
-                $response
+                $response,
+                $revision->getStability(),
+                $revision->getRetrievability()
             );
 
             // Mettre à jour l'entité Revision
             $revision->setEaseFactor($result['easeFactor']);
             $revision->setInterval($result['interval']);
             $revision->setReviewDate($result['nextReviewDate']);
+            $revision->setStability($result['stability']);
+            $revision->setRetrievability($result['retrievability']);
 
             // Sauvegarder les changements dans la base de données
             $this->entityManager->persist($revision);
@@ -131,7 +135,7 @@ class ReviewController extends AbstractController
             if (!$nextRevision) {
                 return $this->render('review/finished.html.twig', [
                     'message' => 'Toutes les cartes ont été révisées pour ce deck aujourd\'hui !',
-                    'deck' => $deck, // Ajout de deck ici
+                    'deck' => $deck,
                 ]);
             }
 
@@ -143,7 +147,7 @@ class ReviewController extends AbstractController
         return $this->render('review/index.html.twig', [
             'revision' => $revision,
             'flashcard' => $revision->getFlashcard(),
-            'nextReviewIntervals' => $nextReviewIntervals, // Ajout des intervalles
+            'nextReviewIntervals' => $nextReviewIntervals, // Ajout des intervalles pour le front-end
         ]);
     }
 
@@ -183,7 +187,7 @@ class ReviewController extends AbstractController
         if (!$nextRevision) {
             return $this->render('review/finished.html.twig', [
                 'message' => 'Toutes les cartes ont été révisées pour ce deck aujourd\'hui !',
-                'deck' => $deck, // Ajout de deck ici
+                'deck' => $deck,
             ]);
         }
 

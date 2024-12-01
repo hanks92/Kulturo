@@ -26,6 +26,12 @@ class Revision
     #[ORM\Column(nullable: true)]
     private ?float $easeFactor = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $stability = 1.0; // Ajout de la propriété stability avec une valeur par défaut
+
+    #[ORM\Column(nullable: true)]
+    private ?float $retrievability = 0.9; // Ajout de la propriété retrievability avec une valeur par défaut
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $status = null;
 
@@ -78,6 +84,30 @@ class Revision
     public function setEaseFactor(?float $easeFactor): static
     {
         $this->easeFactor = $easeFactor;
+
+        return $this;
+    }
+
+    public function getStability(): ?float
+    {
+        return $this->stability;
+    }
+
+    public function setStability(?float $stability): static
+    {
+        $this->stability = $stability;
+
+        return $this;
+    }
+
+    public function getRetrievability(): ?float
+    {
+        return $this->retrievability;
+    }
+
+    public function setRetrievability(?float $retrievability): static
+    {
+        $this->retrievability = $retrievability;
 
         return $this;
     }
