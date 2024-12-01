@@ -22,19 +22,31 @@
             <p id="answer-text">{{ flashcard.answer }}</p>
         </div>
 
-        <div id="buttons-section" class="hidden flex justify-between">
+        <div id="buttons-section" class="hidden flex flex-col space-y-4">
             <button type="button" 
-                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
-                onclick="submitResponse('a_revoir')">À revoir</button>
+                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition flex justify-between items-center"
+                onclick="submitResponse('a_revoir')">
+                À revoir
+                <span class="text-gray-300 text-sm">(Dans : {{ nextReviewIntervals.a_revoir }})</span>
+            </button>
             <button type="button" 
-                class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition"
-                onclick="submitResponse('difficile')">Difficile</button>
+                class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition flex justify-between items-center"
+                onclick="submitResponse('difficile')">
+                Difficile
+                <span class="text-gray-300 text-sm">(Dans : {{ nextReviewIntervals.difficile }})</span>
+            </button>
             <button type="button" 
-                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-                onclick="submitResponse('correct')">Correct</button>
+                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition flex justify-between items-center"
+                onclick="submitResponse('correct')">
+                Correct
+                <span class="text-gray-300 text-sm">(Dans : {{ nextReviewIntervals.correct }})</span>
+            </button>
             <button type="button" 
-                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
-                onclick="submitResponse('facile')">Facile</button>
+                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition flex justify-between items-center"
+                onclick="submitResponse('facile')">
+                Facile
+                <span class="text-gray-300 text-sm">(Dans : {{ nextReviewIntervals.facile }})</span>
+            </button>
         </div>
 
         <div class="flex justify-center">

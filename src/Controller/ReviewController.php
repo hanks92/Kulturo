@@ -59,6 +59,42 @@ class ReviewController extends AbstractController
             throw $this->createNotFoundException('Révision non autorisée.');
         }
 
+        // Calcul des intervalles (en jours ou minutes)
+        $nextReviewIntervals = [
+            'facile' => $this->calculateInterval(
+                $revision->getReviewDate(),
+                $this->sm2Algorithm->calculateNextReview(
+                    $revision->getEaseFactor(),
+                    $revision->getInterval(),
+                    'facile'
+                )['nextReviewDate']
+            ),
+            'correct' => $this->calculateInterval(
+                $revision->getReviewDate(),
+                $this->sm2Algorithm->calculateNextReview(
+                    $revision->getEaseFactor(),
+                    $revision->getInterval(),
+                    'correct'
+                )['nextReviewDate']
+            ),
+            'difficile' => $this->calculateInterval(
+                $revision->getReviewDate(),
+                $this->sm2Algorithm->calculateNextReview(
+                    $revision->getEaseFactor(),
+                    $revision->getInterval(),
+                    'difficile'
+                )['nextReviewDate']
+            ),
+            'a_revoir' => $this->calculateInterval(
+                $revision->getReviewDate(),
+                $this->sm2Algorithm->calculateNextReview(
+                    $revision->getEaseFactor(),
+                    $revision->getInterval(),
+                    'a_revoir'
+                )['nextReviewDate']
+            ),
+        ];
+
         // Si une réponse est soumise (méthode POST)
         if ($request->isMethod('POST')) {
             // Récupérer la réponse utilisateur (facile, correct, difficile, à revoir)
@@ -107,7 +143,24 @@ class ReviewController extends AbstractController
         return $this->render('review/index.html.twig', [
             'revision' => $revision,
             'flashcard' => $revision->getFlashcard(),
+            'nextReviewIntervals' => $nextReviewIntervals, // Ajout des intervalles
         ]);
+    }
+
+    private function calculateInterval(\DateTime $currentDate, \DateTime $nextReviewDate): string
+    {
+        $interval = $currentDate->diff($nextReviewDate);
+
+        if ($interval->days > 0) {
+            return $interval->days . ' j'; // En jours
+        }
+
+        if ($interval->h > 0 || $interval->i > 0) {
+            $minutes = ($interval->h * 60) + $interval->i;
+            return $minutes . ' min'; // En minutes
+        }
+
+        return '0 min';
     }
 
     #[Route('/review/{deckId<\d+>}', name: 'app_review')]
@@ -138,45 +191,5 @@ class ReviewController extends AbstractController
         return $this->render('review/index.html.twig', [
             'revision' => $nextRevision,
         ]);
-    }
-
-    #[Route('/review/{id<\d+>}/response', name: 'app_review_response', methods: ['POST'])]
-    public function handleResponse(Request $request, Revision $revision): Response
-    {
-        // Vérifier que la flashcard appartient bien à un deck de l'utilisateur
-        $deck = $revision->getFlashcard()->getDeck();
-        if ($deck->getOwner() !== $this->getUser()) {
-            throw $this->createNotFoundException('Révision non autorisée.');
-        }
-
-        // Récupérer la réponse utilisateur (facile, correct, difficile, à revoir)
-        $response = $request->request->get('response');
-
-        // Vérifier la validité de la réponse
-        if (!in_array($response, ['facile', 'correct', 'difficile', 'a_revoir'])) {
-            $this->addFlash('error', 'Réponse invalide.');
-            return $this->redirectToRoute('app_review', ['deckId' => $deck->getId()]);
-        }
-
-        // Récupérer les attributs actuels de la révision
-        $easeFactor = $revision->getEaseFactor();
-        $interval = $revision->getInterval();
-
-        // Calculer les nouvelles valeurs avec l'algorithme SM-2
-        $result = $this->sm2Algorithm->calculateNextReview($easeFactor, $interval, $response);
-
-        // Mettre à jour l'entité Revision
-        $revision->setEaseFactor($result['easeFactor']);
-        $revision->setInterval($result['interval']);
-        $revision->setReviewDate($result['nextReviewDate']);
-
-        // Sauvegarder les changements
-        $this->entityManager->persist($revision);
-        $this->entityManager->flush();
-
-        $this->addFlash('success', 'Révision mise à jour avec succès.');
-
-        // Rediriger vers la prochaine carte ou la fin des révisions
-        return $this->redirectToRoute('app_review', ['deckId' => $deck->getId()]);
     }
 }
