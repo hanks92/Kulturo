@@ -1,0 +1,5 @@
+{
+  "appId": "com.local.flint",
+  "appName": "Flint",
+  "webDir": "../public"
+}
