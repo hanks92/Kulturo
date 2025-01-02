@@ -45,6 +45,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 25, nullable: true)]
     private ?string $username = null;
 
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $theme = 'light'; // Valeur par défaut
+
     /**
      * @var Collection<int, Deck>
      */
@@ -174,6 +177,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getTheme(): ?string
+    {
+        return $this->theme;
+    }
+
+    public function setTheme(?string $theme): static
+    {
+        $this->theme = $theme;
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, Deck>
      */
@@ -203,5 +218,4 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-    
 }

@@ -52,6 +52,18 @@ class SettingsType extends AbstractType
                 'attr' => [
                     'class' => 'grid grid-cols-4 gap-2'
                 ]
+            ])
+            ->add('theme', ChoiceType::class, [
+                'label' => 'Choisissez un thème',
+                'choices' => [
+                    'Mode clair' => 'light',
+                    'Mode sombre' => 'dark',
+                ],
+                'expanded' => true, // Afficher sous forme de boutons radio
+                'multiple' => false,
+                'attr' => [
+                    'class' => 'flex space-x-4'
+                ]
             ]);
     }
 
