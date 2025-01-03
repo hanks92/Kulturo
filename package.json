@@ -27,6 +27,7 @@
     "dependencies": {
         "@symfony/stimulus-bridge": "^3.2.2",
         "flowbite": "^2.5.2",
-        "stimulus": "^3.2.2"
+        "stimulus": "^3.2.2",
+        "ts-fsrs": "^4.5.1"
     }
 }
