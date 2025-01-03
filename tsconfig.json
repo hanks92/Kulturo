@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "target": "es6",
+      "module": "esnext",
+      "strict": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "moduleResolution": "node",
+      "outDir": "./public/build",
+      "sourceMap": true
+    },
+    "include": ["./assets/**/*.ts"],
+    "exclude": ["node_modules"]
+  }
+  

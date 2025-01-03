@@ -20,7 +20,8 @@ Encore
      * Each entry will result in one JavaScript file (e.g. app.js)
      * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
      */
-    .addEntry('app', './assets/app.js')
+    .addEntry('app', './assets/app.js') // Principal entry point
+    .addEntry('fsrs', './assets/js/fsrs.ts') // FSRS entry point
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
@@ -44,6 +45,9 @@ Encore
     .enableSourceMaps(!Encore.isProduction())
     // enables hashed filenames (e.g. app.abc123.css)
     .enableVersioning(Encore.isProduction())
+
+    // enables TypeScript support
+    .enableTypeScriptLoader()
 
     // configure Babel
     // .configureBabel((config) => {
@@ -74,4 +78,12 @@ Encore
     //.autoProvidejQuery()
 ;
 
-module.exports = Encore.getWebpackConfig();
+// Export the Webpack configuration
+const config = Encore.getWebpackConfig();
+
+// Change target for the `fsrs` entry to Node.js
+if (config.entry.fsrs) {
+    config.target = 'node';
+}
+
+module.exports = config;
