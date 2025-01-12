@@ -1,4 +1,3 @@
-
 services:
 ###> doctrine/doctrine-bundle ###
   database:
@@ -20,6 +19,15 @@ services:
       # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
       # - ./docker/db/data:/var/lib/postgresql/data:rw
 ###< doctrine/doctrine-bundle ###
+
+  flask-api: # Ajout minimal pour le service Flask
+    build:
+      context: ./fsrs-api
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - database
 
 volumes:
 ###> doctrine/doctrine-bundle ###
