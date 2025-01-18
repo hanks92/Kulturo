@@ -25,27 +25,27 @@
         <div id="buttons-section" class="hidden flex flex-col space-y-4">
             <button type="button" 
                 class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition flex justify-between items-center"
-                onclick="submitResponse('a_revoir')">
-                À revoir
-                <span class="text-gray-300 text-sm">(Dans : {{ nextReviewIntervals.a_revoir }})</span>
+                onclick="submitResponse('again')">
+                Again
+                <span class="text-gray-300 text-sm">({{ nextReviewIntervals.again }})</span>
             </button>
             <button type="button" 
                 class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition flex justify-between items-center"
-                onclick="submitResponse('difficile')">
-                Difficile
-                <span class="text-gray-300 text-sm">(Dans : {{ nextReviewIntervals.difficile }})</span>
+                onclick="submitResponse('hard')">
+                Hard
+                <span class="text-gray-300 text-sm">({{ nextReviewIntervals.hard }})</span>
             </button>
             <button type="button" 
                 class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition flex justify-between items-center"
-                onclick="submitResponse('correct')">
-                Correct
-                <span class="text-gray-300 text-sm">(Dans : {{ nextReviewIntervals.correct }})</span>
+                onclick="submitResponse('good')">
+                Good
+                <span class="text-gray-300 text-sm">({{ nextReviewIntervals.good }})</span>
             </button>
             <button type="button" 
                 class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition flex justify-between items-center"
-                onclick="submitResponse('facile')">
-                Facile
-                <span class="text-gray-300 text-sm">(Dans : {{ nextReviewIntervals.facile }})</span>
+                onclick="submitResponse('easy')">
+                Easy
+                <span class="text-gray-300 text-sm">({{ nextReviewIntervals.easy }})</span>
             </button>
         </div>
 
@@ -68,12 +68,41 @@
         document.getElementById('show-answer-button').classList.add('hidden');
     }
 
-    function submitResponse(response) {
+    async function submitResponse(response) {
         // Définit la réponse dans l'input caché
-        document.getElementById('response').value = response;
+        const form = document.getElementById('review-form');
+        const revisionId = "{{ revision.id }}";
 
-        // Soumet le formulaire pour passer à la carte suivante
-        document.getElementById('review-form').submit();
+        try {
+            const res = await fetch(`/review/session/${revisionId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ response }),
+            });
+
+            if (!res.ok) {
+                throw new Error('Erreur lors de l\'envoi de la réponse.');
+            }
+
+            const data = await res.json();
+
+            if (data.finished) {
+                // Redirige vers la vue de fin si toutes les cartes sont révisées
+                window.location.href = `/review/finished/${revisionId}`;
+            } else {
+                // Met à jour la question et la réponse
+                document.getElementById('question-text').innerText = data.flashcard.question;
+                document.getElementById('answer-text').innerText = data.flashcard.answer;
+
+                // Réinitialise les boutons
+                document.getElementById('answer-section').classList.add('hidden');
+                document.getElementById('buttons-section').classList.add('hidden');
+                document.getElementById('show-answer-button').classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Une erreur est survenue. Veuillez réessayer.');
+        }
     }
 </script>
 {% endblock %}

@@ -14,26 +14,33 @@ class Revision
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'revisions')]
+    #[ORM\ManyToOne(targetEntity: Flashcard::class, inversedBy: 'revisions')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Flashcard $flashcard = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $reviewDate = null;
+    private ?\DateTimeInterface $lastReview = null; // Date de la dernière révision
 
-    #[ORM\Column(nullable: true)]
-    private ?int $interval = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dueDate = null; // Date de la prochaine révision
 
-    #[ORM\Column(nullable: true)]
-    private ?float $easeFactor = null;
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $state = null; // État de la révision (1: Learning, 2: Review, 3: Relearning)
 
-    #[ORM\Column(nullable: true)]
-    private ?float $stability = 1.0; // Ajout de la propriété stability avec une valeur par défaut
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $stability = 1.0; // Stabilité initiale
 
-    #[ORM\Column(nullable: true)]
-    private ?float $retrievability = 0.9; // Ajout de la propriété retrievability avec une valeur par défaut
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $difficulty = 5.0; // Difficulté initiale
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $status = null;
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $interval = null; // Intervalle en jours avant la prochaine révision
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $retrievability = 0.9; // Probabilité de rappel
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $rating = null; // Dernière évaluation de l'utilisateur (Again, Hard, Good, Easy)
 
     public function getId(): ?int
     {
@@ -52,38 +59,38 @@ class Revision
         return $this;
     }
 
-    public function getReviewDate(): ?\DateTimeInterface
+    public function getLastReview(): ?\DateTimeInterface
     {
-        return $this->reviewDate;
+        return $this->lastReview;
     }
 
-    public function setReviewDate(?\DateTimeInterface $reviewDate): static
+    public function setLastReview(?\DateTimeInterface $lastReview): static
     {
-        $this->reviewDate = $reviewDate;
+        $this->lastReview = $lastReview;
 
         return $this;
     }
 
-    public function getInterval(): ?int
+    public function getDueDate(): ?\DateTimeInterface
     {
-        return $this->interval;
+        return $this->dueDate;
     }
 
-    public function setInterval(?int $interval): static
+    public function setDueDate(?\DateTimeInterface $dueDate): static
     {
-        $this->interval = $interval;
+        $this->dueDate = $dueDate;
 
         return $this;
     }
 
-    public function getEaseFactor(): ?float
+    public function getState(): ?int
     {
-        return $this->easeFactor;
+        return $this->state;
     }
 
-    public function setEaseFactor(?float $easeFactor): static
+    public function setState(?int $state): static
     {
-        $this->easeFactor = $easeFactor;
+        $this->state = $state;
 
         return $this;
     }
@@ -100,6 +107,30 @@ class Revision
         return $this;
     }
 
+    public function getDifficulty(): ?float
+    {
+        return $this->difficulty;
+    }
+
+    public function setDifficulty(?float $difficulty): static
+    {
+        $this->difficulty = $difficulty;
+
+        return $this;
+    }
+
+    public function getInterval(): ?int
+    {
+        return $this->interval;
+    }
+
+    public function setInterval(?int $interval): static
+    {
+        $this->interval = $interval;
+
+        return $this;
+    }
+
     public function getRetrievability(): ?float
     {
         return $this->retrievability;
@@ -112,14 +143,14 @@ class Revision
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getRating(): ?string
     {
-        return $this->status;
+        return $this->rating;
     }
 
-    public function setStatus(?string $status): static
+    public function setRating(?string $rating): static
     {
-        $this->status = $status;
+        $this->rating = $rating;
 
         return $this;
     }

@@ -7,6 +7,7 @@ use App\Entity\Flashcard;
 use App\Entity\Revision;
 use App\Form\FlashcardType;
 use App\Repository\FlashcardRepository;
+use App\Repository\RevisionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,19 +17,20 @@ use Symfony\Component\Routing\Annotation\Route;
 class FlashcardController extends AbstractController
 {
     #[Route('/deck/{id}/review', name: 'flashcard_review')]
-    public function review(Deck $deck, FlashcardRepository $flashcardRepository): Response
+    public function review(Deck $deck, RevisionRepository $revisionRepository): Response
     {
         // Vérifie que le deck appartient à l'utilisateur connecté
         if ($deck->getOwner() !== $this->getUser()) {
             throw $this->createNotFoundException('You do not have access to this deck.');
         }
 
-        // Récupère toutes les flashcards du deck
-        $flashcards = $flashcardRepository->findBy(['deck' => $deck]);
+        // Récupère les révisions dues pour aujourd'hui ou avant
+        $today = new \DateTime();
+        $revisions = $revisionRepository->findDueRevisionsForDeck($deck, $today);
 
         return $this->render('flashcard/review.html.twig', [
             'deck' => $deck,
-            'flashcards' => $flashcards,
+            'revisions' => $revisions, // Révisions dues, associées aux flashcards
         ]);
     }
 
@@ -51,13 +53,16 @@ class FlashcardController extends AbstractController
             // Persist la flashcard
             $entityManager->persist($flashcard);
 
-            // Crée une révision associée
+            // Crée une révision associée avec des paramètres FSRS par défaut
             $revision = new Revision();
             $revision->setFlashcard($flashcard);
-            $revision->setReviewDate(new \DateTime()); // Initialiser à aujourd'hui
+            $revision->setLastReview(new \DateTime()); // Aujourd'hui
+            $revision->setDueDate((new \DateTime())->modify('+1 day')); // Premier intervalle : 1 jour
             $revision->setInterval(1); // Intervalle initial
-            $revision->setEaseFactor(2.5); // Facteur initial
-            $revision->setStatus('ready'); // Statut initial
+            $revision->setStability(1.0); // Stabilité initiale
+            $revision->setDifficulty(5.0); // Difficulté moyenne
+            $revision->setRetrievability(0.9); // Probabilité de rappel initiale
+            $revision->setState(1); // État Learning
 
             // Persist la révision
             $entityManager->persist($revision);
