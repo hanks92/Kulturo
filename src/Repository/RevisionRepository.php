@@ -79,4 +79,23 @@ class RevisionRepository extends ServiceEntityRepository
             ->getQuery()
             ->execute(); // Exécuter la requête
     }
+
+    /**
+     * Récupère les révisions dues pour aujourd'hui pour un deck spécifique.
+     *
+     * @param Deck $deck
+     * @return Revision[]
+     */
+    public function findRevisionsDueForTodayByDeck(Deck $deck): array
+    {
+        return $this->createQueryBuilder('r')
+            ->innerJoin('r.flashcard', 'f') // Jointure avec Flashcard
+            ->andWhere('f.deck = :deck') // Filtre par Deck
+            ->andWhere('r.dueDate <= :now') // Filtrer par date d'échéance due pour aujourd'hui
+            ->setParameter('deck', $deck)
+            ->setParameter('now', new \DateTime()) // Date actuelle
+            ->orderBy('r.dueDate', 'ASC') // Trier par date d'échéance
+            ->getQuery()
+            ->getResult(); // Retourner un tableau de révisions
+    }
 }

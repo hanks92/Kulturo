@@ -4,6 +4,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    flask_api_url: 'http://127.0.0.1:5000' # Ajout de l'URL pour l'API Flask
 
 services:
     # default configuration for services in *this* file
@@ -24,3 +25,4 @@ services:
     App\Service\FSRSService:
         arguments:
             $fsrsScriptPath: '%kernel.project_dir%/public/build/fsrs.js'
+            $flaskApiUrl: '%flask_api_url%' # Injection de l'URL de l'API Flask

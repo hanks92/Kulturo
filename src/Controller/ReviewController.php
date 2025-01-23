@@ -31,18 +31,20 @@ class ReviewController extends AbstractController
             throw $this->createNotFoundException('Deck introuvable ou accès refusé.');
         }
 
-        $revision = $this->entityManager
+        // Récupère les révisions dues pour aujourd'hui
+        $revisions = $this->entityManager
             ->getRepository(Revision::class)
-            ->findNextRevisionForTodayByDeck($deck);
+            ->findRevisionsDueForTodayByDeck($deck);
 
-        if (!$revision) {
+        if (empty($revisions)) {
             return $this->render('review/finished.html.twig', [
                 'message' => 'Toutes les cartes ont été révisées pour ce deck aujourd\'hui !',
                 'deck' => $deck,
             ]);
         }
 
-        return $this->redirectToRoute('app_review_session', ['id' => $revision->getId()]);
+        // Redirige vers la première révision
+        return $this->redirectToRoute('app_review_session', ['id' => $revisions[0]->getId()]);
     }
 
     #[Route('/review/session/{id<\d+>}', name: 'app_review_session', methods: ['GET', 'POST'])]
@@ -86,16 +88,16 @@ class ReviewController extends AbstractController
 
                 $nextRevision = $this->entityManager
                     ->getRepository(Revision::class)
-                    ->findNextRevisionForTodayByDeck($deck);
+                    ->findRevisionsDueForTodayByDeck($deck);
 
-                if (!$nextRevision) {
+                if (empty($nextRevision)) {
                     return $this->render('review/finished.html.twig', [
                         'message' => 'Toutes les cartes ont été révisées pour ce deck aujourd\'hui !',
                         'deck' => $deck,
                     ]);
                 }
 
-                return $this->redirectToRoute('app_review_session', ['id' => $nextRevision->getId()]);
+                return $this->redirectToRoute('app_review_session', ['id' => $nextRevision[0]->getId()]);
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Erreur lors de la communication avec FSRS : ' . $e->getMessage());
             }
@@ -118,9 +120,9 @@ class ReviewController extends AbstractController
 
         $revision = $this->entityManager
             ->getRepository(Revision::class)
-            ->findNextRevisionForTodayByDeck($deck);
+            ->findRevisionsDueForTodayByDeck($deck);
 
-        if (!$revision) {
+        if (empty($revision)) {
             return $this->render('review/finished.html.twig', [
                 'message' => 'Toutes les cartes ont été révisées pour ce deck aujourd\'hui !',
                 'deck' => $deck,
@@ -128,7 +130,7 @@ class ReviewController extends AbstractController
         }
 
         return $this->render('review/index.html.twig', [
-            'revision' => $revision,
+            'revision' => $revision[0],
         ]);
     }
 }

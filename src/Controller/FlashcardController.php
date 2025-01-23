@@ -8,6 +8,7 @@ use App\Entity\Revision;
 use App\Form\FlashcardType;
 use App\Repository\FlashcardRepository;
 use App\Repository\RevisionRepository;
+use App\Service\FSRSService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,6 +17,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class FlashcardController extends AbstractController
 {
+    private FSRSService $fsrsService;
+
+    public function __construct(FSRSService $fsrsService)
+    {
+        $this->fsrsService = $fsrsService;
+    }
+
     #[Route('/deck/{id}/review', name: 'flashcard_review')]
     public function review(Deck $deck, RevisionRepository $revisionRepository): Response
     {
@@ -53,16 +61,20 @@ class FlashcardController extends AbstractController
             // Persist la flashcard
             $entityManager->persist($flashcard);
 
-            // Crée une révision associée avec des paramètres FSRS par défaut
+            // Initialisation de la révision avec FSRS
+            $fsrsDefaults = $this->fsrsService->initializeCard();
+
+            // Crée une révision associée avec des paramètres FSRS
             $revision = new Revision();
             $revision->setFlashcard($flashcard);
             $revision->setLastReview(new \DateTime()); // Aujourd'hui
-            $revision->setDueDate((new \DateTime())->modify('+1 day')); // Premier intervalle : 1 jour
-            $revision->setInterval(1); // Intervalle initial
-            $revision->setStability(1.0); // Stabilité initiale
-            $revision->setDifficulty(5.0); // Difficulté moyenne
-            $revision->setRetrievability(0.9); // Probabilité de rappel initiale
-            $revision->setState(1); // État Learning
+            $revision->setDueDate(new \DateTime($fsrsDefaults['due'])); // Date due calculée
+            $revision->setInterval($fsrsDefaults['interval']); // Intervalle initial
+            $revision->setStability($fsrsDefaults['stability']); // Stabilité initiale
+            $revision->setDifficulty($fsrsDefaults['difficulty']); // Difficulté initiale
+            $revision->setRetrievability($fsrsDefaults['retrievability']); // Probabilité de rappel initiale
+            $revision->setState($fsrsDefaults['state']); // État initial
+            $revision->setStep($fsrsDefaults['step']); // Étape initiale
 
             // Persist la révision
             $entityManager->persist($revision);

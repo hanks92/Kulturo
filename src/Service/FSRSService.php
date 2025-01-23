@@ -8,11 +8,60 @@ class FSRSService
 {
     private string $fsrsScriptPath;
     private LoggerInterface $logger;
+    private string $flaskApiUrl; // URL de l'API Flask
 
-    public function __construct(string $fsrsScriptPath, LoggerInterface $logger)
+    public function __construct(string $fsrsScriptPath, LoggerInterface $logger, string $flaskApiUrl)
     {
         $this->fsrsScriptPath = $fsrsScriptPath;
         $this->logger = $logger;
+        $this->flaskApiUrl = $flaskApiUrl;
+    }
+
+    /**
+     * Initialise les paramètres d'une carte via l'API Flask FSRS.
+     *
+     * @return array Les paramètres initiaux pour FSRS.
+     * @throws \RuntimeException En cas d'échec de la requête ou de l'API Flask.
+     */
+    public function initializeCard(): array
+    {
+        $this->logger->info('Requesting FSRS initial parameters from Flask API');
+
+        // Préparer l'URL de l'API Flask
+        $endpoint = $this->flaskApiUrl . '/initialize';
+
+        // Effectuer la requête HTTP
+        $ch = curl_init($endpoint);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200 || !$response) {
+            $this->logger->error('Failed to fetch initial parameters from Flask API', [
+                'http_code' => $httpCode,
+                'response' => $response,
+            ]);
+            throw new \RuntimeException('Unable to fetch initial parameters from FSRS Flask API.');
+        }
+
+        // Convertir la réponse JSON en tableau PHP
+        $result = json_decode($response, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->logger->error('Invalid JSON received from FSRS Flask API', [
+                'response' => $response,
+            ]);
+            throw new \RuntimeException('Invalid JSON received from FSRS Flask API.');
+        }
+
+        $this->logger->info('Successfully fetched FSRS initial parameters from Flask API', [
+            'result' => $result,
+        ]);
+
+        return $result;
     }
 
     /**
@@ -70,6 +119,23 @@ class FSRSService
     }
 
     /**
+     * Valide les résultats retournés par FSRS.
+     *
+     * @param array $result
+     * @throws \RuntimeException Si les résultats sont invalides.
+     */
+    private function validateFSRSResult(array $result): void
+    {
+        $requiredKeys = ['stability', 'difficulty', 'last_review', 'due', 'state', 'step'];
+        foreach ($requiredKeys as $key) {
+            if (!array_key_exists($key, $result)) {
+                $this->logger->error('Missing key in FSRS result', ['key' => $key, 'result' => $result]);
+                throw new \RuntimeException(sprintf('Missing key "%s" in FSRS result.', $key));
+            }
+        }
+    }
+
+    /**
      * Valide la structure des données de la carte.
      *
      * @param array $cardData
@@ -102,22 +168,6 @@ class FSRSService
 
         if (!is_string($cardData['last_review']) && !is_null($cardData['last_review'])) {
             throw new \InvalidArgumentException('Invalid type for "last_review". Expected string or null.');
-        }
-    }
-
-    /**
-     * Valide les résultats retournés par FSRS.
-     *
-     * @param array $result
-     * @throws \RuntimeException Si les résultats sont invalides.
-     */
-    private function validateFSRSResult(array $result): void
-    {
-        $requiredKeys = ['stability', 'difficulty', 'last_review', 'due', 'state'];
-        foreach ($requiredKeys as $key) {
-            if (!array_key_exists($key, $result)) {
-                throw new \RuntimeException(sprintf('Missing key "%s" in FSRS result.', $key));
-            }
         }
     }
 }

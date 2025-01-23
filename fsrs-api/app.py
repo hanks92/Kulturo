@@ -19,7 +19,8 @@ def index():
     return jsonify({
         "message": "Welcome to the FSRS API",
         "routes": {
-            "/review": "POST - Process a flashcard review"
+            "/review": "POST - Process a flashcard review",
+            "/initialize": "GET - Fetch initial parameters for a new flashcard"
         }
     }), 200
 
@@ -69,6 +70,29 @@ def review_card():
         return jsonify({"error": f"Invalid value: {str(e)}"}), 400
     except Exception as e:
         app.logger.error(f"An unexpected error occurred: {str(e)}")
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+
+@app.route('/initialize', methods=['GET'])
+def initialize():
+    """
+    Route pour obtenir les paramètres d'initialisation d'une carte flash.
+    """
+    try:
+        # Paramètres d'initialisation pour une nouvelle carte
+        initial_params = {
+            "stability": 1.0,
+            "difficulty": 5.0,
+            "last_review": None,
+            "due": None,
+            "state": 1,
+            "retrievability": 0.9,
+            "step": 1,
+            "interval": 1  # Ajout de l'intervalle initial manquant
+        }
+        app.logger.info("Successfully fetched initial parameters for flashcard initialization")
+        return jsonify(initial_params), 200
+    except Exception as e:
+        app.logger.error(f"An unexpected error occurred while initializing: {str(e)}")
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
 if __name__ == '__main__':
