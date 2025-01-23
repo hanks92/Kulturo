@@ -42,6 +42,9 @@ class Revision
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $rating = null; // Dernière évaluation de l'utilisateur (Again, Hard, Good, Easy)
 
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $step = null; // Étape de la révision (nécessaire pour l'algorithme FSRS)
+
     public function getId(): ?int
     {
         return $this->id;
@@ -151,6 +154,18 @@ class Revision
     public function setRating(?string $rating): static
     {
         $this->rating = $rating;
+
+        return $this;
+    }
+
+    public function getStep(): ?int
+    {
+        return $this->step;
+    }
+
+    public function setStep(?int $step): static
+    {
+        $this->step = $step;
 
         return $this;
     }
