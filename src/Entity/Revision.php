@@ -18,22 +18,28 @@ class Revision
     private ?Flashcard $flashcard = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $reviewDate = null;
+    private ?\DateTimeInterface $reviewDate = null; // Dernière révision (last_review)
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dueDate = null; // Prochaine révision (due)
 
     #[ORM\Column(nullable: true)]
-    private ?int $interval = null;
+    private ?float $stability = 1.0; // Stabilité initiale par défaut
 
     #[ORM\Column(nullable: true)]
-    private ?float $easeFactor = null;
+    private ?float $retrievability = 0.9; // Probabilité de rappel initiale
 
     #[ORM\Column(nullable: true)]
-    private ?float $stability = 1.0; // Ajout de la propriété stability avec une valeur par défaut
+    private ?float $difficulty = 5.0; // Difficulté initiale par défaut
 
     #[ORM\Column(nullable: true)]
-    private ?float $retrievability = 0.9; // Ajout de la propriété retrievability avec une valeur par défaut
+    private ?int $rating = null; // 1 = Again, 2 = Hard, 3 = Good, 4 = Easy
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $status = null;
+    #[ORM\Column(nullable: true)]
+    private ?int $state = null; // 1 = Learning, 2 = Review, 3 = Relearning
+
+    #[ORM\Column(nullable: true)]
+    private ?int $step = null; // Étape actuelle de progression
 
     public function getId(): ?int
     {
@@ -64,26 +70,14 @@ class Revision
         return $this;
     }
 
-    public function getInterval(): ?int
+    public function getDueDate(): ?\DateTimeInterface
     {
-        return $this->interval;
+        return $this->dueDate;
     }
 
-    public function setInterval(?int $interval): static
+    public function setDueDate(?\DateTimeInterface $dueDate): static
     {
-        $this->interval = $interval;
-
-        return $this;
-    }
-
-    public function getEaseFactor(): ?float
-    {
-        return $this->easeFactor;
-    }
-
-    public function setEaseFactor(?float $easeFactor): static
-    {
-        $this->easeFactor = $easeFactor;
+        $this->dueDate = $dueDate;
 
         return $this;
     }
@@ -112,14 +106,50 @@ class Revision
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getDifficulty(): ?float
     {
-        return $this->status;
+        return $this->difficulty;
     }
 
-    public function setStatus(?string $status): static
+    public function setDifficulty(?float $difficulty): static
     {
-        $this->status = $status;
+        $this->difficulty = $difficulty;
+
+        return $this;
+    }
+
+    public function getRating(): ?int
+    {
+        return $this->rating;
+    }
+
+    public function setRating(?int $rating): static
+    {
+        $this->rating = $rating;
+
+        return $this;
+    }
+
+    public function getState(): ?int
+    {
+        return $this->state;
+    }
+
+    public function setState(?int $state): static
+    {
+        $this->state = $state;
+
+        return $this;
+    }
+
+    public function getStep(): ?int
+    {
+        return $this->step;
+    }
+
+    public function setStep(?int $step): static
+    {
+        $this->step = $step;
 
         return $this;
     }
