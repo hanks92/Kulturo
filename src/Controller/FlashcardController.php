@@ -7,6 +7,7 @@ use App\Entity\Flashcard;
 use App\Entity\Revision;
 use App\Form\FlashcardType;
 use App\Repository\FlashcardRepository;
+use App\Service\FSRSService; // Service pour appeler l'API Flask
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,6 +16,15 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class FlashcardController extends AbstractController
 {
+    private FSRSService $fsrsService;
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(FSRSService $fsrsService, EntityManagerInterface $entityManager)
+    {
+        $this->fsrsService = $fsrsService;
+        $this->entityManager = $entityManager;
+    }
+
     #[Route('/deck/{id}/review', name: 'flashcard_review')]
     public function review(Deck $deck, FlashcardRepository $flashcardRepository): Response
     {
@@ -23,7 +33,7 @@ class FlashcardController extends AbstractController
             throw $this->createNotFoundException('You do not have access to this deck.');
         }
 
-        // Récupère toutes les flashcards du deck
+        // Récupère les flashcards associées au deck
         $flashcards = $flashcardRepository->findBy(['deck' => $deck]);
 
         return $this->render('flashcard/review.html.twig', [
@@ -33,7 +43,7 @@ class FlashcardController extends AbstractController
     }
 
     #[Route('/deck/{id}/flashcard/create', name: 'flashcard_create')]
-    public function create(Deck $deck, Request $request, EntityManagerInterface $entityManager): Response
+    public function create(Deck $deck, Request $request): Response
     {
         // Vérifie que le deck appartient à l'utilisateur connecté
         if ($deck->getOwner() !== $this->getUser()) {
@@ -49,23 +59,32 @@ class FlashcardController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Persist la flashcard
-            $entityManager->persist($flashcard);
+            $this->entityManager->persist($flashcard);
+            $this->entityManager->flush();
+
+            // Appel à l'API Flask pour initialiser les paramètres FSRS
+            $revisionData = $this->fsrsService->initializeCard($flashcard->getId());
+
+            if (!$revisionData) {
+                $this->addFlash('error', 'Failed to initialize flashcard using FSRS.');
+                return $this->redirectToRoute('flashcard_create', ['id' => $deck->getId()]);
+            }
 
             // Crée une révision associée
             $revision = new Revision();
             $revision->setFlashcard($flashcard);
-            $revision->setReviewDate(new \DateTime()); // Initialiser à aujourd'hui
-            $revision->setInterval(1); // Intervalle initial
-            $revision->setEaseFactor(2.5); // Facteur initial
-            $revision->setStatus('ready'); // Statut initial
+            $revision->setStability($revisionData['stability'] ?? null);
+            $revision->setDifficulty($revisionData['difficulty'] ?? null);
+            $revision->setState($revisionData['state']);
+            $revision->setStep($revisionData['step']);
+            $revision->setDueDate(new \DateTime($revisionData['due']));
 
             // Persist la révision
-            $entityManager->persist($revision);
+            $this->entityManager->persist($revision);
+            $this->entityManager->flush();
 
-            // Sauvegarde les deux entités
-            $entityManager->flush();
-
-            // Redirige vers la page de création pour ajouter une nouvelle flashcard
+            // Redirige l'utilisateur avec un message de succès
+            $this->addFlash('success', 'Flashcard created and initialized successfully!');
             return $this->redirectToRoute('flashcard_create', ['id' => $deck->getId()]);
         }
 

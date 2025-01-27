@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from datetime import datetime
-from fsrs.fsrs import Scheduler, Card, Rating
+from fsrs.fsrs import Scheduler, Card, Rating, State
 import logging
 
 app = Flask(__name__)
@@ -19,7 +19,8 @@ def index():
     return jsonify({
         "message": "Welcome to the FSRS API",
         "routes": {
-            "/review": "POST - Process a flashcard review"
+            "/review": "POST - Process a flashcard review",
+            "/initialize_card": "POST - Initialize a new flashcard"
         }
     }), 200
 
@@ -60,6 +61,47 @@ def review_card():
             "card": updated_card.to_dict(),
             "review_log": review_log.to_dict()
         }), 200
+
+    except KeyError as e:
+        app.logger.error(f"KeyError: {str(e)}")
+        return jsonify({"error": f"Missing key: {str(e)}"}), 422
+    except ValueError as e:
+        app.logger.error(f"ValueError: {str(e)}")
+        return jsonify({"error": f"Invalid value: {str(e)}"}), 400
+    except Exception as e:
+        app.logger.error(f"An unexpected error occurred: {str(e)}")
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+
+@app.route('/initialize_card', methods=['POST'])
+def initialize_card():
+    """
+    Route pour initialiser une nouvelle flashcard avec FSRS.
+    """
+    try:
+        # Récupération des données JSON de la requête
+        data = request.get_json()
+        if not data:
+            app.logger.error("No JSON data received")
+            return jsonify({"error": "No JSON data received"}), 400
+
+        # Validation des données reçues
+        if 'id' not in data:
+            app.logger.error("Invalid input: Missing 'id'")
+            return jsonify({
+                "error": "Invalid input: 'id' is required"
+            }), 400
+
+        # Création d'une nouvelle carte
+        card_id = data['id']
+        card = Card(
+            card_id=card_id,
+            state=State.Learning,
+            step=0,  # Étape initiale pour les nouvelles cartes
+        )
+
+        # Retourner les paramètres initialisés au format JSON
+        initialized_card = card.to_dict()
+        return jsonify(initialized_card), 200
 
     except KeyError as e:
         app.logger.error(f"KeyError: {str(e)}")
