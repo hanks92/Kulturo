@@ -44,7 +44,7 @@ class ReviewController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             // Sauvegarder la flashcard dans la base de données
             $this->entityManager->persist($flashcard);
-            $this->entityManager->flush();
+            $this->entityManager->flush(); // Nécessaire pour générer un ID pour la flashcard
 
             // Appel à FSRS pour initialiser les données de la révision
             $revisionData = $this->fsrsService->initializeCard($flashcard->getId());
@@ -56,13 +56,13 @@ class ReviewController extends AbstractController
 
             // Crée une nouvelle révision avec les données retournées
             $revision = new Revision();
-            $revision->setFlashcard($flashcard);
-            $revision->setStability($revisionData['stability'] ?? 1.0);
-            $revision->setRetrievability($revisionData['retrievability'] ?? 0.9);
-            $revision->setDifficulty($revisionData['difficulty'] ?? 5.0);
-            $revision->setState($revisionData['state'] ?? 1); // État initial (Learning)
-            $revision->setStep($revisionData['step'] ?? 0);
-            $revision->setDueDate(new \DateTime($revisionData['due'] ?? 'now'));
+            $revision->setFlashcard($flashcard); // Associe la révision à la flashcard
+            $revision->setStability($revisionData['stability']);
+            $revision->setRetrievability($revisionData['retrievability']);
+            $revision->setDifficulty($revisionData['difficulty']);
+            $revision->setState($revisionData['state']);
+            $revision->setStep($revisionData['step']);
+            $revision->setDueDate(new \DateTime($revisionData['due']));
 
             // Sauvegarde la révision dans la base de données
             $this->entityManager->persist($revision);
@@ -108,13 +108,13 @@ class ReviewController extends AbstractController
     #[Route('/review/session/{id<\d+>}', name: 'app_review_session')]
     public function session(Revision $revision): Response
     {
-        // Vérifier que la révision appartient bien à un deck de l'utilisateur
+        // Vérifie que la révision appartient bien à un deck de l'utilisateur
         $deck = $revision->getFlashcard()->getDeck();
         if ($deck->getOwner() !== $this->getUser()) {
             throw $this->createNotFoundException('Révision non autorisée.');
         }
 
-        // Afficher la révision actuelle
+        // Affiche la révision actuelle
         return $this->render('review/index.html.twig', [
             'revision' => $revision,
             'flashcard' => $revision->getFlashcard(),

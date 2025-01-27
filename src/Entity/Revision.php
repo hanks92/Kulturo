@@ -15,6 +15,7 @@ class Revision
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'revisions')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Flashcard $flashcard = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
