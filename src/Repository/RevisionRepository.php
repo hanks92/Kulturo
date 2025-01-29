@@ -35,18 +35,18 @@ class RevisionRepository extends ServiceEntityRepository
     }
 
     /**
-     * Récupérer toutes les cartes à réviser pour un deck spécifique (plusieurs révisions)
+     * Récupérer toutes les cartes à réviser pour un deck spécifique (toutes les révisions dues)
      */
-    public function findRevisionsForToday(Deck $deck): array
+    public function findDueFlashcardsByDeck(Deck $deck, \DateTime $today): array
     {
         return $this->createQueryBuilder('r')
             ->innerJoin('r.flashcard', 'f') // Jointure avec Flashcard
             ->andWhere('f.deck = :deck') // Filtre par Deck
             ->andWhere('r.dueDate <= :today') // Filtre sur la date d'échéance (dueDate)
             ->setParameter('deck', $deck)
-            ->setParameter('today', (new \DateTime())->setTime(0, 0, 0)) // Date actuelle avec l'heure à minuit
+            ->setParameter('today', $today) // Date actuelle passée en paramètre
             ->orderBy('r.dueDate', 'ASC') // Trier par la date d'échéance
             ->getQuery()
-            ->getResult(); // Retourner un tableau de révisions
+            ->getResult(); // Retourner toutes les révisions
     }
 }

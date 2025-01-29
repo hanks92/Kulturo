@@ -42,6 +42,9 @@ class Revision
     #[ORM\Column(nullable: true)]
     private ?int $step = null; // Étape actuelle de progression
 
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $lastReview = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -152,6 +155,17 @@ class Revision
     {
         $this->step = $step;
 
+        return $this;
+    }
+
+    public function getLastReview(): ?\DateTimeInterface
+    {
+        return $this->lastReview;
+    }
+
+    public function setLastReview(?\DateTimeInterface $lastReview): self
+    {
+        $this->lastReview = $lastReview;
         return $this;
     }
 }

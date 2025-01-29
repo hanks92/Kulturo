@@ -13,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use DateTime;
 
 class ReviewController extends AbstractController
 {
@@ -90,19 +91,25 @@ class ReviewController extends AbstractController
             throw $this->createNotFoundException('Deck introuvable ou accès refusé.');
         }
 
-        // Récupérer la première carte à réviser pour ce deck
-        $revision = $revisionRepository->findNextFlashcardForTodayByDeck($deck);
+        // Récupérer toutes les révisions dues aujourd'hui ou avant
+        $today = new DateTime();
+        $revisions = $revisionRepository->findDueFlashcardsByDeck($deck, $today);
 
         // Si aucune carte à réviser, afficher un message de fin
-        if (!$revision) {
+        if (!$revisions) {
             return $this->render('review/finished.html.twig', [
                 'message' => 'Toutes les cartes ont été révisées pour ce deck aujourd\'hui !',
                 'deck' => $deck,
             ]);
         }
 
+        // Trier les cartes selon leur date de révision
+        usort($revisions, function ($a, $b) {
+            return $a->getDueDate() <=> $b->getDueDate();
+        });
+
         // Rediriger vers la session avec la première carte
-        return $this->redirectToRoute('app_review_session', ['id' => $revision->getId()]);
+        return $this->redirectToRoute('app_review_session', ['id' => $revisions[0]->getId()]);
     }
 
     #[Route('/review/session/{id<\d+>}', name: 'app_review_session')]
@@ -119,5 +126,51 @@ class ReviewController extends AbstractController
             'revision' => $revision,
             'flashcard' => $revision->getFlashcard(),
         ]);
+    }
+
+    #[Route('/review/submit/{id<\d+>}', name: 'app_review_submit', methods: ['POST'])]
+    public function submitReview(Revision $revision, Request $request): Response
+    {
+        // Récupérer la réponse de l'utilisateur
+        $response = $request->request->get('response');
+
+        if (!in_array($response, ['1', '2', '3', '4'])) {
+            $this->addFlash('error', 'Réponse invalide.');
+            return $this->redirectToRoute('app_review_session', ['id' => $revision->getId()]);
+        }
+
+        // Préparer les données pour l'API Flask
+        $cardData = [
+            'card_id' => $revision->getFlashcard()->getId(),
+            'state' => $revision->getState(),
+            'step' => $revision->getStep(),
+            'stability' => $revision->getStability(),
+            'difficulty' => $revision->getDifficulty(),
+            'due' => $revision->getDueDate()->format(DATE_ISO8601),
+            'last_review' => $revision->getLastReview() ? $revision->getLastReview()->format(DATE_ISO8601) : null,
+        ];
+
+        // Appeler l'API Flask pour mettre à jour la carte
+        $result = $this->fsrsService->reviewCard($cardData, (int) $response);
+
+        if (!$result || !isset($result['card'])) {
+            $this->addFlash('error', 'Erreur lors de la mise à jour de la révision.');
+            return $this->redirectToRoute('app_review_session', ['id' => $revision->getId()]);
+        }
+
+        // Mettre à jour les données de la révision avec les résultats de l'API
+        $updatedCard = $result['card'];
+        $revision->setState($updatedCard['state']);
+        $revision->setStep($updatedCard['step']);
+        $revision->setStability($updatedCard['stability']);
+        $revision->setDifficulty($updatedCard['difficulty']);
+        $revision->setDueDate(new \DateTime($updatedCard['due']));
+        $revision->setLastReview(new \DateTime($updatedCard['last_review']));
+
+        $this->entityManager->persist($revision);
+        $this->entityManager->flush();
+
+        // Rediriger vers la prochaine carte ou la fin
+        return $this->redirectToRoute('app_review_start', ['deckId' => $revision->getFlashcard()->getDeck()->getId()]);
     }
 }

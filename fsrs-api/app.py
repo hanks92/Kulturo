@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from fsrs.fsrs import Scheduler, Card, State, Rating
 import logging
 
@@ -36,47 +36,24 @@ def initialize_card():
             app.logger.error("No JSON data received")
             return jsonify({"error": "No JSON data received"}), 400
 
-        # Validation des données reçues
         if 'id' not in data:
             app.logger.error("Invalid input: Missing 'id'")
-            return jsonify({
-                "error": "Invalid input: 'id' is required"
-            }), 400
+            return jsonify({"error": "Invalid input: 'id' is required"}), 400
 
-        # Création d'une nouvelle carte
+        # Création d'une nouvelle carte en mode Learning
         card_id = data['id']
-        card = Card(
-            card_id=card_id,
-            state=State.Learning,
-            step=0,  # Étape initiale pour les nouvelles cartes
-        )
+        card = Card(card_id=card_id)  # La carte est automatiquement configurée en Learning
 
-        # Initialiser les valeurs de stability et difficulty via le scheduler
-        rating = Rating.Good  # Par défaut, "Good" comme première évaluation
-        card.stability = scheduler._initial_stability(rating)
-        card.difficulty = scheduler._initial_difficulty(rating)
-
-        # Génère la prochaine date de révision
-        next_interval_days = scheduler._next_interval(card.stability)
-        card.due = datetime.now() + timedelta(days=next_interval_days)
-        card.last_review = datetime.now()  # Dernière révision initialisée à maintenant
-
-        # Calcul de retrievability
-        retrievability = card.get_retrievability(card.last_review)
-
-        # Retourner les paramètres initialisés au format JSON
+        # Convertir la carte en dictionnaire pour la réponse
         initialized_card = card.to_dict()
-        initialized_card['retrievability'] = retrievability  # Ajout de retrievability
+
+        # ✅ Ajout du calcul de retrievability
+        retrievability = card.get_retrievability(datetime.now(timezone.utc))
+        initialized_card['retrievability'] = retrievability  # Ajout de retrievability dans la réponse
 
         app.logger.info(f"Card initialized: {initialized_card}")
         return jsonify(initialized_card), 200
 
-    except KeyError as e:
-        app.logger.error(f"KeyError: {str(e)}")
-        return jsonify({"error": f"Missing key: {str(e)}"}), 422
-    except ValueError as e:
-        app.logger.error(f"ValueError: {str(e)}")
-        return jsonify({"error": f"Invalid value: {str(e)}"}), 400
     except Exception as e:
         app.logger.error(f"An unexpected error occurred: {str(e)}")
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
