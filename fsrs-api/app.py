@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from fsrs.fsrs import Scheduler, Card, State, Rating
 import logging
 
@@ -24,73 +24,41 @@ def index():
         }
     }), 200
 
-@app.route('/initialize_card', methods=['POST'])
-def initialize_card():
-    """
-    Route pour initialiser une nouvelle flashcard avec FSRS.
-    """
-    try:
-        # Récupération des données JSON de la requête
-        data = request.get_json()
-        if not data:
-            app.logger.error("No JSON data received")
-            return jsonify({"error": "No JSON data received"}), 400
-
-        if 'id' not in data:
-            app.logger.error("Invalid input: Missing 'id'")
-            return jsonify({"error": "Invalid input: 'id' is required"}), 400
-
-        # Création d'une nouvelle carte en mode Learning
-        card_id = data['id']
-        card = Card(card_id=card_id)  # La carte est automatiquement configurée en Learning
-
-        # Convertir la carte en dictionnaire pour la réponse
-        initialized_card = card.to_dict()
-
-        # ✅ Ajout du calcul de retrievability
-        retrievability = card.get_retrievability(datetime.now(timezone.utc))
-        initialized_card['retrievability'] = retrievability  # Ajout de retrievability dans la réponse
-
-        app.logger.info(f"Card initialized: {initialized_card}")
-        return jsonify(initialized_card), 200
-
-    except Exception as e:
-        app.logger.error(f"An unexpected error occurred: {str(e)}")
-        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
-
 @app.route('/review', methods=['POST'])
 def review_card():
     """
     Route pour traiter une révision de carte.
     """
     try:
-        # Récupération des données JSON de la requête
         data = request.get_json()
         if not data:
             app.logger.error("No JSON data received")
             return jsonify({"error": "No JSON data received"}), 400
 
-        # Validation des données reçues
         if 'card' not in data or 'rating' not in data or 'review_datetime' not in data:
             app.logger.error("Invalid input: Missing 'card', 'rating', or 'review_datetime'")
             return jsonify({
                 "error": "Invalid input: 'card', 'rating', and 'review_datetime' are required"
             }), 400
 
-        # Extraction et transformation des données
         card_data = data['card']
         rating = Rating(data['rating'])
-        review_datetime = datetime.fromisoformat(data['review_datetime'])
 
-        # Recréer une carte à partir des données
+        # ✅ Correction minimale : conversion uniquement si c'est une chaîne
+        review_datetime = datetime.fromisoformat(data['review_datetime'].replace("Z", "+00:00")) if isinstance(data['review_datetime'], str) else None
+        due_datetime = datetime.fromisoformat(card_data['due'].replace("Z", "+00:00")) if isinstance(card_data.get('due'), str) else None
+        last_review_datetime = datetime.fromisoformat(card_data['last_review'].replace("Z", "+00:00")) if isinstance(card_data.get('last_review'), str) else None
+
+        # Mise à jour des valeurs dans card_data
+        card_data['due'] = due_datetime
+        card_data['last_review'] = last_review_datetime
+
         card = Card.from_dict(card_data)
 
-        # Passer la carte à l'algorithme FSRS
         updated_card, review_log = scheduler.review_card(
             card=card, rating=rating, review_datetime=review_datetime
         )
 
-        # Retourner les résultats au format JSON
         return jsonify({
             "card": updated_card.to_dict(),
             "review_log": review_log.to_dict()

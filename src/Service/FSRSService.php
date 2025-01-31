@@ -3,48 +3,115 @@
 namespace App\Service;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Psr\Log\LoggerInterface;
+use DateTime;
+use DateTimeZone;
 
 class FSRSService
 {
     private HttpClientInterface $client;
+    private string $flaskApiUrl;
+    private LoggerInterface $logger;
 
-    public function __construct(HttpClientInterface $client)
+    public function __construct(HttpClientInterface $client, ?string $flaskApiUrl, LoggerInterface $logger)
     {
+        // Correction de l'URL si elle commence par "tcp://"
+        if ($flaskApiUrl && str_starts_with($flaskApiUrl, 'tcp://')) {
+            $flaskApiUrl = str_replace('tcp://', 'http://', $flaskApiUrl);
+        }
+
+        $this->flaskApiUrl = $flaskApiUrl ?: 'http://127.0.0.1:5000';
+
+        if (!preg_match('/^https?:\/\//', $this->flaskApiUrl)) {
+            throw new \InvalidArgumentException("L'URL de l'API Flask est invalide : {$this->flaskApiUrl}. Elle doit commencer par http:// ou https://");
+        }
+
         $this->client = $client;
+        $this->logger = $logger;
+        $this->logger->info("🌍 URL de l'API Flask utilisée : {$this->flaskApiUrl}");
     }
 
     /**
      * Initialise une flashcard en envoyant une requête à l'API Flask.
      */
-    public function initializeCard(int $flashcardId): array
+    public function initializeCard(int $flashcardId): ?array
     {
-        $response = $this->client->request('POST', 'http://localhost:5000/initialize_card', [
-            'json' => [
-                'id' => $flashcardId,
-            ],
-        ]);
+        $url = "{$this->flaskApiUrl}/initialize_card";
 
-        return $response->toArray();
+        try {
+            $this->logger->info('🟡 Envoi à FSRS (Initialisation)', ['id' => $flashcardId]);
+
+            $response = $this->client->request('POST', $url, [
+                'json' => ['id' => $flashcardId],
+            ]);
+
+            if ($response->getStatusCode() !== 200) {
+                throw new \Exception('FSRS API returned an error: ' . $response->getContent(false));
+            }
+
+            $result = $response->toArray();
+            
+            // Assurer que toutes les clés sont bien présentes, même si elles sont NULL
+            $result['stability'] = $result['stability'] ?? null;
+            $result['difficulty'] = $result['difficulty'] ?? null;
+            $result['retrievability'] = $result['retrievability'] ?? 0;
+            $result['state'] = $result['state'] ?? 1;
+            $result['step'] = $result['step'] ?? 0;
+            $result['due'] = $result['due'] ?? (new DateTime())->format(DateTime::ISO8601);
+
+            $this->logger->info('🟢 Réponse FSRS (Initialisation)', $result);
+            return $result;
+        } catch (TransportExceptionInterface $e) {
+            $this->logger->error('🔴 Erreur API Flask (Initialisation)', ['message' => $e->getMessage()]);
+            return null;
+        } catch (\Exception $e) {
+            $this->logger->error('🔴 Erreur lors de l\'initialisation FSRS', ['message' => $e->getMessage()]);
+            return null;
+        }
     }
 
     /**
      * Met à jour une carte via l'API Flask en fonction de la révision utilisateur.
      */
-    public function reviewCard(array $cardData, int $rating): ?array
+    public function updateCard(array $cardData, int $rating): ?array
     {
+        $url = "{$this->flaskApiUrl}/review"; // RESTE sur /review
+        $reviewDateTime = (new DateTime('now', new DateTimeZone('UTC')))->format(DateTime::ISO8601);
+
         try {
-            $response = $this->client->request('POST', 'http://localhost:5000/review', [
+            $this->logger->info('🔵 Envoi à FSRS (Mise à jour)', [
+                'card' => $cardData,
+                'rating' => $rating,
+                'review_datetime' => $reviewDateTime,
+            ]);
+
+            $response = $this->client->request('POST', $url, [
                 'json' => [
                     'card' => $cardData,
                     'rating' => $rating,
-                    'review_datetime' => (new \DateTime())->format(DATE_ISO8601),
+                    'review_datetime' => $reviewDateTime, // Format corrigé
                 ],
             ]);
 
-            return $response->toArray();
+            if ($response->getStatusCode() !== 200) {
+                throw new \Exception('FSRS API returned an error: ' . $response->getContent(false));
+            }
+
+            $result = $response->toArray();
+            if (!isset($result['card'])) {
+                throw new \Exception('Réponse FSRS invalide : données manquantes.');
+            }
+
+            $this->logger->info('🟢 Réponse FSRS (Mise à jour)', $result);
+            return $result;
+        } catch (TransportExceptionInterface $e) {
+            $this->logger->error('🔴 Erreur API Flask (Mise à jour)', ['message' => $e->getMessage()]);
+            return null;
         } catch (\Exception $e) {
-            // Gestion des erreurs (log optionnel ou retour null)
+            $this->logger->error('🔴 Erreur lors de la mise à jour FSRS', ['message' => $e->getMessage()]);
             return null;
         }
     }
+
 }

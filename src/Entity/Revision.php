@@ -15,7 +15,7 @@ class Revision
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'revisions')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private ?Flashcard $flashcard = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
@@ -24,25 +24,25 @@ class Revision
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dueDate = null; // Prochaine révision (due)
 
-    #[ORM\Column(nullable: true)]
-    private ?float $stability = 1.0; // Stabilité initiale par défaut
+    #[ORM\Column(type: Types::FLOAT, nullable: true)]
+    private ?float $stability = null; // Stabilité, peut rester NULL
 
-    #[ORM\Column(nullable: true)]
-    private ?float $retrievability = 0.9; // Probabilité de rappel initiale
+    #[ORM\Column(type: Types::FLOAT, nullable: true)]
+    private ?float $retrievability = null; // Probabilité de rappel initiale
 
-    #[ORM\Column(nullable: true)]
-    private ?float $difficulty = 5.0; // Difficulté initiale par défaut
+    #[ORM\Column(type: Types::FLOAT, nullable: true)]
+    private ?float $difficulty = null; // Difficulté, peut rester NULL
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
     private ?int $rating = null; // 1 = Again, 2 = Hard, 3 = Good, 4 = Easy
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
     private ?int $state = null; // 1 = Learning, 2 = Review, 3 = Relearning
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
     private ?int $step = null; // Étape actuelle de progression
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $lastReview = null;
 
     public function getId(): ?int
@@ -58,7 +58,6 @@ class Revision
     public function setFlashcard(?Flashcard $flashcard): static
     {
         $this->flashcard = $flashcard;
-
         return $this;
     }
 
@@ -70,7 +69,6 @@ class Revision
     public function setReviewDate(?\DateTimeInterface $reviewDate): static
     {
         $this->reviewDate = $reviewDate;
-
         return $this;
     }
 
@@ -82,7 +80,6 @@ class Revision
     public function setDueDate(?\DateTimeInterface $dueDate): static
     {
         $this->dueDate = $dueDate;
-
         return $this;
     }
 
@@ -94,7 +91,6 @@ class Revision
     public function setStability(?float $stability): static
     {
         $this->stability = $stability;
-
         return $this;
     }
 
@@ -106,7 +102,6 @@ class Revision
     public function setRetrievability(?float $retrievability): static
     {
         $this->retrievability = $retrievability;
-
         return $this;
     }
 
@@ -118,7 +113,6 @@ class Revision
     public function setDifficulty(?float $difficulty): static
     {
         $this->difficulty = $difficulty;
-
         return $this;
     }
 
@@ -130,7 +124,6 @@ class Revision
     public function setRating(?int $rating): static
     {
         $this->rating = $rating;
-
         return $this;
     }
 
@@ -142,7 +135,6 @@ class Revision
     public function setState(?int $state): static
     {
         $this->state = $state;
-
         return $this;
     }
 
@@ -154,7 +146,6 @@ class Revision
     public function setStep(?int $step): static
     {
         $this->step = $step;
-
         return $this;
     }
 
@@ -163,7 +154,7 @@ class Revision
         return $this->lastReview;
     }
 
-    public function setLastReview(?\DateTimeInterface $lastReview): self
+    public function setLastReview(?\DateTimeInterface $lastReview): static
     {
         $this->lastReview = $lastReview;
         return $this;
