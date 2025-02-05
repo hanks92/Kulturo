@@ -19,10 +19,38 @@ def index():
     return jsonify({
         "message": "Welcome to the FSRS API",
         "routes": {
-            "/review": "POST - Process a flashcard review",
-            "/initialize_card": "POST - Initialize a new flashcard"
+            "/initialize_card": "POST - Initialize a new flashcard",
+            "/review": "POST - Process a flashcard review"
         }
     }), 200
+
+@app.route('/initialize_card', methods=['POST'])
+def initialize_card():
+    """
+    Route pour initialiser une nouvelle flashcard avec FSRS.
+    """
+    try:
+        data = request.get_json()
+        if not data or 'id' not in data:
+            app.logger.error("Invalid input: Missing 'id'")
+            return jsonify({"error": "Invalid input: 'id' is required"}), 400
+
+        card_id = data['id']
+        card = Card(card_id=card_id)  # Création de la carte en mode Learning
+
+        # Convertir la carte en dictionnaire pour la réponse
+        initialized_card = card.to_dict()
+
+        # ✅ Ajout du calcul de retrievability
+        retrievability = card.get_retrievability(datetime.now(timezone.utc))
+        initialized_card['retrievability'] = retrievability  # Ajout de retrievability dans la réponse
+
+        app.logger.info(f"✅ Card initialized: {initialized_card}")
+        return jsonify(initialized_card), 200
+
+    except Exception as e:
+        app.logger.error(f"❌ An unexpected error occurred: {str(e)}")
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
 @app.route('/review', methods=['POST'])
 def review_card():
@@ -44,15 +72,52 @@ def review_card():
         card_data = data['card']
         rating = Rating(data['rating'])
 
-        # ✅ Correction minimale : conversion uniquement si c'est une chaîne
-        review_datetime = datetime.fromisoformat(data['review_datetime'].replace("Z", "+00:00")) if isinstance(data['review_datetime'], str) else None
-        due_datetime = datetime.fromisoformat(card_data['due'].replace("Z", "+00:00")) if isinstance(card_data.get('due'), str) else None
-        last_review_datetime = datetime.fromisoformat(card_data['last_review'].replace("Z", "+00:00")) if isinstance(card_data.get('last_review'), str) else None
+        # ✅ Log des données brutes reçues
+        app.logger.info(f"Received data: {data}")
 
-        # Mise à jour des valeurs dans card_data
-        card_data['due'] = due_datetime
-        card_data['last_review'] = last_review_datetime
+        # ✅ Vérifier et log les types avant conversion
+        review_datetime = data['review_datetime']
+        due_datetime = card_data.get('due')
+        last_review_datetime = card_data.get('last_review')
 
+        app.logger.info(f"BEFORE CONVERSION - review_datetime: {type(review_datetime)}, value: {review_datetime}")
+        app.logger.info(f"BEFORE CONVERSION - due_datetime: {type(due_datetime)}, value: {due_datetime}")
+        app.logger.info(f"BEFORE CONVERSION - last_review_datetime: {type(last_review_datetime)}, value: {last_review_datetime}")
+
+        # ✅ Sécurisation de la conversion des dates avec logs détaillés
+        def safe_convert(date_value, field_name):
+            app.logger.info(f"Converting {field_name}: {date_value} (type: {type(date_value)})")
+            if isinstance(date_value, str):
+                try:
+                    converted_date = datetime.fromisoformat(date_value.replace("Z", "+00:00"))
+                    app.logger.info(f"SUCCESS: Converted {field_name} -> {converted_date}")
+                    return converted_date
+                except ValueError as e:
+                    app.logger.error(f"ERROR: Invalid date format for {field_name}: {date_value} - {str(e)}")
+                    return None
+            elif date_value is None:
+                app.logger.info(f"Skipping conversion for {field_name} because value is None")
+            else:
+                app.logger.error(f"Unexpected type for {field_name}: {type(date_value)} ({date_value})")
+            return None
+
+        review_datetime = safe_convert(review_datetime, "review_datetime")
+        due_datetime = safe_convert(due_datetime, "due_datetime")
+        last_review_datetime = safe_convert(last_review_datetime, "last_review_datetime")
+
+        # ✅ Vérification après conversion
+        app.logger.info(f"AFTER CONVERSION - review_datetime: {review_datetime}")
+        app.logger.info(f"AFTER CONVERSION - due_datetime: {due_datetime}")
+        app.logger.info(f"AFTER CONVERSION - last_review_datetime: {last_review_datetime}")
+
+        # ✅ Vérifie et remplace None par une chaîne correcte pour `Card.from_dict()`
+        card_data['due'] = due_datetime.isoformat() if due_datetime else "1970-01-01T00:00:00+00:00"
+        card_data['last_review'] = last_review_datetime.isoformat() if last_review_datetime else "1970-01-01T00:00:00+00:00"
+
+        # ✅ Log pour vérifier
+        app.logger.info(f"BEFORE Card.from_dict() - corrected card_data: {card_data}")
+
+        # ✅ Maintenant, Card.from_dict() reçoit toujours une chaîne et ne casse plus
         card = Card.from_dict(card_data)
 
         updated_card, review_log = scheduler.review_card(
@@ -73,6 +138,7 @@ def review_card():
     except Exception as e:
         app.logger.error(f"An unexpected error occurred: {str(e)}")
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+
 
 if __name__ == '__main__':
     # Ajoute le mode debug pour le développement et écoute sur 0.0.0.0 pour Docker
