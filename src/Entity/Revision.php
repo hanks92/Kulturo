@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\RevisionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -19,22 +21,13 @@ class Revision
     private ?Flashcard $flashcard = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $reviewDate = null; // Dernière révision (last_review)
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dueDate = null; // Prochaine révision (due)
 
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
     private ?float $stability = null; // Stabilité, peut rester NULL
 
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
-    private ?float $retrievability = null; // Probabilité de rappel initiale
-
-    #[ORM\Column(type: Types::FLOAT, nullable: true)]
     private ?float $difficulty = null; // Difficulté, peut rester NULL
-
-    #[ORM\Column(type: Types::INTEGER, nullable: true)]
-    private ?int $rating = null; // 1 = Again, 2 = Hard, 3 = Good, 4 = Easy
 
     #[ORM\Column(type: Types::INTEGER, nullable: true)]
     private ?int $state = null; // 1 = Learning, 2 = Review, 3 = Relearning
@@ -44,6 +37,17 @@ class Revision
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $lastReview = null;
+
+    /**
+     * @var Collection<int, ReviewLog>
+     */
+    #[ORM\OneToMany(targetEntity: ReviewLog::class, mappedBy: 'revision', orphanRemoval: true)]
+    private Collection $reviewLogs;
+
+    public function __construct()
+    {
+        $this->reviewLogs = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -58,17 +62,6 @@ class Revision
     public function setFlashcard(?Flashcard $flashcard): static
     {
         $this->flashcard = $flashcard;
-        return $this;
-    }
-
-    public function getReviewDate(): ?\DateTimeInterface
-    {
-        return $this->reviewDate;
-    }
-
-    public function setReviewDate(?\DateTimeInterface $reviewDate): static
-    {
-        $this->reviewDate = $reviewDate;
         return $this;
     }
 
@@ -94,17 +87,6 @@ class Revision
         return $this;
     }
 
-    public function getRetrievability(): ?float
-    {
-        return $this->retrievability;
-    }
-
-    public function setRetrievability(?float $retrievability): static
-    {
-        $this->retrievability = $retrievability;
-        return $this;
-    }
-
     public function getDifficulty(): ?float
     {
         return $this->difficulty;
@@ -113,17 +95,6 @@ class Revision
     public function setDifficulty(?float $difficulty): static
     {
         $this->difficulty = $difficulty;
-        return $this;
-    }
-
-    public function getRating(): ?int
-    {
-        return $this->rating;
-    }
-
-    public function setRating(?int $rating): static
-    {
-        $this->rating = $rating;
         return $this;
     }
 
@@ -157,6 +128,36 @@ class Revision
     public function setLastReview(?\DateTimeInterface $lastReview): static
     {
         $this->lastReview = $lastReview;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ReviewLog>
+     */
+    public function getReviewLogs(): Collection
+    {
+        return $this->reviewLogs;
+    }
+
+    public function addReviewLog(ReviewLog $reviewLog): static
+    {
+        if (!$this->reviewLogs->contains($reviewLog)) {
+            $this->reviewLogs->add($reviewLog);
+            $reviewLog->setRevision($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReviewLog(ReviewLog $reviewLog): static
+    {
+        if ($this->reviewLogs->removeElement($reviewLog)) {
+            // set the owning side to null (unless already changed)
+            if ($reviewLog->getRevision() === $this) {
+                $reviewLog->setRevision(null);
+            }
+        }
+
         return $this;
     }
 }

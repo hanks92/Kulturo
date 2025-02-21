@@ -51,14 +51,14 @@ class FSRSService
             }
 
             $result = $response->toArray();
-            
+
             // Assurer que toutes les clés sont bien présentes, même si elles sont NULL
             $result['stability'] = $result['stability'] ?? null;
             $result['difficulty'] = $result['difficulty'] ?? null;
-            $result['retrievability'] = $result['retrievability'] ?? 0;
             $result['state'] = $result['state'] ?? 1;
             $result['step'] = $result['step'] ?? 0;
             $result['due'] = $result['due'] ?? (new DateTime())->format(DateTime::ISO8601);
+            $result['last_review'] = null; // Initialisation
 
             $this->logger->info('🟢 Réponse FSRS (Initialisation)', $result);
             return $result;
@@ -76,7 +76,7 @@ class FSRSService
      */
     public function updateCard(array $cardData, int $rating): ?array
     {
-        $url = "{$this->flaskApiUrl}/review"; // RESTE sur /review
+        $url = "{$this->flaskApiUrl}/review";
         $reviewDateTime = (new DateTime('now', new DateTimeZone('UTC')))->format(DateTime::ISO8601);
 
         try {
@@ -90,7 +90,7 @@ class FSRSService
                 'json' => [
                     'card' => $cardData,
                     'rating' => $rating,
-                    'review_datetime' => $reviewDateTime, // Format corrigé
+                    'review_datetime' => $reviewDateTime,
                 ],
             ]);
 
@@ -99,12 +99,29 @@ class FSRSService
             }
 
             $result = $response->toArray();
-            if (!isset($result['card'])) {
+            if (!isset($result['card']) || !isset($result['review_log'])) {
                 throw new \Exception('Réponse FSRS invalide : données manquantes.');
             }
 
-            $this->logger->info('🟢 Réponse FSRS (Mise à jour)', $result);
-            return $result;
+            // Mise à jour des paramètres de la carte
+            $updatedCard = $result['card'];
+            $updatedCard['last_review'] = $reviewDateTime; // Mise à jour de la dernière révision
+
+            $reviewLog = [
+                'rating' => $result['review_log']['rating'] ?? $rating,
+                'review_datetime' => $reviewDateTime,
+                'review_duration' => $result['review_log']['review_duration'] ?? null,
+            ];
+
+            $this->logger->info('🟢 Réponse FSRS (Mise à jour)', [
+                'updated_card' => $updatedCard,
+                'review_log' => $reviewLog
+            ]);
+
+            return [
+                'updated_card' => $updatedCard,
+                'review_log' => $reviewLog,
+            ];
         } catch (TransportExceptionInterface $e) {
             $this->logger->error('🔴 Erreur API Flask (Mise à jour)', ['message' => $e->getMessage()]);
             return null;
@@ -113,5 +130,4 @@ class FSRSService
             return null;
         }
     }
-
 }

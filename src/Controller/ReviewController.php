@@ -59,11 +59,10 @@ class ReviewController extends AbstractController
 
             $this->logger->info('🟡 Données FSRS reçues', ['data' => $revisionData]);
 
-            // Vérification et attribution des valeurs (accepte NULL)
+            // Création de la révision en base
             $revision = new Revision();
             $revision->setFlashcard($flashcard);
             $revision->setStability($revisionData['stability'] ?? null);
-            $revision->setRetrievability($revisionData['retrievability'] ?? 0);
             $revision->setDifficulty($revisionData['difficulty'] ?? null);
             $revision->setState($revisionData['state'] ?? 1);
             $revision->setStep($revisionData['step'] ?? 0);
@@ -146,12 +145,12 @@ class ReviewController extends AbstractController
 
         $updatedData = $this->fsrsService->updateCard($cardData, $ratingMapping[$response]);
 
-        if (!$updatedData || !isset($updatedData['card'])) {
+        if (!$updatedData || !isset($updatedData['updated_card'])) {
             $this->addFlash('error', 'Erreur lors de la mise à jour de la révision.');
             return $this->redirectToRoute('app_review_session', ['id' => $revision->getId()]);
         }
 
-        $updatedCard = $updatedData['card'];
+        $updatedCard = $updatedData['updated_card'];
         $revision->setState($updatedCard['state']);
         $revision->setStep($updatedCard['step']);
         $revision->setStability($updatedCard['stability'] ?? null);
