@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Deck;
 use App\Entity\Flashcard;
 use App\Entity\Revision;
+use App\Entity\ReviewLog;
 use App\Form\FlashcardType;
 use App\Repository\RevisionRepository;
 use App\Service\FSRSService;
@@ -15,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Psr\Log\LoggerInterface;
 use DateTime;
+use DateTimeZone;
 
 class ReviewController extends AbstractController
 {
@@ -133,7 +135,7 @@ class ReviewController extends AbstractController
             return $this->redirectToRoute('app_review_session', ['id' => $revision->getId()]);
         }
 
-        $cardData = [
+        $updatedData = $this->fsrsService->updateCard([
             'card_id' => $revision->getFlashcard()->getId(),
             'state' => $revision->getState(),
             'step' => $revision->getStep(),
@@ -141,16 +143,17 @@ class ReviewController extends AbstractController
             'difficulty' => $revision->getDifficulty(),
             'due' => $revision->getDueDate()?->format('Y-m-d\TH:i:s\Z'),
             'last_review' => $revision->getLastReview()?->format('Y-m-d\TH:i:s\Z'),
-        ];
+        ], $ratingMapping[$response]);
 
-        $updatedData = $this->fsrsService->updateCard($cardData, $ratingMapping[$response]);
-
-        if (!$updatedData || !isset($updatedData['updated_card'])) {
+        if (!$updatedData || !isset($updatedData['updated_card']) || !isset($updatedData['review_log'])) {
             $this->addFlash('error', 'Erreur lors de la mise à jour de la révision.');
             return $this->redirectToRoute('app_review_session', ['id' => $revision->getId()]);
         }
 
         $updatedCard = $updatedData['updated_card'];
+        $reviewLogData = $updatedData['review_log'];
+
+        // Mise à jour de la révision
         $revision->setState($updatedCard['state']);
         $revision->setStep($updatedCard['step']);
         $revision->setStability($updatedCard['stability'] ?? null);
@@ -158,19 +161,19 @@ class ReviewController extends AbstractController
         $revision->setDueDate(new DateTime($updatedCard['due'] ?? 'now'));
         $revision->setLastReview(new DateTime($updatedCard['last_review'] ?? 'now'));
 
+        // Création et sauvegarde du `ReviewLog`
+        $reviewLog = new ReviewLog();
+        $reviewLog->setRevision($revision);
+        $reviewLog->setRating($reviewLogData['rating']);
+        $reviewLog->setReviewDateTime(new DateTime($reviewLogData['review_datetime']));
+        $reviewLog->setReviewDuration($reviewLogData['review_duration'] ?? null);
+
+        $this->entityManager->persist($reviewLog);
         $this->entityManager->persist($revision);
         $this->entityManager->flush();
 
-        $this->logger->info('✅ Révision mise à jour', ['revision_id' => $revision->getId()]);
+        $this->logger->info('✅ ReviewLog sauvegardé', ['review_log_id' => $reviewLog->getId()]);
 
-        $nextRevision = $revisionRepository->findNextFlashcardForTodayByDeck($revision->getFlashcard()->getDeck());
-
-        if (!$nextRevision) {
-            return $this->render('review/finished.html.twig', [
-                'message' => 'Toutes les cartes ont été révisées pour aujourd\'hui !',
-            ]);
-        }
-
-        return $this->redirectToRoute('app_review_session', ['id' => $nextRevision->getId()]);
+        return $this->redirectToRoute('app_review_session', ['id' => $revision->getId()]);
     }
 }

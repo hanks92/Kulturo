@@ -94,13 +94,20 @@ def review_card():
             card=card, rating=rating, review_datetime=review_datetime
         )
 
-        # Conversion en dictionnaire
+        # Ajout de logs pour voir si `review_log` est bien généré
+        app.logger.info(f"🟢 Updated card: {updated_card.to_dict()}")
+        if review_log:
+            app.logger.info(f"🟢 ReviewLog generated: {review_log.to_dict()}")
+        else:
+            app.logger.warning(f"⚠️ No ReviewLog generated for card_id {card.card_id}")
+
+        # Construction de la réponse JSON
         response_data = {
             "card": updated_card.to_dict(),
-            "review_log": review_log.to_dict()
+            "review_log": review_log.to_dict() if review_log else None  # Évite une erreur si `review_log` est None
         }
 
-        app.logger.info(f"🟢 Review processed successfully: {response_data}")
+        app.logger.info(f"✅ Review processed successfully: {response_data}")
         return jsonify(response_data), 200
 
     except KeyError as e:
