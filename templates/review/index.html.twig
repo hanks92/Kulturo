@@ -15,7 +15,7 @@
     </div>
 
     {% if flashcard %}
-    <form id="review-form" class="space-y-4" method="post" action="{{ path('app_review_session', { 'id': revision.id }) }}">
+    <form id="review-form" class="space-y-4" method="post" action="{{ path('app_review_submit', { 'id': revision.id }) }}">
         <input type="hidden" name="response" id="response" value="">
 
         <div id="answer-section" class="hidden bg-gray-100 p-4 rounded mb-4">
@@ -25,27 +25,27 @@
         <div id="buttons-section" class="hidden flex flex-col space-y-4">
             <button type="button" 
                 class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition flex justify-between items-center"
-                onclick="submitResponse('a_revoir')">
+                onclick="submitResponse(1)">
                 À revoir
-                <span class="text-gray-300 text-sm">(Dans : {{ nextReviewIntervals.a_revoir }})</span>
+                <span class="text-gray-300 text-sm">(Priorité basse)</span>
             </button>
             <button type="button" 
                 class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition flex justify-between items-center"
-                onclick="submitResponse('difficile')">
+                onclick="submitResponse(2)">
                 Difficile
-                <span class="text-gray-300 text-sm">(Dans : {{ nextReviewIntervals.difficile }})</span>
+                <span class="text-gray-300 text-sm">(Priorité moyenne)</span>
             </button>
             <button type="button" 
                 class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition flex justify-between items-center"
-                onclick="submitResponse('correct')">
+                onclick="submitResponse(3)">
                 Correct
-                <span class="text-gray-300 text-sm">(Dans : {{ nextReviewIntervals.correct }})</span>
+                <span class="text-gray-300 text-sm">(Priorité haute)</span>
             </button>
             <button type="button" 
                 class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition flex justify-between items-center"
-                onclick="submitResponse('facile')">
+                onclick="submitResponse(4)">
                 Facile
-                <span class="text-gray-300 text-sm">(Dans : {{ nextReviewIntervals.facile }})</span>
+                <span class="text-gray-300 text-sm">(Facile à retenir)</span>
             </button>
         </div>
 
@@ -68,11 +68,11 @@
         document.getElementById('show-answer-button').classList.add('hidden');
     }
 
-    function submitResponse(response) {
-        // Définit la réponse dans l'input caché
-        document.getElementById('response').value = response;
+    function submitResponse(rating) {
+        // Définit la réponse (rating) dans l'input caché
+        document.getElementById('response').value = rating;
 
-        // Soumet le formulaire pour passer à la carte suivante
+        // Soumet le formulaire pour envoyer la réponse au backend
         document.getElementById('review-form').submit();
     }
 </script>

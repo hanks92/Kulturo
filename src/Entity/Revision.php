@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\RevisionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -15,25 +17,37 @@ class Revision
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'revisions')]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private ?Flashcard $flashcard = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $reviewDate = null;
+    private ?\DateTimeInterface $dueDate = null; // Prochaine révision (due)
 
-    #[ORM\Column(nullable: true)]
-    private ?int $interval = null;
+    #[ORM\Column(type: Types::FLOAT, nullable: true)]
+    private ?float $stability = null; // Stabilité, peut rester NULL
 
-    #[ORM\Column(nullable: true)]
-    private ?float $easeFactor = null;
+    #[ORM\Column(type: Types::FLOAT, nullable: true)]
+    private ?float $difficulty = null; // Difficulté, peut rester NULL
 
-    #[ORM\Column(nullable: true)]
-    private ?float $stability = 1.0; // Ajout de la propriété stability avec une valeur par défaut
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private ?int $state = null; // 1 = Learning, 2 = Review, 3 = Relearning
 
-    #[ORM\Column(nullable: true)]
-    private ?float $retrievability = 0.9; // Ajout de la propriété retrievability avec une valeur par défaut
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private ?int $step = null; // Étape actuelle de progression
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $status = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $lastReview = null;
+
+    /**
+     * @var Collection<int, ReviewLog>
+     */
+    #[ORM\OneToMany(targetEntity: ReviewLog::class, mappedBy: 'revision', orphanRemoval: true)]
+    private Collection $reviewLogs;
+
+    public function __construct()
+    {
+        $this->reviewLogs = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -48,43 +62,17 @@ class Revision
     public function setFlashcard(?Flashcard $flashcard): static
     {
         $this->flashcard = $flashcard;
-
         return $this;
     }
 
-    public function getReviewDate(): ?\DateTimeInterface
+    public function getDueDate(): ?\DateTimeInterface
     {
-        return $this->reviewDate;
+        return $this->dueDate;
     }
 
-    public function setReviewDate(?\DateTimeInterface $reviewDate): static
+    public function setDueDate(?\DateTimeInterface $dueDate): static
     {
-        $this->reviewDate = $reviewDate;
-
-        return $this;
-    }
-
-    public function getInterval(): ?int
-    {
-        return $this->interval;
-    }
-
-    public function setInterval(?int $interval): static
-    {
-        $this->interval = $interval;
-
-        return $this;
-    }
-
-    public function getEaseFactor(): ?float
-    {
-        return $this->easeFactor;
-    }
-
-    public function setEaseFactor(?float $easeFactor): static
-    {
-        $this->easeFactor = $easeFactor;
-
+        $this->dueDate = $dueDate;
         return $this;
     }
 
@@ -96,30 +84,79 @@ class Revision
     public function setStability(?float $stability): static
     {
         $this->stability = $stability;
+        return $this;
+    }
+
+    public function getDifficulty(): ?float
+    {
+        return $this->difficulty;
+    }
+
+    public function setDifficulty(?float $difficulty): static
+    {
+        $this->difficulty = $difficulty;
+        return $this;
+    }
+
+    public function getState(): ?int
+    {
+        return $this->state;
+    }
+
+    public function setState(?int $state): static
+    {
+        $this->state = $state;
+        return $this;
+    }
+
+    public function getStep(): ?int
+    {
+        return $this->step;
+    }
+
+    public function setStep(?int $step): static
+    {
+        $this->step = $step;
+        return $this;
+    }
+
+    public function getLastReview(): ?\DateTimeInterface
+    {
+        return $this->lastReview;
+    }
+
+    public function setLastReview(?\DateTimeInterface $lastReview): static
+    {
+        $this->lastReview = $lastReview;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ReviewLog>
+     */
+    public function getReviewLogs(): Collection
+    {
+        return $this->reviewLogs;
+    }
+
+    public function addReviewLog(ReviewLog $reviewLog): static
+    {
+        if (!$this->reviewLogs->contains($reviewLog)) {
+            $this->reviewLogs->add($reviewLog);
+            $reviewLog->setRevision($this);
+        }
 
         return $this;
     }
 
-    public function getRetrievability(): ?float
+    public function removeReviewLog(ReviewLog $reviewLog): static
     {
-        return $this->retrievability;
-    }
-
-    public function setRetrievability(?float $retrievability): static
-    {
-        $this->retrievability = $retrievability;
-
-        return $this;
-    }
-
-    public function getStatus(): ?string
-    {
-        return $this->status;
-    }
-
-    public function setStatus(?string $status): static
-    {
-        $this->status = $status;
+        if ($this->reviewLogs->removeElement($reviewLog)) {
+            // set the owning side to null (unless already changed)
+            if ($reviewLog->getRevision() === $this) {
+                $reviewLog->setRevision(null);
+            }
+        }
 
         return $this;
     }

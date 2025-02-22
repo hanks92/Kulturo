@@ -18,35 +18,35 @@ class RevisionRepository extends ServiceEntityRepository
     }
 
     /**
-     * Récupérer la prochaine carte à réviser pour un deck spécifique
+     * Récupérer la prochaine carte à réviser pour un deck spécifique (une seule révision)
      */
     public function findNextFlashcardForTodayByDeck(Deck $deck): ?Revision
     {
         return $this->createQueryBuilder('r')
             ->innerJoin('r.flashcard', 'f') // Jointure avec Flashcard
             ->andWhere('f.deck = :deck') // Filtre par Deck
-            ->andWhere('r.reviewDate <= :today') // Filtre sur la date de révision
+            ->andWhere('r.dueDate <= :today') // Filtre sur la date d'échéance (dueDate)
             ->setParameter('deck', $deck)
-            ->setParameter('today', new \DateTime()) // Date actuelle
-            ->orderBy('r.reviewDate', 'ASC') // Trier par la date de révision
+            ->setParameter('today', (new \DateTime())->setTime(0, 0, 0)) // Date actuelle avec l'heure à minuit
+            ->orderBy('r.dueDate', 'ASC') // Trier par la date d'échéance
             ->setMaxResults(1) // Limiter à une révision
             ->getQuery()
             ->getOneOrNullResult(); // Retourner une révision ou null
     }
 
     /**
-     * Récupérer toutes les cartes à réviser pour un deck spécifique
+     * Récupérer toutes les cartes à réviser pour un deck spécifique (toutes les révisions dues)
      */
-    public function findAllFlashcardsToReviewByDeck(Deck $deck): array
+    public function findDueFlashcardsByDeck(Deck $deck, \DateTime $today): array
     {
         return $this->createQueryBuilder('r')
             ->innerJoin('r.flashcard', 'f') // Jointure avec Flashcard
             ->andWhere('f.deck = :deck') // Filtre par Deck
-            ->andWhere('r.reviewDate <= :today') // Filtre sur la date de révision
+            ->andWhere('r.dueDate <= :today') // Filtre sur la date d'échéance (dueDate)
             ->setParameter('deck', $deck)
-            ->setParameter('today', new \DateTime()) // Date actuelle
-            ->orderBy('r.reviewDate', 'ASC') // Trier par la date de révision
+            ->setParameter('today', $today) // Date actuelle passée en paramètre
+            ->orderBy('r.dueDate', 'ASC') // Trier par la date d'échéance
             ->getQuery()
-            ->getResult(); // Retourner un tableau de révisions
+            ->getResult(); // Retourner toutes les révisions
     }
 }

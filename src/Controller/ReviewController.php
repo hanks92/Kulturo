@@ -3,197 +3,183 @@
 namespace App\Controller;
 
 use App\Entity\Deck;
+use App\Entity\Flashcard;
 use App\Entity\Revision;
-use App\Service\SM2Algorithm;
+use App\Entity\ReviewLog;
+use App\Form\FlashcardType;
+use App\Repository\RevisionRepository;
+use App\Service\FSRSService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Psr\Log\LoggerInterface;
+use DateTime;
+use DateTimeZone;
 
 class ReviewController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
-    private SM2Algorithm $sm2Algorithm;
+    private FSRSService $fsrsService;
+    private LoggerInterface $logger;
 
-    public function __construct(EntityManagerInterface $entityManager, SM2Algorithm $sm2Algorithm)
+    public function __construct(EntityManagerInterface $entityManager, FSRSService $fsrsService, LoggerInterface $logger)
     {
         $this->entityManager = $entityManager;
-        $this->sm2Algorithm = $sm2Algorithm;
+        $this->fsrsService = $fsrsService;
+        $this->logger = $logger;
     }
 
-    #[Route('/review/start/{deckId<\d+>}', name: 'app_review_start')]
-    public function start(int $deckId): Response
+    #[Route('/deck/{id}/flashcard/create', name: 'flashcard_create')]
+    public function createFlashcard(Deck $deck, Request $request): Response
     {
-        // Récupérer le Deck
+        if ($deck->getOwner() !== $this->getUser()) {
+            throw $this->createNotFoundException('Vous n\'avez pas accès à ce deck.');
+        }
+
+        $flashcard = new Flashcard();
+        $flashcard->setDeck($deck);
+
+        $form = $this->createForm(FlashcardType::class, $flashcard);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->persist($flashcard);
+            $this->entityManager->flush();
+
+            $this->logger->info('✅ Flashcard créée', ['id' => $flashcard->getId()]);
+
+            // Initialisation FSRS
+            $revisionData = $this->fsrsService->initializeCard($flashcard->getId());
+
+            if (!$revisionData) {
+                $this->logger->error('❌ Échec de l\'initialisation FSRS.');
+                $this->addFlash('error', 'Échec de l\'initialisation de la révision via FSRS.');
+                return $this->redirectToRoute('flashcard_create', ['id' => $deck->getId()]);
+            }
+
+            $revision = new Revision();
+            $revision->setFlashcard($flashcard);
+            $revision->setStability($revisionData['stability'] ?? null);
+            $revision->setDifficulty($revisionData['difficulty'] ?? null);
+            $revision->setState($revisionData['state'] ?? 1);
+            $revision->setStep($revisionData['step'] ?? 0);
+            $revision->setDueDate(new DateTime($revisionData['due'] ?? 'now'));
+
+            // Sauvegarde en base
+            $this->entityManager->persist($revision);
+            $this->entityManager->flush();
+
+            $this->logger->info('✅ Révision initialisée', ['revision_id' => $revision->getId()]);
+
+            $this->addFlash('success', 'Flashcard et révision créées avec succès !');
+
+            return $this->redirectToRoute('flashcard_create', ['id' => $deck->getId()]);
+        }
+
+        return $this->render('flashcard/create.html.twig', [
+            'form' => $form->createView(),
+            'deck' => $deck,
+        ]);
+    }
+
+    #[Route('/review/start/{deckId}', name: 'app_review_start')]
+    public function start(int $deckId, RevisionRepository $revisionRepository): Response
+    {
         $deck = $this->entityManager->getRepository(Deck::class)->find($deckId);
 
-        // Vérifier si le Deck existe et appartient à l'utilisateur
         if (!$deck || $deck->getOwner() !== $this->getUser()) {
             throw $this->createNotFoundException('Deck introuvable ou accès refusé.');
         }
 
-        // Récupérer la première carte à réviser pour ce deck
-        $flashcard = $this->entityManager
-            ->getRepository(Revision::class)
-            ->findNextFlashcardForTodayByDeck($deck);
+        $today = new DateTime();
+        $revisions = $revisionRepository->findDueFlashcardsByDeck($deck, $today);
 
-        // Si aucune carte à réviser, afficher un message de fin
-        if (!$flashcard) {
+        if (!$revisions) {
             return $this->render('review/finished.html.twig', [
-                'message' => 'Toutes les cartes ont été révisées pour ce deck aujourd\'hui !',
+                'message' => 'Toutes les cartes ont été révisées pour aujourd\'hui !',
                 'deck' => $deck,
             ]);
         }
 
-        // Rediriger vers la session avec la première carte
-        return $this->redirectToRoute('app_review_session', ['id' => $flashcard->getId()]);
+        return $this->redirectToRoute('app_review_session', ['id' => $revisions[0]->getId()]);
     }
 
-    #[Route('/review/session/{id<\d+>}', name: 'app_review_session')]
-    public function session(Request $request, Revision $revision): Response
+    #[Route('/review/session/{id}', name: 'app_review_session')]
+    public function session(Revision $revision): Response
     {
-        // Vérifier que la flashcard appartient bien à un deck de l'utilisateur
         $deck = $revision->getFlashcard()->getDeck();
         if ($deck->getOwner() !== $this->getUser()) {
             throw $this->createNotFoundException('Révision non autorisée.');
         }
 
-        // Calcul des intervalles pour chaque réponse
-        $nextReviewIntervals = [
-            'facile' => $this->calculateInterval(
-                $revision->getReviewDate(),
-                $this->sm2Algorithm->calculateNextReview(
-                    $revision->getEaseFactor(),
-                    $revision->getInterval(),
-                    'facile'
-                )['nextReviewDate']
-            ),
-            'correct' => $this->calculateInterval(
-                $revision->getReviewDate(),
-                $this->sm2Algorithm->calculateNextReview(
-                    $revision->getEaseFactor(),
-                    $revision->getInterval(),
-                    'correct'
-                )['nextReviewDate']
-            ),
-            'difficile' => $this->calculateInterval(
-                $revision->getReviewDate(),
-                $this->sm2Algorithm->calculateNextReview(
-                    $revision->getEaseFactor(),
-                    $revision->getInterval(),
-                    'difficile'
-                )['nextReviewDate']
-            ),
-            'a_revoir' => $this->calculateInterval(
-                $revision->getReviewDate(),
-                $this->sm2Algorithm->calculateNextReview(
-                    $revision->getEaseFactor(),
-                    $revision->getInterval(),
-                    'a_revoir'
-                )['nextReviewDate']
-            ),
-        ];
-
-        // Si une réponse est soumise (méthode POST)
-        if ($request->isMethod('POST')) {
-            // Récupérer la réponse utilisateur
-            $response = $request->request->get('response');
-
-            // Vérifier la validité de la réponse
-            if (!in_array($response, ['facile', 'correct', 'difficile', 'a_revoir'])) {
-                $this->addFlash('error', 'Réponse invalide.');
-                return $this->redirectToRoute('app_review_session', ['id' => $revision->getId()]);
-            }
-
-            // Calculer les nouvelles valeurs avec SM-2
-            $result = $this->sm2Algorithm->calculateNextReview(
-                $revision->getEaseFactor(),
-                $revision->getInterval(),
-                $response,
-                $revision->getStability(),
-                $revision->getRetrievability()
-            );
-
-            // Mettre à jour l'entité Revision
-            $revision->setEaseFactor($result['easeFactor']);
-            $revision->setInterval($result['interval']);
-            $revision->setReviewDate($result['nextReviewDate']);
-            $revision->setStability($result['stability']);
-            $revision->setRetrievability($result['retrievability']);
-
-            // Sauvegarder les changements dans la base de données
-            $this->entityManager->persist($revision);
-            $this->entityManager->flush();
-
-            // Récupérer la prochaine carte
-            $nextRevision = $this->entityManager
-                ->getRepository(Revision::class)
-                ->findNextFlashcardForTodayByDeck($deck);
-
-            // Si aucune carte suivante, afficher un message de fin
-            if (!$nextRevision) {
-                return $this->render('review/finished.html.twig', [
-                    'message' => 'Toutes les cartes ont été révisées pour ce deck aujourd\'hui !',
-                    'deck' => $deck,
-                ]);
-            }
-
-            // Rediriger vers la prochaine carte
-            return $this->redirectToRoute('app_review_session', ['id' => $nextRevision->getId()]);
-        }
-
-        // Afficher la carte actuelle
         return $this->render('review/index.html.twig', [
             'revision' => $revision,
             'flashcard' => $revision->getFlashcard(),
-            'nextReviewIntervals' => $nextReviewIntervals, // Ajout des intervalles pour le front-end
         ]);
     }
 
-    private function calculateInterval(\DateTime $currentDate, \DateTime $nextReviewDate): string
+    #[Route('/review/submit/{id}', name: 'app_review_submit', methods: ['POST'])]
+    public function submitReview(Revision $revision, Request $request, RevisionRepository $revisionRepository): Response
     {
-        $interval = $currentDate->diff($nextReviewDate);
+        $response = $request->request->get('response');
 
-        if ($interval->days > 0) {
-            return $interval->days . ' j'; // En jours
+        $ratingMapping = ['1' => 1, '2' => 2, '3' => 3, '4' => 4];
+
+        if (!isset($ratingMapping[$response])) {
+            $this->addFlash('error', 'Réponse invalide.');
+            return $this->redirectToRoute('app_review_session', ['id' => $revision->getId()]);
         }
 
-        if ($interval->h > 0 || $interval->i > 0) {
-            $minutes = ($interval->h * 60) + $interval->i;
-            return $minutes . ' min'; // En minutes
+        $updatedData = $this->fsrsService->updateCard([
+            'card_id' => $revision->getFlashcard()->getId(),
+            'state' => $revision->getState(),
+            'step' => $revision->getStep(),
+            'stability' => $revision->getStability(),
+            'difficulty' => $revision->getDifficulty(),
+            'due' => $revision->getDueDate()?->format('Y-m-d\TH:i:s\Z'),
+            'last_review' => $revision->getLastReview()?->format('Y-m-d\TH:i:s\Z'),
+        ], $ratingMapping[$response]);
+
+        if (!$updatedData || !isset($updatedData['updated_card']) || !isset($updatedData['review_log'])) {
+            $this->addFlash('error', 'Erreur lors de la mise à jour de la révision.');
+            return $this->redirectToRoute('app_review_session', ['id' => $revision->getId()]);
         }
 
-        return '0 min';
-    }
+        $updatedCard = $updatedData['updated_card'];
+        $reviewLogData = $updatedData['review_log'];
 
-    #[Route('/review/{deckId<\d+>}', name: 'app_review')]
-    public function index(int $deckId): Response
-    {
-        // Récupérer le Deck
-        $deck = $this->entityManager->getRepository(Deck::class)->find($deckId);
+        // Mise à jour de la révision
+        $revision->setState($updatedCard['state']);
+        $revision->setStep($updatedCard['step']);
+        $revision->setStability($updatedCard['stability'] ?? null);
+        $revision->setDifficulty($updatedCard['difficulty'] ?? null);
+        $revision->setDueDate(new DateTime($updatedCard['due'] ?? 'now'));
+        $revision->setLastReview(new DateTime($updatedCard['last_review'] ?? 'now'));
 
-        // Vérifier si le Deck existe et appartient à l'utilisateur
-        if (!$deck || $deck->getOwner() !== $this->getUser()) {
-            throw $this->createNotFoundException('Deck introuvable ou accès refusé.');
+        // Création et sauvegarde du `ReviewLog`
+        $reviewLog = new ReviewLog();
+        $reviewLog->setRevision($revision);
+        $reviewLog->setRating($reviewLogData['rating']);
+        $reviewLog->setReviewDateTime(new DateTime($reviewLogData['review_datetime']));
+        $reviewLog->setReviewDuration($reviewLogData['review_duration'] ?? null);
+
+        $this->entityManager->persist($reviewLog);
+        $this->entityManager->persist($revision);
+        $this->entityManager->flush();
+
+        $this->logger->info('✅ ReviewLog sauvegardé', ['review_log_id' => $reviewLog->getId()]);
+
+        // **Correction : Charger la prochaine carte au lieu de rester sur la même**
+        $nextRevision = $revisionRepository->findNextFlashcardForTodayByDeck($revision->getFlashcard()->getDeck());
+
+        if ($nextRevision) {
+            return $this->redirectToRoute('app_review_session', ['id' => $nextRevision->getId()]);
         }
 
-        // Récupérer la prochaine carte à réviser pour ce deck
-        $nextRevision = $this->entityManager
-            ->getRepository(Revision::class)
-            ->findNextFlashcardForTodayByDeck($deck);
-
-        // Si aucune carte à réviser, afficher un message de fin
-        if (!$nextRevision) {
-            return $this->render('review/finished.html.twig', [
-                'message' => 'Toutes les cartes ont été révisées pour ce deck aujourd\'hui !',
-                'deck' => $deck,
-            ]);
-        }
-
-        // Rendre la vue pour afficher la carte
-        return $this->render('review/index.html.twig', [
-            'revision' => $nextRevision,
+        return $this->render('review/finished.html.twig', [
+            'message' => 'Toutes les cartes ont été révisées pour aujourd\'hui !',
         ]);
     }
 }
