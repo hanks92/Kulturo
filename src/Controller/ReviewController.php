@@ -50,7 +50,7 @@ class ReviewController extends AbstractController
 
             $this->logger->info('✅ Flashcard créée', ['id' => $flashcard->getId()]);
 
-            // Récupération des données FSRS
+            // Initialisation FSRS
             $revisionData = $this->fsrsService->initializeCard($flashcard->getId());
 
             if (!$revisionData) {
@@ -59,9 +59,6 @@ class ReviewController extends AbstractController
                 return $this->redirectToRoute('flashcard_create', ['id' => $deck->getId()]);
             }
 
-            $this->logger->info('🟡 Données FSRS reçues', ['data' => $revisionData]);
-
-            // Création de la révision en base
             $revision = new Revision();
             $revision->setFlashcard($flashcard);
             $revision->setStability($revisionData['stability'] ?? null);
@@ -174,6 +171,15 @@ class ReviewController extends AbstractController
 
         $this->logger->info('✅ ReviewLog sauvegardé', ['review_log_id' => $reviewLog->getId()]);
 
-        return $this->redirectToRoute('app_review_session', ['id' => $revision->getId()]);
+        // **Correction : Charger la prochaine carte au lieu de rester sur la même**
+        $nextRevision = $revisionRepository->findNextFlashcardForTodayByDeck($revision->getFlashcard()->getDeck());
+
+        if ($nextRevision) {
+            return $this->redirectToRoute('app_review_session', ['id' => $nextRevision->getId()]);
+        }
+
+        return $this->render('review/finished.html.twig', [
+            'message' => 'Toutes les cartes ont été révisées pour aujourd\'hui !',
+        ]);
     }
 }
