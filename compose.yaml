@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
 ###> doctrine/doctrine-bundle ###
   database:
@@ -16,16 +18,37 @@ services:
       - database_data:/var/lib/postgresql/data:rw
     ports:
       - "5433:5432"
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
 ###< doctrine/doctrine-bundle ###
 
-  flask-api: # Ajout minimal pour le service Flask
+###> symfony/mailer ###
+  mailer:
+    image: axllent/mailpit
+    ports:
+      - "1025"
+      - "8025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+###< symfony/mailer ###
+
+  flask-api:  # API Flask existante
     build:
       context: ./fsrs-api
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
+    depends_on:
+      - database
+  ai-api:  # DeepSeek via Ollama
+    build:
+      context: ./ai-api
+      dockerfile: Dockerfile
+    container_name: deepseek-ollama
+    ports:
+      - "11435:11434"  # Port d’Ollama
+    volumes:
+      - ./ai-api:/app
+    restart: always
     depends_on:
       - database
 
