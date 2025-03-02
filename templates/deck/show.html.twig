@@ -15,5 +15,11 @@
        class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 focus:outline-none dark:focus:ring-green-800">
         Créer une Flashcard
     </a>
+
+    <a href="{{ path('flashcard_list', { id: deck.id }) }}" 
+        class="text-white bg-yellow-500 hover:bg-yellow-600 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-yellow-400 dark:hover:bg-yellow-500 focus:outline-none dark:focus:ring-yellow-600">
+        Voir toutes les Flashcards
+    </a>
+
 </div>
 {% endblock %}

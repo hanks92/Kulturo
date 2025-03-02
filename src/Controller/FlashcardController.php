@@ -76,6 +76,24 @@ class FlashcardController extends AbstractController
         ]);
     }
 
+    #[Route('/deck/{id}/flashcards', name: 'flashcard_list')]
+    public function list(Deck $deck, FlashcardRepository $flashcardRepository): Response
+        {
+            // Vérification que l'utilisateur possède bien le deck
+            if ($deck->getOwner() !== $this->getUser()) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas accès à ce deck.');
+        }
+
+    // Récupération des flashcards associées au deck
+    $flashcards = $flashcardRepository->findBy(['deck' => $deck]);
+
+            return $this->render('deck/list.html.twig', [
+            'deck' => $deck,
+            'flashcards' => $flashcards,
+         ]);
+    }
+
+
     /**
      * 📌 Fonction pour créer et persister une flashcard (réutilisable par l'IA et le formulaire)
      */

@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Flashcards - {{ deck.title }}{% endblock %}
+
+{% block body %}
+<div style="display: flex; flex-direction: column; align-items: center; text-align: center; min-height: 80vh;">
+    <h1 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 1.5rem;">Flashcards du deck : {{ deck.title }}</h1>
+
+    {% if flashcards is empty %}
+        <p style="font-size: 1.2rem; color: #888;">Aucune flashcard dans ce deck.</p>
+    {% else %}
+        <ul style="list-style: none; padding: 0; max-width: 600px;">
+            {% for flashcard in flashcards %}
+                <li style="margin-bottom: 1rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px;">
+                    <p style="font-weight: bold;">{{ flashcard.question }}</p>
+                    <p style="color: #666;">{{ flashcard.answer }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <a href="{{ path('deck_show', { id: deck.id }) }}" 
+       class="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 mt-4 dark:bg-gray-600 dark:hover:bg-gray-700 focus:outline-none dark:focus:ring-gray-800">
+        Retour au Deck
+    </a>
+</div>
+{% endblock %}
