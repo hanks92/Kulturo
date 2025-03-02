@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Deck;
 use App\Form\AIType;
 use App\Controller\DeckController;
+use App\Controller\FlashcardController;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,14 +18,20 @@ class AIController extends AbstractController
 {
     private HttpClientInterface $httpClient;
     private EntityManagerInterface $entityManager;
-    private string $apiKey;
     private DeckController $deckController;
+    private FlashcardController $flashcardController;
+    private string $apiKey;
 
-    public function __construct(HttpClientInterface $httpClient, EntityManagerInterface $entityManager, DeckController $deckController)
-    {
+    public function __construct(
+        HttpClientInterface $httpClient,
+        EntityManagerInterface $entityManager,
+        DeckController $deckController,
+        FlashcardController $flashcardController
+    ) {
         $this->httpClient = $httpClient;
         $this->entityManager = $entityManager;
         $this->deckController = $deckController;
+        $this->flashcardController = $flashcardController;
         $this->apiKey = $_ENV['OPENROUTER_API_KEY'];
     }
 
@@ -42,7 +49,7 @@ class AIController extends AbstractController
                 flush();
 
                 $data = $form->getData();
-                $title = $data['title']; // Récupération du titre du deck
+                $title = $data['title'];
                 $subject = $data['subject'];
                 $context = $data['context'] ?? '';
 
@@ -88,15 +95,38 @@ class AIController extends AbstractController
                     echo "✅ Réponse reçue !\n";
                     flush();
 
-                    $aiResponse = $result['choices'][0]['message']['content']; // Texte brut pour l'instant
+                    $aiResponse = $result['choices'][0]['message']['content']; // Texte brut
 
-                    // ✅ Création du deck même si la conversion JSON des flashcards échoue
+                    // ✅ Nettoyage et conversion de la réponse en JSON
+                    $aiResponse = trim($aiResponse); // Suppression des espaces inutiles
+                    $aiResponse = preg_replace('/^```json|```$/', '', $aiResponse); // Suppression des balises Markdown JSON
+                    $flashcardsArray = json_decode($aiResponse, true);
+
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        echo "❌ Erreur de conversion JSON : " . json_last_error_msg() . "\n";
+                        flush();
+                        return;
+                    }
+
+                    // ✅ Création du deck
                     $deck = $this->deckController->createDeckEntity($title);
                     echo "✅ Deck créé avec succès !\n";
                     flush();
 
-                    echo "📌 Réponse brute de l'IA affichée ci-dessous :\n";
-                    echo $aiResponse;
+                    // ✅ Création des flashcards
+                    foreach ($flashcardsArray as $flashcardData) {
+                        if (isset($flashcardData['recto'], $flashcardData['verso'])) {
+                            $this->flashcardController->createFlashcard(
+                                $deck,
+                                $flashcardData['recto'],
+                                $flashcardData['verso']
+                            );
+                            echo "✅ Flashcard ajoutée : " . $flashcardData['recto'] . "\n";
+                            flush();
+                        }
+                    }
+
+                    echo "🎉 Toutes les flashcards ont été générées et enregistrées !\n";
                     flush();
 
                 } catch (\Exception $e) {

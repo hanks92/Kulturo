@@ -7,7 +7,7 @@ use App\Entity\Flashcard;
 use App\Entity\Revision;
 use App\Form\FlashcardType;
 use App\Repository\FlashcardRepository;
-use App\Service\FSRSService; // Service pour appeler l'API Flask
+use App\Service\FSRSService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,12 +28,12 @@ class FlashcardController extends AbstractController
     #[Route('/deck/{id}/review', name: 'flashcard_review')]
     public function review(Deck $deck, FlashcardRepository $flashcardRepository): Response
     {
-        // Vérifie que le deck appartient à l'utilisateur connecté
+        // Vérification de l'accès au deck
         if ($deck->getOwner() !== $this->getUser()) {
-            throw $this->createNotFoundException('You do not have access to this deck.');
+            throw $this->createAccessDeniedException('Vous n\'avez pas accès à ce deck.');
         }
 
-        // Récupère les flashcards associées au deck
+        // Récupération des flashcards du deck
         $flashcards = $flashcardRepository->findBy(['deck' => $deck]);
 
         return $this->render('flashcard/review.html.twig', [
@@ -45,12 +45,12 @@ class FlashcardController extends AbstractController
     #[Route('/deck/{id}/flashcard/create', name: 'flashcard_create')]
     public function create(Deck $deck, Request $request): Response
     {
-        // Vérifie que le deck appartient à l'utilisateur connecté
+        // Vérification de l'accès au deck
         if ($deck->getOwner() !== $this->getUser()) {
-            throw $this->createNotFoundException('You do not have access to this deck.');
+            throw $this->createAccessDeniedException('Vous n\'avez pas accès à ce deck.');
         }
 
-        // Crée une nouvelle flashcard et l’associe au deck
+        // Création et association de la flashcard au deck
         $flashcard = new Flashcard();
         $flashcard->setDeck($deck);
 
@@ -58,19 +58,51 @@ class FlashcardController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Persist la flashcard
+            // Persistance de la flashcard
             $this->entityManager->persist($flashcard);
             $this->entityManager->flush();
 
-            // Appel à l'API Flask pour initialiser les paramètres FSRS
-            $revisionData = $this->fsrsService->initializeCard($flashcard->getId());
+            // Initialisation FSRS
+            $this->initializeFSRS($flashcard);
 
-            if (!$revisionData) {
-                $this->addFlash('error', 'Failed to initialize flashcard using FSRS.');
-                return $this->redirectToRoute('flashcard_create', ['id' => $deck->getId()]);
-            }
+            // Redirection après création
+            $this->addFlash('success', 'Flashcard créée avec succès !');
+            return $this->redirectToRoute('flashcard_review', ['id' => $deck->getId()]);
+        }
 
-            // Crée une révision associée
+        return $this->render('flashcard/create.html.twig', [
+            'form' => $form->createView(),
+            'deck' => $deck,
+        ]);
+    }
+
+    /**
+     * 📌 Fonction pour créer et persister une flashcard (réutilisable par l'IA et le formulaire)
+     */
+    public function createFlashcard(Deck $deck, string $question, string $answer): Flashcard
+    {
+        $flashcard = new Flashcard();
+        $flashcard->setDeck($deck);
+        $flashcard->setQuestion($question);
+        $flashcard->setAnswer($answer);
+
+        $this->entityManager->persist($flashcard);
+        $this->entityManager->flush();
+
+        // Initialisation FSRS
+        $this->initializeFSRS($flashcard);
+
+        return $flashcard;
+    }
+
+    /**
+     * 📌 Fonction privée pour initialiser FSRS après la création d'une flashcard
+     */
+    private function initializeFSRS(Flashcard $flashcard): void
+    {
+        $revisionData = $this->fsrsService->initializeCard($flashcard->getId());
+
+        if ($revisionData) {
             $revision = new Revision();
             $revision->setFlashcard($flashcard);
             $revision->setStability($revisionData['stability'] ?? null);
@@ -79,18 +111,8 @@ class FlashcardController extends AbstractController
             $revision->setStep($revisionData['step']);
             $revision->setDueDate(new \DateTime($revisionData['due']));
 
-            // Persist la révision
             $this->entityManager->persist($revision);
             $this->entityManager->flush();
-
-            // Redirige l'utilisateur avec un message de succès
-            $this->addFlash('success', 'Flashcard created and initialized successfully!');
-            return $this->redirectToRoute('flashcard_create', ['id' => $deck->getId()]);
         }
-
-        return $this->render('flashcard/create.html.twig', [
-            'form' => $form->createView(),
-            'deck' => $deck,
-        ]);
     }
 }
