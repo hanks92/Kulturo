@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Génération de Flashcards {% endblock %}
+
+{% block body %}
+    <div class="container mx-auto mt-10 p-6 bg-white shadow-md rounded-md">
+        <h1 class="text-2xl font-bold mb-4 text-center">Créer un paquet de flashcards avec l'IA</h1>
+
+        {{ form_start(form, {'attr': {'action': path('ai_form'), 'method': 'POST'}}) }}
+            <div class="mb-4">
+                {{ form_widget(form) }}
+            </div>
+
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition">
+                Générer le paquet de flashcards
+            </button>
+        {{ form_end(form) }}
+
+        <!-- Bloc pour afficher la réponse de l'IA -->
+        {% if aiResponse is not null %}
+            <div class="mt-6 p-4 bg-gray-100 border rounded-md">
+                <h2 class="text-lg font-bold">Réponse de l'IA :</h2>
+                <pre class="whitespace-pre-wrap text-gray-800">{{ aiResponse }}</pre>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
