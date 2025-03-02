@@ -2,7 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Deck;
 use App\Form\AIType;
+use App\Controller\DeckController;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,12 +16,16 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class AIController extends AbstractController
 {
     private HttpClientInterface $httpClient;
+    private EntityManagerInterface $entityManager;
     private string $apiKey;
+    private DeckController $deckController;
 
-    public function __construct(HttpClientInterface $httpClient)
+    public function __construct(HttpClientInterface $httpClient, EntityManagerInterface $entityManager, DeckController $deckController)
     {
         $this->httpClient = $httpClient;
-        $this->apiKey = $_ENV['OPENROUTER_API_KEY']; // Assurez-vous que cette clé est bien définie dans .env
+        $this->entityManager = $entityManager;
+        $this->deckController = $deckController;
+        $this->apiKey = $_ENV['OPENROUTER_API_KEY'];
     }
 
     #[Route('/ai', name: 'ai_form', methods: ['GET', 'POST'])]
@@ -26,7 +33,7 @@ class AIController extends AbstractController
     {
         $form = $this->createForm(AIType::class);
         $form->handleRequest($request);
-        $aiResponse = null; // Stocke la réponse de l'IA
+        $aiResponse = null;
 
         if ($form->isSubmitted() && $form->isValid()) {
             return new StreamedResponse(function () use ($form) {
@@ -35,10 +42,11 @@ class AIController extends AbstractController
                 flush();
 
                 $data = $form->getData();
+                $title = $data['title']; // Récupération du titre du deck
                 $subject = $data['subject'];
                 $context = $data['context'] ?? '';
 
-                // 📝 Création du prompt
+                // 📝 Création du prompt pour l'IA
                 $prompt = "Génère un paquet de flashcards sur '$subject'. Contexte : '$context'. 
                 Réponds uniquement avec un JSON sous cette forme : 
                 [{\"recto\": \"...\", \"verso\": \"...\"}].";
@@ -68,7 +76,7 @@ class AIController extends AbstractController
                         return;
                     }
 
-                    // 🔍 Traitement de la réponse de l'IA
+                    // 🔍 Récupération de la réponse de l'IA
                     $result = json_decode($response->getContent(), true);
 
                     if (!isset($result['choices'][0]['message']['content'])) {
@@ -77,8 +85,18 @@ class AIController extends AbstractController
                         return;
                     }
 
-                    echo "✅ Réponse reçue :\n";
-                    echo json_encode($result['choices'][0]['message']['content'], JSON_PRETTY_PRINT);
+                    echo "✅ Réponse reçue !\n";
+                    flush();
+
+                    $aiResponse = $result['choices'][0]['message']['content']; // Texte brut pour l'instant
+
+                    // ✅ Création du deck même si la conversion JSON des flashcards échoue
+                    $deck = $this->deckController->createDeckEntity($title);
+                    echo "✅ Deck créé avec succès !\n";
+                    flush();
+
+                    echo "📌 Réponse brute de l'IA affichée ci-dessous :\n";
+                    echo $aiResponse;
                     flush();
 
                 } catch (\Exception $e) {
@@ -90,7 +108,7 @@ class AIController extends AbstractController
 
         return $this->render('ai/index.html.twig', [
             'form' => $form->createView(),
-            'aiResponse' => $aiResponse,
+            'aiResponse' => $aiResponse, // Affichage brut de la réponse de l'IA
         ]);
     }
 }

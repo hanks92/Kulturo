@@ -13,6 +13,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class DeckController extends AbstractController
 {
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
     #[Route('/deck', name: 'app_deck')]
     public function index(DeckRepository $deckRepository): Response
     {
@@ -25,19 +32,15 @@ class DeckController extends AbstractController
     }
 
     #[Route('/deck/create', name: 'deck_create')]
-    public function create(Request $request, EntityManagerInterface $entityManager): Response
+    public function create(Request $request): Response
     {
         $deck = new Deck();
         $form = $this->createForm(DeckType::class, $deck);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $deck->setOwner($this->getUser());
-            $deck->setCreatedAt(new \DateTimeImmutable());
-            $deck->setUpdatedAt(new \DateTimeImmutable());
-
-            $entityManager->persist($deck);
-            $entityManager->flush();
+            // Utilisation de la nouvelle méthode pour créer et persister le deck
+            $this->createDeckEntity($deck->getTitle());
 
             return $this->redirectToRoute('app_deck');
         }
@@ -57,5 +60,23 @@ class DeckController extends AbstractController
         return $this->render('deck/show.html.twig', [
             'deck' => $deck,
         ]);
+    }
+
+    /**
+     * 📌 Fonction pour créer un Deck et le persister en base de données.
+     * Cette fonction est utilisée aussi bien dans la création manuelle que dans l'IA.
+     */
+    public function createDeckEntity(string $title): Deck
+    {
+        $deck = new Deck();
+        $deck->setTitle($title);
+        $deck->setOwner($this->getUser());
+        $deck->setCreatedAt(new \DateTimeImmutable());
+        $deck->setUpdatedAt(new \DateTimeImmutable());
+
+        $this->entityManager->persist($deck);
+        $this->entityManager->flush();
+
+        return $deck;
     }
 }
