@@ -150,7 +150,6 @@ class ReviewController extends AbstractController
         $updatedCard = $updatedData['updated_card'];
         $reviewLogData = $updatedData['review_log'];
 
-        // Mise à jour de la révision
         $revision->setState($updatedCard['state']);
         $revision->setStep($updatedCard['step']);
         $revision->setStability($updatedCard['stability'] ?? null);
@@ -158,7 +157,6 @@ class ReviewController extends AbstractController
         $revision->setDueDate(new DateTime($updatedCard['due'] ?? 'now'));
         $revision->setLastReview(new DateTime($updatedCard['last_review'] ?? 'now'));
 
-        // Création et sauvegarde du `ReviewLog`
         $reviewLog = new ReviewLog();
         $reviewLog->setRevision($revision);
         $reviewLog->setRating($reviewLogData['rating']);
@@ -169,13 +167,10 @@ class ReviewController extends AbstractController
         $this->entityManager->persist($revision);
         $this->entityManager->flush();
 
-        $this->logger->info('✅ ReviewLog sauvegardé', ['review_log_id' => $reviewLog->getId()]);
+        $nextRevisions = $revisionRepository->findDueFlashcardsByDeck($revision->getFlashcard()->getDeck(), new \DateTime());
 
-        // **Correction : Charger la prochaine carte au lieu de rester sur la même**
-        $nextRevision = $revisionRepository->findNextFlashcardForTodayByDeck($revision->getFlashcard()->getDeck());
-
-        if ($nextRevision) {
-            return $this->redirectToRoute('app_review_session', ['id' => $nextRevision->getId()]);
+        if (!empty($nextRevisions)) {
+            return $this->redirectToRoute('app_review_session', ['id' => $nextRevisions[0]->getId()]);
         }
 
         return $this->render('review/finished.html.twig', [
