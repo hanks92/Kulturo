@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="text-center p-10">
+        <h1 class="text-4xl font-bold">Bienvenue sur notre plateforme !</h1>
+        <p class="mt-4 text-lg text-gray-600">Veuillez vous connecter pour accéder à nos fonctionnalités.</p>
+
+        <a href="{{ path('app_login') }}" 
+           class="mt-6 inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+            Connexion
+        </a>
+    </div>
+{% endblock %}
