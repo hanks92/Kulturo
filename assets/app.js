@@ -1,3 +1,4 @@
+import { registerReactControllerComponents } from '@symfony/ux-react';
 import './bootstrap.js';
 /*
  * Welcome to your app's main JavaScript file!
@@ -9,3 +10,5 @@ import './styles/app.css';
 import 'flowbite';
 
 console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
+
+registerReactControllerComponents(require.context('./react/controllers', true, /\.(j|t)sx?$/));
