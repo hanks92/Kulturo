@@ -1,13 +1,15 @@
-{% extends 'base.html.twig' %}
+{% extends 'layouts/unauthenticated.html.twig' %}
 
-{% block body %}
-    <div class="text-center p-10">
-        <h1 class="text-4xl font-bold">Bienvenue sur notre plateforme !</h1>
-        <p class="mt-4 text-lg text-gray-600">Veuillez vous connecter pour accéder à nos fonctionnalités.</p>
+{% block content %}
+    <h1 class="text-3xl font-bold text-center mb-4">Bienvenue sur Flint</h1>
+    <p class="text-center text-gray-600 mb-6">Apprenez efficacement avec la mémorisation espacée</p>
 
-        <a href="{{ path('app_login') }}" 
-           class="mt-6 inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+    <div class="flex flex-col gap-4">
+        <a href="{{ path('app_login') }}" class="bg-blue-500 text-white p-3 rounded-lg text-center">
             Connexion
+        </a>
+        <a href="{{ path('app_register') }}" class="bg-green-500 text-white p-3 rounded-lg text-center">
+            Inscription
         </a>
     </div>
 {% endblock %}

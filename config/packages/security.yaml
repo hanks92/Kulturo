@@ -1,27 +1,40 @@
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    # Gestion du hashage des mots de passe
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+
+    # Gestion du provider utilisateur
     providers:
         # used to reload user from session & other features (e.g. switch_user)
         app_user_provider:
             entity:
                 class: App\Entity\User
                 property: email
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
         main:
             lazy: true
             provider: app_user_provider
             custom_authenticator: App\Security\AppAuthenticator
+
+            # Gestion de la connexion
+            form_login:
+                login_path: app_login       # Page de connexion
+                check_path: app_login       # Symfony gère cette route automatiquement
+                default_target_path: app_home  # Redirige l'utilisateur après connexion
+
+            entry_point: form_login
+            
+            # Gestion de la déconnexion
             logout:
                 path: app_logout
-                # where to redirect after logout
-                # target: app_any_route
+                target: app_landing  # Redirection vers la page de départ
 
+            # Gestion de la fonctionnalité "Se souvenir de moi"
             remember_me:
                 secret: '%kernel.secret%'
                 lifetime: 604800
@@ -30,20 +43,20 @@ security:
                 # login form, uncomment the following line to always enable it.
                 #always_remember_me: true
 
-            # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#the-firewall
-
-            # https://symfony.com/doc/current/security/impersonating_user.html
+            # switch_user (optionnel mais non activé par défaut)
             # switch_user: true
 
-    # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
+    # Gestion des accès aux différentes parties du site
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
         - { path: ^/app, roles: ROLE_USER }
         - { path: ^/settings, roles: ROLE_USER }
         - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/login, roles: PUBLIC_ACCESS }   # Permet l'accès à la page de connexion
+        - { path: ^/register, roles: PUBLIC_ACCESS } # Permet l'accès à la page d'inscription
+        - { path: ^/logout, roles: PUBLIC_ACCESS }   # Permet la déconnexion
+        - { path: ^/, roles: PUBLIC_ACCESS }         # Permet l'accès à la landing page
 
 when@test:
     security:
@@ -54,6 +67,6 @@ when@test:
             # reduces the work factor to the lowest possible values.
             Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
                 algorithm: auto
-                cost: 4 # Lowest possible value for bcrypt
-                time_cost: 3 # Lowest possible value for argon
-                memory_cost: 10 # Lowest possible value for argon
+                cost: 4  # Valeur minimale pour bcrypt
+                time_cost: 3  # Valeur minimale pour argon
+                memory_cost: 10  # Valeur minimale pour argon

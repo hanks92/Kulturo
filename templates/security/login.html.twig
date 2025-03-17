@@ -1,8 +1,8 @@
-{% extends 'base.html.twig' %}
+{% extends 'layouts/unauthenticated.html.twig' %}
 
 {% block title %}Connexion{% endblock %}
 
-{% block body %}
+{% block content %}
 <form method="post" class="max-w-md mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
     {% if error %}
         <div class="mb-4 p-4 text-red-700 bg-red-100 rounded-lg" role="alert">
@@ -12,23 +12,43 @@
 
     {% if app.user %}
         <div class="mb-3 text-center text-gray-800 dark:text-white">
-            Vous êtes connecté en tant que {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}" class="text-blue-600 hover:underline">Déconnexion</a>
+            Vous êtes connecté en tant que {{ app.user.userIdentifier }}, 
+            <a href="{{ path('app_logout') }}" class="text-blue-600 hover:underline">Déconnexion</a>
         </div>
     {% endif %}
 
-    <!-- Réduire la marge supérieure pour remonter le titre -->
     <h1 class="text-2xl font-bold text-center mb-6 mt-6 text-gray-800 dark:text-white">Connexion</h1>
 
     <!-- Email -->
     <div class="mb-5">
         <label for="inputEmail" class="block text-sm font-medium text-gray-900 dark:text-white">Email</label>
-        <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" autocomplete="email" required autofocus>
+        <input 
+            type="email" 
+            value="{{ last_username }}" 
+            name="email" 
+            id="inputEmail" 
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
+                   focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 
+                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" 
+            autocomplete="email" 
+            required 
+            autofocus
+        >
     </div>
 
     <!-- Password -->
     <div class="mb-5">
         <label for="inputPassword" class="block text-sm font-medium text-gray-900 dark:text-white">Mot de passe</label>
-        <input type="password" name="password" id="inputPassword" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" autocomplete="current-password" required>
+        <input 
+            type="password" 
+            name="password" 
+            id="inputPassword" 
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
+                   focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 
+                   dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" 
+            autocomplete="current-password" 
+            required
+        >
     </div>
 
     <!-- CSRF Token -->
@@ -36,12 +56,25 @@
 
     <!-- Remember Me -->
     <div class="flex items-start mb-5">
-        <input type="checkbox" name="_remember_me" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600">
-        <label for="_remember_me" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Se souvenir de moi</label>
+        <input 
+            type="checkbox" 
+            name="_remember_me" 
+            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded 
+                   focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 
+                   dark:bg-gray-700 dark:border-gray-600"
+        >
+        <label for="_remember_me" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+            Se souvenir de moi
+        </label>
     </div>
 
     <!-- Submit Button -->
-    <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-700 dark:hover:bg-blue-800 dark:focus:ring-blue-900">
+    <button 
+        type="submit" 
+        class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none 
+               focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center 
+               dark:bg-blue-700 dark:hover:bg-blue-800 dark:focus:ring-blue-900"
+    >
         Connexion
     </button>
 </form>
