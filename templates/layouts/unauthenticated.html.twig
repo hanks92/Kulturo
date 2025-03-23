@@ -2,12 +2,48 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Flint - Espace d'Apprentissage</title>
+
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="Flint - Plateforme d'Apprentissage Intelligent">
+    <meta name="description" content="Flint - Une plateforme interactive pour améliorer votre mémoire grâce à des flashcards intelligentes et des jeux stimulants.">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://flint-app.com">
+    <meta property="og:title" content="Flint - Plateforme d'Apprentissage Intelligent">
+    <meta property="og:description" content="Flint - Une plateforme interactive pour améliorer votre mémoire grâce à des flashcards intelligentes et des jeux stimulants.">
+    <meta property="og:image" content="https://flint-app.com/assets/images/flint-meta.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://flint-app.com">
+    <meta property="twitter:title" content="Flint - Plateforme d'Apprentissage Intelligent">
+    <meta property="twitter:description" content="Flint - Une plateforme interactive pour améliorer votre mémoire grâce à des flashcards intelligentes et des jeux stimulants.">
+    <meta property="twitter:image" content="https://flint-app.com/assets/images/flint-meta.jpg">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.svg') }}" type="image/svg" />
+
+    <!-- Styles -->
     {{ encore_entry_link_tags('app') }}
+    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/animate.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/lineicons.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/ud-styles.css') }}" />
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
-    <div class="max-w-md w-full bg-white p-6 rounded-lg shadow-md">
-        {% block content %}{% endblock %}
-    </div>
+
+<body>
+    {% block content %}{% endblock %}
+
+    <!-- JavaScript pour les animations -->
+    <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/js/wow.min.js') }}"></script>
+    <script>
+        // Initialisation des animations
+        new WOW().init();
+    </script>
 </body>
 </html>
