@@ -1,59 +1,452 @@
 {% extends 'layouts/unauthenticated.html.twig' %}
 
-{% block title %}Inscription{% endblock %}
-
 {% block content %}
-    {% for flash_error in app.flashes('verify_email_error') %}
-        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
-    {% endfor %}
+    <!-- ====== Header Start ====== -->
+    <header class="ud-header">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <nav class="navbar navbar-expand-lg">
+              <a class="navbar-brand" href="index.html">
+                <img src="assets/images/logo/logo.svg" alt="Logo" />
+              </a>
+              <button class="navbar-toggler">
+                <span class="toggler-icon"> </span>
+                <span class="toggler-icon"> </span>
+                <span class="toggler-icon"> </span>
+              </button>
 
-    <!-- Ajuster la marge supérieure pour l'alignement -->
-    <h1 class="text-2xl font-bold text-center mb-6 mt-10 text-gray-800 dark:text-white">Créer un compte</h1>
+              <div class="navbar-collapse">
+                <ul id="nav" class="navbar-nav mx-auto">
+                  <li class="nav-item">
+                    <a class="ud-menu-scroll" href="#home">Home</a>
+                  </li>
 
-    {{ form_start(registrationForm, {'attr': {'class': 'max-w-md mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md'}}) }}
+                  <li class="nav-item">
+                    <a class="ud-menu-scroll" href="#about">About</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="ud-menu-scroll" href="#pricing">Pricing</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="ud-menu-scroll" href="#team">Team</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="ud-menu-scroll" href="#contact">Contact</a>
+                  </li>
+                  <li class="nav-item nav-item-has-children">
+                    <a href="javascript:void(0)"> Pages </a>
+                    <ul class="ud-submenu">
+                      <li class="ud-submenu-item">
+                        <a href="about.html" class="ud-submenu-link">
+                          About Page
+                        </a>
+                      </li>
+                      <li class="ud-submenu-item">
+                        <a href="pricing.html" class="ud-submenu-link">
+                          Pricing Page
+                        </a>
+                      </li>
+                      <li class="ud-submenu-item">
+                        <a href="contact.html" class="ud-submenu-link">
+                          Contact Page
+                        </a>
+                      </li>
+                      <li class="ud-submenu-item">
+                        <a href="blog.html" class="ud-submenu-link">
+                          Blog Grid Page
+                        </a>
+                      </li>
+                      <li class="ud-submenu-item">
+                        <a href="blog-details.html" class="ud-submenu-link">
+                          Blog Details Page
+                        </a>
+                      </li>
+                      <li class="ud-submenu-item">
+                        <a href="login.html" class="ud-submenu-link">
+                          Sign In Page
+                        </a>
+                      </li>
+                      <li class="ud-submenu-item">
+                        <a href="404.html" class="ud-submenu-link">404 Page</a>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
 
-        <div class="mb-5">
-            {{ form_label(registrationForm.email, "Email", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
-            {{ form_widget(registrationForm.email, {'attr': {'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-                    focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 
-                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white'}}) }}
-            {{ form_errors(registrationForm.email) }}
+              <div class="navbar-btn d-none d-sm-inline-block">
+                <a href="login.html" class="ud-main-btn ud-login-btn">
+                  Sign In
+                </a>
+                <a class="ud-main-btn ud-white-btn" href="javascript:void(0)">
+                  Sign Up
+                </a>
+              </div>
+            </nav>
+          </div>
         </div>
+      </div>
+    </header>
+    <!-- ====== Header End ====== -->
 
-        <div class="mb-5">
-            {{ form_label(registrationForm.username, "Nom d'utilisateur", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
-            {{ form_widget(registrationForm.username, {'attr': {'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-                    focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 
-                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white'}}) }}
-            {{ form_errors(registrationForm.username) }}
-        </div>
-
-        <div class="mb-5">
-            <label for="profileImage" class="block text-sm font-medium text-gray-900 dark:text-white">Choisissez un avatar</label>
-            <div class="grid grid-cols-4 gap-4 mt-2">
-                {% for choice in registrationForm.profileImage %}
-                    <label class="cursor-pointer">
-                        {{ form_widget(choice) }}
-                        <img src="{{ asset(choice.vars.value) }}" alt="Avatar" class="w-16 h-16 rounded-full border border-gray-300">
-                    </label>
-                {% endfor %}
+    <!-- ====== Banner Start ====== -->
+    <section class="ud-page-banner">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="ud-banner-content">
+              <h1>Login Page</h1>
             </div>
-            {{ form_errors(registrationForm.profileImage) }}
+          </div>
         </div>
+      </div>
+    </section>
+    <!-- ====== Banner End ====== -->
 
-        <div class="mb-5">
-            {{ form_label(registrationForm.plainPassword, "Mot de passe", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
-            {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-                    focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 
-                    dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white'}}) }}
-            {{ form_errors(registrationForm.plainPassword) }}
+    <!-- ====== Login Start ====== -->
+    <section class="ud-login">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="ud-login-wrapper">
+              <div class="ud-login-logo">
+                <img src="assets/images/logo/logo-2.svg" alt="logo" />
+              </div>
+              {{ form_start(registrationForm, {'attr': {'class': 'ud-login-form'}}) }}
+                    {% for flash_error in app.flashes('verify_email_error') %}
+                        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+                    {% endfor %}
+
+                    <div class="ud-form-group">
+                        {{ form_widget(registrationForm.email, {
+                        'attr': {
+                            'placeholder': 'Email',
+                            'class': 'form-control'
+                        }
+                        }) }}
+                        {{ form_errors(registrationForm.email) }}
+                    </div>
+
+                    <div class="ud-form-group">
+                        {{ form_widget(registrationForm.username, {
+                        'attr': {
+                            'placeholder': "Nom d'utilisateur",
+                            'class': 'form-control'
+                        }
+                        }) }}
+                        {{ form_errors(registrationForm.username) }}
+                    </div>
+
+                    <div class="ud-form-group">
+                        <label class="form-label">Choisissez un avatar</label>
+                        <div class="d-flex flex-wrap gap-2">
+                        {% for choice in registrationForm.profileImage %}
+                            <label class="cursor-pointer">
+                            {{ form_widget(choice) }}
+                            <img src="{{ asset(choice.vars.value) }}" alt="Avatar" class="rounded-circle border" width="64" height="64">
+                            </label>
+                        {% endfor %}
+                        </div>
+                        {{ form_errors(registrationForm.profileImage) }}
+                    </div>
+
+                    <div class="ud-form-group">
+                        {{ form_widget(registrationForm.plainPassword, {
+                        'attr': {
+                            'placeholder': 'Mot de passe',
+                            'class': 'form-control'
+                        }
+                        }) }}
+                        {{ form_errors(registrationForm.plainPassword) }}
+                    </div>
+
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                    <div class="ud-form-group">
+                        <button type="submit" class="ud-main-btn w-100">Créer un compte</button>
+                    </div>
+                    {{ form_end(registrationForm) }}
+
+
+              <div class="ud-socials-connect">
+                <p>Connect With</p>
+
+                <ul>
+                  <li>
+                    <a href="javascript:void(0)" class="facebook">
+                      <i class="lni lni-facebook-filled"></i>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="javascript:void(0)" class="twitter">
+                      <i class="lni lni-twitter-filled"></i>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="javascript:void(0)" class="google">
+                      <i class="lni lni-google"></i>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <a class="forget-pass" href="javascript:void(0)">
+                Forget Password?
+              </a>
+              <p class="signup-option">
+                Not a member yet? <a href="javascript:void(0)"> Sign Up </a>
+              </p>
+            </div>
+          </div>
         </div>
+      </div>
+    </section>
+    <!-- ====== Login End ====== -->
 
-        <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 
-                focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center 
-                dark:bg-blue-700 dark:hover:bg-blue-800 dark:focus:ring-blue-900">
-            Créer un compte
-        </button>
+    <!-- ====== Footer Start ====== -->
+    <footer class="ud-footer wow fadeInUp" data-wow-delay=".15s">
+      <div class="shape shape-1">
+        <img src="assets/images/footer/shape-1.svg" alt="shape" />
+      </div>
+      <div class="shape shape-2">
+        <img src="assets/images/footer/shape-2.svg" alt="shape" />
+      </div>
+      <div class="shape shape-3">
+        <img src="assets/images/footer/shape-3.svg" alt="shape" />
+      </div>
+      <div class="ud-footer-widgets">
+        <div class="container">
+          <div class="row">
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="ud-widget">
+                <a href="index.html" class="ud-footer-logo">
+                  <img src="assets/images/logo/logo.svg" alt="logo" />
+                </a>
+                <p class="ud-widget-desc">
+                  We create digital experiences for brands and companies by
+                  using technology.
+                </p>
+                <ul class="ud-widget-socials">
+                  <li>
+                    <a href="https://twitter.com/MusharofChy">
+                      <i class="lni lni-facebook-filled"></i>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://twitter.com/MusharofChy">
+                      <i class="lni lni-twitter-filled"></i>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://twitter.com/MusharofChy">
+                      <i class="lni lni-instagram-filled"></i>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://twitter.com/MusharofChy">
+                      <i class="lni lni-linkedin-original"></i>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
 
-    {{ form_end(registrationForm) }}
+            <div class="col-xl-2 col-lg-2 col-md-6 col-sm-6">
+              <div class="ud-widget">
+                <h5 class="ud-widget-title">About Us</h5>
+                <ul class="ud-widget-links">
+                  <li>
+                    <a href="javascript:void(0)">Home</a>
+                  </li>
+                  <li>
+                    <a href="javascript:void(0)">Features</a>
+                  </li>
+                  <li>
+                    <a href="javascript:void(0)">About</a>
+                  </li>
+                  <li>
+                    <a href="javascript:void(0)">Testimonial</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-xl-2 col-lg-3 col-md-6 col-sm-6">
+              <div class="ud-widget">
+                <h5 class="ud-widget-title">Features</h5>
+                <ul class="ud-widget-links">
+                  <li>
+                    <a href="javascript:void(0)">How it works</a>
+                  </li>
+                  <li>
+                    <a href="javascript:void(0)">Privacy policy</a>
+                  </li>
+                  <li>
+                    <a href="javascript:void(0)">Terms of service</a>
+                  </li>
+                  <li>
+                    <a href="javascript:void(0)">Refund policy</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-xl-2 col-lg-3 col-md-6 col-sm-6">
+              <div class="ud-widget">
+                <h5 class="ud-widget-title">Our Products</h5>
+                <ul class="ud-widget-links">
+                  <li>
+                    <a
+                      href="https://lineicons.com/"
+                      rel="nofollow noopner"
+                      target="_blank"
+                      >Lineicons
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://ecommercehtml.com/"
+                      rel="nofollow noopner"
+                      target="_blank"
+                      >Ecommerce HTML</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://ayroui.com/"
+                      rel="nofollow noopner"
+                      target="_blank"
+                      >Ayro UI</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://graygrids.com/"
+                      rel="nofollow noopner"
+                      target="_blank"
+                      >Plain Admin</a
+                    >
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-8 col-sm-10">
+              <div class="ud-widget">
+                <h5 class="ud-widget-title">Partners</h5>
+                <ul class="ud-widget-brands">
+                  <li>
+                    <a
+                      href="https://ayroui.com/"
+                      rel="nofollow noopner"
+                      target="_blank"
+                    >
+                      <img
+                        src="assets/images/footer/brands/ayroui.svg"
+                        alt="ayroui"
+                      />
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://ecommercehtml.com/"
+                      rel="nofollow noopner"
+                      target="_blank"
+                    >
+                      <img
+                        src="assets/images/footer/brands/ecommerce-html.svg"
+                        alt="ecommerce-html"
+                      />
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://graygrids.com/"
+                      rel="nofollow noopner"
+                      target="_blank"
+                    >
+                      <img
+                        src="assets/images/footer/brands/graygrids.svg"
+                        alt="graygrids"
+                      />
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://lineicons.com/"
+                      rel="nofollow noopner"
+                      target="_blank"
+                    >
+                      <img
+                        src="assets/images/footer/brands/lineicons.svg"
+                        alt="lineicons"
+                      />
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://uideck.com/"
+                      rel="nofollow noopner"
+                      target="_blank"
+                    >
+                      <img
+                        src="assets/images/footer/brands/uideck.svg"
+                        alt="uideck"
+                      />
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://tailwindtemplates.co/"
+                      rel="nofollow noopner"
+                      target="_blank"
+                    >
+                      <img
+                        src="assets/images/footer/brands/tailwindtemplates.svg"
+                        alt="tailwindtemplates"
+                      />
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ud-footer-bottom">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-8">
+              <ul class="ud-footer-bottom-left">
+                <li>
+                  <a href="javascript:void(0)">Privacy policy</a>
+                </li>
+                <li>
+                  <a href="javascript:void(0)">Support policy</a>
+                </li>
+                <li>
+                  <a href="javascript:void(0)">Terms of service</a>
+                </li>
+              </ul>
+            </div>
+            <div class="col-md-4">
+              <p class="ud-footer-bottom-right">
+                Designed and Developed by
+                <a href="https://uideck.com" rel="nofollow">UIdeck</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <!-- ====== Footer End ====== -->
+
+    <!-- ====== Back To Top Start ====== -->
+    <a href="javascript:void(0)" class="back-to-top">
+      <i class="lni lni-chevron-up"> </i>
+    </a>
+    <!-- ====== Back To Top End ====== -->
+
+    <!-- ====== All Javascript Files ====== -->
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/wow.min.js"></script>
+    <script src="assets/js/main.js"></script>
 {% endblock %}
