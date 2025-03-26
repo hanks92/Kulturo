@@ -13,9 +13,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&display=swap");
 :root {
   --font: "Inter", sans-serif;
-  --body-color: #637381;
-  --heading-color: #212b36;
-  --primary-color: #3056d3;
+  --body-color: #2F5178;
+  --heading-color: #2F5178;
+  --primary-color: #79d7be;
   --white: #ffffff;
 }
 
@@ -898,8 +898,8 @@ p {
 }
 
 .ud-single-pricing.active {
-  background: -webkit-gradient(linear, left top, left bottom, from(#3056d3), to(#179bee));
-  background: linear-gradient(180deg, #3056d3 0%, #179bee 100%);
+  background: -webkit-gradient(linear, left top, left bottom, from(#79d7be), to(#179bee));
+  background: linear-gradient(180deg, #79d7be 0%, #179bee 100%);
   border: none;
   padding: 55px 30px;
 }
