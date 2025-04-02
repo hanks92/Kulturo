@@ -7,7 +7,7 @@
         <div class="row">
           <div class="col-lg-12">
             <div class="ud-banner-content">
-              <h1>Login Page</h1>
+              <h1>Registration Page</h1>
             </div>
           </div>
         </div>
@@ -22,7 +22,7 @@
           <div class="col-lg-12">
             <div class="ud-login-wrapper">
               <div class="ud-login-logo">
-                <img src="assets/images/logo/logo-2.svg" alt="logo" />
+                <img src="assets/images/logo/logo-2.png" alt="logo" />
               </div>
               {{ form_start(registrationForm, {'attr': {'class': 'ud-login-form'}}) }}
                     {% for flash_error in app.flashes('verify_email_error') %}
@@ -51,13 +51,13 @@
 
                     <div class="ud-form-group">
                         <label class="form-label">Choisissez un avatar</label>
-                        <div class="d-flex flex-wrap gap-2">
-                        {% for choice in registrationForm.profileImage %}
-                            <label class="cursor-pointer">
-                            {{ form_widget(choice) }}
-                            <img src="{{ asset(choice.vars.value) }}" alt="Avatar" class="rounded-circle border" width="64" height="64">
-                            </label>
-                        {% endfor %}
+                        <div class="d-flex flex-wrap gap-2" id="avatar-selection">
+                            {% for choice in registrationForm.profileImage %}
+                                <label class="position-relative">
+                                    {{ form_widget(choice, {'attr': {'class': 'd-none'}}) }}
+                                    <img src="{{ asset(choice.vars.value) }}" alt="Avatar" class="rounded-circle border avatar-img" width="64" height="64">
+                                </label>
+                            {% endfor %}
                         </div>
                         {{ form_errors(registrationForm.profileImage) }}
                     </div>

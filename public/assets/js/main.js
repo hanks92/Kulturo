@@ -90,4 +90,26 @@
   document.querySelector(".back-to-top").onclick = () => {
     scrollTo(document.documentElement);
   };
+
+  // ===== avatar selection via image
+  document.addEventListener("DOMContentLoaded", function () {
+    const labels = document.querySelectorAll("#avatar-selection label");
+
+    labels.forEach(label => {
+      const input = label.querySelector("input");
+      const img = label.querySelector("img");
+
+      // Initial state if already selected
+      if (input.checked) {
+        img.classList.add("selected");
+      }
+
+      img.addEventListener("click", () => {
+        labels.forEach(l => l.querySelector("img").classList.remove("selected"));
+        img.classList.add("selected");
+        input.checked = true;
+      });
+    });
+  });
+
 })();

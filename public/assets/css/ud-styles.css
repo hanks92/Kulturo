@@ -13,9 +13,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&display=swap");
 :root {
   --font: "Inter", sans-serif;
-  --body-color: #2F5178;
-  --heading-color: #2F5178;
-  --primary-color: #79d7be;
+  --body-color: #4DA1A9;
+  --heading-color: #090B0F;
+  --primary-color: #2F5178;
   --white: #ffffff;
 }
 
@@ -2610,4 +2610,15 @@ p {
     padding: 10px 20px;
   }
 }
+
+.avatar-img {
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.avatar-img.selected {
+  opacity: 0.5;
+  outline: 2px solid #007bff;
+}
+
 /*# sourceMappingURL=ud-styles.css.map */
