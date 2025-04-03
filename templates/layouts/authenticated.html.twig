@@ -1,32 +1,68 @@
 <!DOCTYPE html>
-<html class="{{ app.user and app.user.theme == 'dark' ? 'dark' : '' }}">
+<html lang="fr" class="{{ app.user and app.user.theme == 'dark' ? 'dark' : '' }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>{% block title %}Flint - Espace Membre{% endblock %}</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-    
+
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="Flint - Plateforme d'Apprentissage Intelligent">
+    <meta name="description" content="Flint - Une plateforme interactive pour améliorer votre mémoire grâce à des flashcards intelligentes et des jeux stimulants.">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://flint-app.com">
+    <meta property="og:title" content="Flint - Plateforme d'Apprentissage Intelligent">
+    <meta property="og:description" content="Flint - Une plateforme interactive pour améliorer votre mémoire grâce à des flashcards intelligentes et des jeux stimulants.">
+    <meta property="og:image" content="https://flint-app.com/assets/images/flint-meta.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://flint-app.com">
+    <meta property="twitter:title" content="Flint - Plateforme d'Apprentissage Intelligent">
+    <meta property="twitter:description" content="Flint - Une plateforme interactive pour améliorer votre mémoire grâce à des flashcards intelligentes et des jeux stimulants.">
+    <meta property="twitter:image" content="https://flint-app.com/assets/images/flint-meta.jpg">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.svg') }}" type="image/svg+xml" />
+
     {% block stylesheets %}
         {{ encore_entry_link_tags('app') }}
-        <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
+        <link rel="stylesheet" href="{{ asset('assets/css/animate.css') }}" />
+        <link rel="stylesheet" href="{{ asset('assets/css/lineicons.css') }}" />
+        <link rel="stylesheet" href="{{ asset('assets/css/ud-styles.css') }}" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" />
     {% endblock %}
 </head>
 
-<body class="flex bg-gray-100 dark:bg-gray-900">
+<body class="bg-gray-100 dark:bg-gray-900">
 
-    <!-- Sidebar -->
-    {% include 'base/sidebar.html.twig' %}
+    <!-- Bannière en haut de page -->
+    {% block banner %}{% endblock %}
 
-    <!-- Main content -->
-    <div class="flex flex-col flex-1 min-h-screen overflow-hidden">
-        <main class="flex-1 overflow-y-auto p-6">
-            {% block body %}
-            {% endblock %}
-        </main>
+    <!-- Structure principale avec sidebar + contenu -->
+    <div class="flex">
+        <!-- Sidebar -->
+        {% include 'base/sidebar.html.twig' %}
+
+        <!-- Contenu principal -->
+        <div class="flex flex-col flex-1 min-h-screen overflow-hidden">
+            <main class="flex-1 overflow-y-auto p-6">
+                {% block body %}{% endblock %}
+            </main>
+        </div>
     </div>
 
     {% block javascripts %}
         {{ encore_entry_script_tags('app') }}
+        <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
+        <script src="{{ asset('assets/js/wow.min.js') }}"></script>
+        <script>
+            new WOW().init();
+        </script>
         <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
     {% endblock %}
 </body>
