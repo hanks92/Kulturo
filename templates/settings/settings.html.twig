@@ -1,48 +1,66 @@
-{% extends 'base.html.twig' %}
+{% extends 'layouts/authenticated.html.twig' %}
 
 {% block title %}Modifier les paramètres{% endblock %}
 
 {% block body %}
-    <h1 class="text-2xl font-bold text-center mb-6 mt-10 text-gray-800 dark:text-white">Modifier vos paramètres</h1>
+    <section class="py-12 bg-gray-50 dark:bg-gray-900 min-h-screen">
+        <div class="container mx-auto max-w-lg px-4">
+            <div class="ud-login-wrapper p-6 rounded-lg shadow bg-white dark:bg-gray-800">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 dark:text-white">Modifier vos paramètres</h2>
+                </div>
 
-    {{ form_start(settingsForm, {'attr': {'class': 'max-w-md mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md'}}) }}
+                {{ form_start(settingsForm, {'attr': {'class': 'ud-login-form'}}) }}
 
-        <div class="mb-5">
-            {{ form_label(settingsForm.username, "Nom d'utilisateur", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
-            {{ form_widget(settingsForm.username) }}
-            {{ form_errors(settingsForm.username) }}
-        </div>
+                    <div class="ud-form-group mb-4">
+                        {{ form_widget(settingsForm.username, {
+                            'attr': {
+                                'placeholder': "Nom d'utilisateur",
+                                'class': 'form-control'
+                            }
+                        }) }}
+                        {{ form_errors(settingsForm.username) }}
+                    </div>
 
-        <div class="mb-5">
-            {{ form_label(settingsForm.plainPassword, "Mot de passe", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
-            {{ form_widget(settingsForm.plainPassword) }}
-            {{ form_errors(settingsForm.plainPassword) }}
-        </div>
+                    <div class="ud-form-group mb-4">
+                        {{ form_widget(settingsForm.plainPassword, {
+                            'attr': {
+                                'placeholder': "Nouveau mot de passe",
+                                'class': 'form-control'
+                            }
+                        }) }}
+                        {{ form_errors(settingsForm.plainPassword) }}
+                    </div>
 
-        <div class="mb-5">
-            {{ form_label(settingsForm.profileImage, "Choisissez un avatar", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
-            <div class="grid grid-cols-4 gap-4">
-                {% for choice in settingsForm.profileImage %}
-                    <label class="block text-center">
-                        {{ form_widget(choice, {'attr': {'class': 'hidden'}}) }}
-                        <img src="{{ choice.vars.value }}" alt="{{ choice.vars.label }}" class="cursor-pointer w-20 h-20 rounded-full border-2 border-gray-300 hover:border-blue-500">
-                    </label>
-                {% endfor %}
+                    <div class="ud-form-group mb-4">
+                        <label class="form-label">Choisissez un avatar</label>
+                        <div class="flex flex-wrap gap-3">
+                            {% for choice in settingsForm.profileImage %}
+                                <label class="relative">
+                                    {{ form_widget(choice, {'attr': {'class': 'hidden'}}) }}
+                                    <img src="{{ asset(choice.vars.value) }}" alt="Avatar" class="rounded-full border avatar-img cursor-pointer w-16 h-16">
+                                </label>
+                            {% endfor %}
+                        </div>
+                        {{ form_errors(settingsForm.profileImage) }}
+                    </div>
+
+                    <div class="ud-form-group mb-4">
+                        {{ form_label(settingsForm.theme, "Choisissez un thème", {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(settingsForm.theme, {
+                            'attr': {
+                                'class': 'form-control'
+                            }
+                        }) }}
+                        {{ form_errors(settingsForm.theme) }}
+                    </div>
+
+                    <div class="ud-form-group">
+                        <button type="submit" class="ud-main-btn w-full">Enregistrer les modifications</button>
+                    </div>
+
+                {{ form_end(settingsForm) }}
             </div>
-            {{ form_errors(settingsForm.profileImage) }}
         </div>
-
-        <div class="mb-5">
-            {{ form_label(settingsForm.theme, "Choisissez un thème", {'label_attr': {'class': 'block text-sm font-medium text-gray-900 dark:text-white'}}) }}
-            <div class="flex space-x-4">
-                {{ form_widget(settingsForm.theme) }}
-            </div>
-            {{ form_errors(settingsForm.theme) }}
-        </div>
-
-        <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-700 dark:hover:bg-blue-800 dark:focus:ring-blue-900">
-            Enregistrer les modifications
-        </button>
-
-    {{ form_end(settingsForm) }}
+    </section>
 {% endblock %}
