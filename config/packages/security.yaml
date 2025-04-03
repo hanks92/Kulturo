@@ -27,8 +27,9 @@ security:
                 check_path: app_login       # Symfony gère cette route automatiquement
                 default_target_path: app_home  # Redirige l'utilisateur après connexion
 
-            entry_point: form_login
-            
+            # ⬇️ Redirection personnalisée si accès refusé
+            entry_point: App\Security\LandingRedirectAuthenticationEntryPoint
+
             # Gestion de la déconnexion
             logout:
                 path: app_logout
@@ -48,15 +49,19 @@ security:
 
     # Gestion des accès aux différentes parties du site
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        # Routes accessibles sans connexion
+        - { path: ^/landing, roles: PUBLIC_ACCESS }   # Landing page
+        - { path: ^/login, roles: PUBLIC_ACCESS }     # Connexion
+        - { path: ^/register, roles: PUBLIC_ACCESS }  # Inscription
+        - { path: ^/logout, roles: PUBLIC_ACCESS }    # Déconnexion
+
+        # Routes protégées : nécessitent d'être connecté
         - { path: ^/app, roles: ROLE_USER }
         - { path: ^/settings, roles: ROLE_USER }
         - { path: ^/profile, roles: ROLE_USER }
-        - { path: ^/login, roles: PUBLIC_ACCESS }   # Permet l'accès à la page de connexion
-        - { path: ^/register, roles: PUBLIC_ACCESS } # Permet l'accès à la page d'inscription
-        - { path: ^/logout, roles: PUBLIC_ACCESS }   # Permet la déconnexion
-        - { path: ^/, roles: PUBLIC_ACCESS }         # Permet l'accès à la landing page
+
+        # Catch-all pour toutes les autres routes
+        - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:
