@@ -56,8 +56,8 @@ class SettingsType extends AbstractType
             ->add('theme', ChoiceType::class, [
                 'label' => 'Choisissez un thème',
                 'choices' => [
-                    'Mode clair' => 'light',
-                    'Mode sombre' => 'dark',
+                    'Light mode' => 'light',
+                    'Dark mode' => 'dark',
                 ],
                 'expanded' => true, // Afficher sous forme de boutons radio
                 'multiple' => false,

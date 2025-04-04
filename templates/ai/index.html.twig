@@ -1,27 +1,49 @@
 {% extends 'layouts/authenticated.html.twig' %}
 
-{% block title %} Génération de Flashcards {% endblock %}
+{% block title %}AI Flashcard Generation{% endblock %}
 
 {% block body %}
-    <div class="container mx-auto mt-10 p-6 bg-white shadow-md rounded-md">
-        <h1 class="text-2xl font-bold mb-4 text-center">Créer un paquet de flashcards avec l'IA</h1>
+<section class="pt-20 pb-20">
+  <div class="container">
+    <div class="row justify-center">
+      <div class="col-lg-8 mx-auto">
+        <div class="text-center mb-10">
+          <h1 class="text-4xl font-bold text-dark mb-4">
+            Generate your <span style="color: #2E5077;">Deck</span>
+          </h1>
+          <p class="text-body-color text-lg">
+            Use our AI to generate a flashcard pack from your content.
+          </p>
+        </div>
 
-        {{ form_start(form, {'attr': {'action': path('ai_form'), 'method': 'POST'}}) }}
-            <div class="mb-4">
-                {{ form_widget(form) }}
+        {{ form_start(form, {'attr': {'action': path('ai_form'), 'method': 'POST', 'class': 'space-y-6'}}) }}
+
+        {% for field in form %}
+          {% if field.vars.name != '_token' and field.vars.name != 'save' %}
+            <div class="ud-form-group">
+              {{ form_label(field, null, {'label_attr': {'class': 'block mb-2 text-sm font-medium text-dark'}}) }}
+              {{ form_widget(field, {'attr': {'class': 'w-full rounded-md border border-gray-300 px-4 py-3 text-base text-dark focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary'}}) }}
+              {{ form_errors(field) }}
             </div>
+          {% endif %}
+        {% endfor %}
 
-            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition">
-                Générer le paquet de flashcards
-            </button>
+        <div class="mt-8">
+          <button type="submit" class="inline-flex items-center justify-center px-6 py-3 text-white rounded-lg text-lg font-semibold shadow-lg transition w-full" style="background-color: #2E5077;">
+            Generate your Deck
+          </button>
+        </div>
+
         {{ form_end(form) }}
 
-        <!-- Bloc pour afficher la réponse de l'IA -->
         {% if aiResponse is not null %}
-            <div class="mt-6 p-4 bg-gray-100 border rounded-md">
-                <h2 class="text-lg font-bold">Réponse de l'IA :</h2>
-                <pre class="whitespace-pre-wrap text-gray-800">{{ aiResponse }}</pre>
-            </div>
+          <div class="mt-12 p-6 border border-gray-200 rounded-lg bg-gray-50">
+            <h2 class="text-lg font-semibold text-dark mb-4">AI Response:</h2>
+            <pre class="whitespace-pre-wrap text-sm text-gray-700">{{ aiResponse }}</pre>
+          </div>
         {% endif %}
+      </div>
     </div>
+  </div>
+</section>
 {% endblock %}

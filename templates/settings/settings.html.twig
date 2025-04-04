@@ -2,84 +2,70 @@
 
 {% block title %}Account Settings{% endblock %}
 
-{% block banner %}
-<section class="ud-page-banner">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-12">
-        <div class="ud-banner-content">
-          <h1>Account Settings</h1>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-{% endblock %}
-
 {% block body %}
-<section class="min-h-screen flex items-center justify-center py-12">
-  <div class="w-full max-w-md"> {# réduit la largeur maximale à md (≈ 28rem / 448px) #}
+<div style="margin-top: 4rem; display: flex; flex-direction: column; align-items: center; text-align: center; min-height: 80vh; width: 100%;">
 
-    <h2 class="text-center text-2xl font-semibold text-gray-800 dark:text-white mb-6">
-      Edit your settings
-    </h2>
+    <h1 class="text-5xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
+        Edit <span style="color: #2E5077;">your settings</span>
+    </h1>
 
-    {{ form_start(settingsForm, {'attr': {'class': 'ud-login-form'}}) }}
+    <div style="width: 100%; max-width: 448px; text-align: left;">
+        {{ form_start(settingsForm) }}
 
-      <div class="ud-form-group mb-4">
-        {{ form_label(settingsForm.username, null, {'label_attr': {'class': 'form-label'}}) }}
-        {{ form_widget(settingsForm.username, {
-          'attr': {
-            'placeholder': "Username",
-            'class': 'form-control'
-          }
-        }) }}
-        {{ form_errors(settingsForm.username) }}
-      </div>
+            <div style="margin-bottom: 1.5rem;">
+                {{ form_label(settingsForm.username, 'Username', { 'label_attr': { 'style': 'display: block; font-weight: bold; margin-bottom: 0.5rem;' } }) }}
+                {{ form_widget(settingsForm.username, {
+                    'attr': {
+                        'placeholder': 'Enter your username',
+                        'style': 'width: 100%; padding: 0.75rem; font-size: 1rem; border-radius: 0.5rem; border: 1px solid #ccc;'
+                    }
+                }) }}
+                {{ form_errors(settingsForm.username) }}
+            </div>
 
-      <div class="ud-form-group mb-4">
-        {{ form_label(settingsForm.plainPassword, null, {'label_attr': {'class': 'form-label'}}) }}
-        {{ form_widget(settingsForm.plainPassword, {
-          'attr': {
-            'placeholder': "New password",
-            'class': 'form-control'
-          }
-        }) }}
-        {{ form_errors(settingsForm.plainPassword) }}
-      </div>
+            <div style="margin-bottom: 1.5rem;">
+                {{ form_label(settingsForm.plainPassword, 'New password', { 'label_attr': { 'style': 'display: block; font-weight: bold; margin-bottom: 0.5rem;' } }) }}
+                {{ form_widget(settingsForm.plainPassword, {
+                    'attr': {
+                        'placeholder': 'Enter a new password',
+                        'style': 'width: 100%; padding: 0.75rem; font-size: 1rem; border-radius: 0.5rem; border: 1px solid #ccc;'
+                    }
+                }) }}
+                {{ form_errors(settingsForm.plainPassword) }}
+            </div>
 
-<div class="ud-form-group mb-4">
-  <label class="form-label">Choose an avatar</label>
-  <div class="grid grid-cols-5 gap-3" id="avatar-selection">
-    {% for choice in settingsForm.profileImage %}
-      <label class="cursor-pointer text-center">
-        {{ form_widget(choice, {'attr': {'class': 'd-none'}}) }}
-        <img src="{{ asset(choice.vars.value) }}" alt="Avatar"
-          class="rounded-circle border avatar-img w-full aspect-square object-cover hover:border-primary border-2" />
-      </label>
-    {% endfor %}
-  </div>
-  {{ form_errors(settingsForm.profileImage) }}
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Choose an avatar</label>
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem;" id="avatar-selection">
+                    {% for choice in settingsForm.profileImage %}
+                        <label style="cursor: pointer; text-align: center;">
+                            {{ form_widget(choice, {'attr': {'style': 'display: none;'}}) }}
+                            <img src="{{ asset(choice.vars.value) }}" alt="Avatar"
+                                 style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 50%; border: 2px solid #ccc; transition: border-color 0.2s ease;" />
+                        </label>
+                    {% endfor %}
+                </div>
+                {{ form_errors(settingsForm.profileImage) }}
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                {{ form_label(settingsForm.theme, 'Theme', { 'label_attr': { 'style': 'display: block; font-weight: bold; margin-bottom: 0.5rem;' } }) }}
+                {{ form_widget(settingsForm.theme, {
+                    'attr': {
+                        'style': 'width: 100%; padding: 0.75rem; font-size: 1rem; border-radius: 0.5rem; border: 1px solid #ccc;'
+                    }
+                }) }}
+                {{ form_errors(settingsForm.theme) }}
+            </div>
+
+            <div style="text-align: center;">
+                <button type="submit"
+                        style="width: 100%; background-color: #2E5077; color: white; border: none; padding: 1rem; border-radius: 0.75rem; font-size: 1.1rem; cursor: pointer;">
+                    Save changes
+                </button>
+            </div>
+
+        {{ form_end(settingsForm) }}
+    </div>
 </div>
-
-
-
-      <div class="ud-form-group mb-4">
-        {{ form_label(settingsForm.theme, "Choose a theme", {'label_attr': {'class': 'form-label'}}) }}
-        {{ form_widget(settingsForm.theme, {
-          'attr': {
-            'class': 'form-control'
-          }
-        }) }}
-        {{ form_errors(settingsForm.theme) }}
-      </div>
-
-      <div class="ud-form-group">
-        <button type="submit" class="ud-main-btn w-100">Save changes</button>
-      </div>
-
-    {{ form_end(settingsForm) }}
-
-  </div>
-</section>
 {% endblock %}

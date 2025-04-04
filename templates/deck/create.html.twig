@@ -1,22 +1,30 @@
 {% extends 'layouts/authenticated.html.twig' %}
 
-{% block title %}Créer un Deck{% endblock %}
+{% block title %}Create a Deck{% endblock %}
 
 {% block body %}
-    <div style="display: flex; flex-direction: column; align-items: center; text-align: center; min-height: 80vh;">
-        <h1 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 2rem;">Créer un Nouveau Deck</h1>
-        
-        <div style="width: 100%; max-width: 500px; padding: 2rem; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
+    <div style="margin-top: 4rem; display: flex; flex-direction: column; align-items: center; text-align: center; min-height: 80vh;">
+
+        <h1 class="text-5xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
+            Create <span style="color: #2E5077;"> your deck</span>
+        </h1>
+
+        <div style="width: 100%; max-width: 600px; padding: 2rem; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 0.75rem; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
             {{ form_start(form) }}
-                <div style="margin-bottom: 1.5rem;">
-                    {{ form_label(form.title, 'Titre du Deck', { 'label_attr': { 'style': 'font-weight: bold; font-size: 1.25rem;' } }) }}
-                    {{ form_widget(form.title, { 'attr': { 'class': 'form-control', 'style': 'width: 100%; padding: 0.5rem; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc;' } }) }}
+
+                <div style="margin-bottom: 1.5rem; text-align: left;">
+                    {{ form_label(form.title, 'Deck Title', { 'label_attr': { 'style': 'font-weight: bold; font-size: 1.25rem; display: block; margin-bottom: 0.5rem;' } }) }}
+                    {{ form_widget(form.title, { 'attr': { 'style': 'width: 100%; padding: 0.75rem; font-size: 1rem; border-radius: 0.5rem; border: 1px solid #ccc;' } }) }}
                     {{ form_errors(form.title) }}
                 </div>
 
-                <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mt-4 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                    Créer le Deck
-                </button>
+                <div style="text-align: center;">
+                    <button type="submit"
+                        style="background-color: #4DA1A9; color: white; border: none; padding: 1rem 2rem; border-radius: 0.75rem; font-size: 1.25rem; cursor: pointer;">
+                        Create Deck
+                    </button>
+                </div>
+
             {{ form_end(form) }}
         </div>
     </div>

@@ -3,23 +3,27 @@
 {% block title %}{{ deck.title }}{% endblock %}
 
 {% block body %}
-<div style="display: flex; flex-direction: column; align-items: center; text-align: center; min-height: 80vh;">
-    <h1 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 1.5rem;">{{ deck.title }}</h1>
+<div style="margin-top: 4rem; display: flex; flex-direction: column; align-items: center; text-align: center; min-height: 80vh;">
 
-    <a href="{{ path('app_review_start', { 'deckId': deck.id }) }}" 
-       class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-4 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-        Démarrer la Révision
-    </a>
+    <h1 class="text-5xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
+        Manage your deck: <span style="color: #2E5077;">{{ deck.title }}</span>
+    </h1>
 
-    <a href="{{ path('flashcard_create', { id: deck.id }) }}" 
-       class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 focus:outline-none dark:focus:ring-green-800">
-        Créer une Flashcard
-    </a>
+    <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+        <a href="{{ path('app_review_start', { 'deckId': deck.id }) }}" 
+           style="background-color: #2E5077; color: white; border: none; padding: 1rem 2rem; border-radius: 0.75rem; font-size: 1.1rem; text-decoration: none; cursor: pointer;">
+            Start Review
+        </a>
 
-    <a href="{{ path('flashcard_list', { id: deck.id }) }}" 
-        class="text-white bg-yellow-500 hover:bg-yellow-600 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-yellow-400 dark:hover:bg-yellow-500 focus:outline-none dark:focus:ring-yellow-600">
-        Voir toutes les Flashcards
-    </a>
+        <a href="{{ path('flashcard_create', { id: deck.id }) }}" 
+           style="background-color: #4DA1A9; color: white; border: none; padding: 1rem 2rem; border-radius: 0.75rem; font-size: 1.1rem; text-decoration: none; cursor: pointer;">
+            Create Flashcard
+        </a>
 
+        <a href="{{ path('flashcard_list', { id: deck.id }) }}" 
+           style="background-color: #79D7BE; color: white; border: none; padding: 1rem 2rem; border-radius: 0.75rem; font-size: 1.1rem; text-decoration: none; cursor: pointer;">
+            View All Flashcards
+        </a>
+    </div>
 </div>
 {% endblock %}

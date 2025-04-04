@@ -3,7 +3,6 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -14,41 +13,37 @@ class AIType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            // Champ pour le titre du deck
+            // Field for the deck title
             ->add('title', TextType::class, [
-                'label' => 'Titre du Deck',
+                'label' => 'Deck Title',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Le titre du deck est requis',
+                        'message' => 'The deck title is required.',
                     ]),
                 ],
                 'attr' => [
-                    'placeholder' => 'Exemple : Histoire Médiévale, Biologie Cellulaire...',
+                    'placeholder' => 'e.g. Medieval History, Cell Biology...',
                 ],
             ])
 
             ->add('subject', TextType::class, [
-                'label' => 'Sujet du paquet de flashcards',
+                'label' => 'Flashcard Pack Subject',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Le sujet est requis',
+                        'message' => 'The subject is required.',
                     ]),
                 ],
                 'attr' => [
-                    'placeholder' => 'Exemple : Histoire de France, Physique Quantique...',
+                    'placeholder' => 'e.g. French History, Quantum Physics...',
                 ],
             ])
 
             ->add('context', TextType::class, [
-                'label' => 'Contexte ou domaine',
+                'label' => 'Context or Domain',
                 'required' => false,
                 'attr' => [
-                    'placeholder' => 'Exemple : Révisions Bac, Test TOEFL...',
+                    'placeholder' => 'e.g. High School Exam Prep, TOEFL Practice...',
                 ],
-            ])
-
-            ->add('save', SubmitType::class, [
-                'label' => 'Générer le paquet de flashcards',
             ]);
     }
 
