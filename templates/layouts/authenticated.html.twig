@@ -40,16 +40,13 @@
 
 <body class="bg-gray-100 dark:bg-gray-900">
 
-    <!-- Bannière en haut de page -->
-    {% block banner %}{% endblock %}
-
-    <!-- Structure principale avec sidebar + contenu -->
-    <div class="flex">
+    <div class="flex min-h-screen">
         <!-- Sidebar -->
         {% include 'base/sidebar.html.twig' %}
 
         <!-- Contenu principal -->
-        <div class="flex flex-col flex-1 min-h-screen overflow-hidden">
+        <div class="flex flex-col flex-1 overflow-hidden">
+            <!-- Contenu page -->
             <main class="flex-1 overflow-y-auto p-6">
                 {% block body %}{% endblock %}
             </main>
