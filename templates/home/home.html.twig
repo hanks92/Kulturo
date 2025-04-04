@@ -1,34 +1,23 @@
 {% extends 'layouts/authenticated.html.twig' %}
 
 {% block body %}
-<section class="bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
-    <div class="max-w-screen-xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-2 items-center gap-12">
-        <!-- Texte -->
-        <div>
-            <h1 class="text-5xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6 animate-fade-in-up">
-                Maîtrisez n'importe quel sujet avec <span class="text-blue-600 dark:text-blue-400">la mémorisation espacée</span>
+<section class="bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 min-h-screen pt-24">
+    <div class="max-w-screen-xl mx-auto px-6 flex flex-col items-center text-center">
+        <!-- Text -->
+        <div class="max-w-3xl animate-fade-in-up">
+            <h1 class="text-5xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
+                Master any topic with <span style="color: #2E5077;">spaced repetition</span>
             </h1>
-            <p class="text-lg text-gray-600 dark:text-gray-300 mb-8 animate-fade-in-up delay-150">
-                Flint vous aide à apprendre plus vite et mieux grâce à des flashcards intelligentes, une IA puissante, et des jeux ludiques. Révisez efficacement et atteignez vos objectifs.
+            <p class="text-lg text-gray-700 dark:text-gray-300 mb-8">
+                Flint helps you learn faster and retain more using intelligent flashcards, powerful AI, and fun games. Review effectively and achieve your learning goals.
             </p>
-            <div class="flex flex-col sm:flex-row gap-4 animate-fade-in-up delay-300">
-                <a href="{{ path('app_register') }}" class="inline-flex items-center justify-center px-6 py-3 text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-lg font-semibold shadow-lg transition">
-                    Commencer maintenant
-                </a>
-                <a href="#features" class="inline-flex items-center justify-center px-6 py-3 text-blue-700 border border-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:border-blue-300 dark:hover:bg-gray-700 rounded-lg text-lg font-medium transition">
-                    Découvrir les fonctionnalités
-                </a>
-            </div>
-        </div>
-
-        <!-- Image Illustrative -->
-        <div class="flex justify-center animate-fade-in">
-            <img src="{{ asset('images/illustration-learning.svg') }}" alt="Illustration apprentissage" class="w-full max-w-md">
+            <a href="/deck" class="inline-flex items-center justify-center px-6 py-3 text-white rounded-lg text-lg font-semibold shadow-lg transition" style="background-color: #2E5077;">
+                Get Started Now
+            </a>
         </div>
     </div>
 </section>
 
-<!-- Animation CSS (facultatif) -->
 <style>
 @keyframes fade-in-up {
     0% {opacity: 0; transform: translateY(20px);}
@@ -36,9 +25,6 @@
 }
 .animate-fade-in-up {
     animation: fade-in-up 0.8s ease-out forwards;
-}
-.animate-fade-in {
-    animation: fade-in-up 1s ease-out forwards;
 }
 </style>
 {% endblock %}
