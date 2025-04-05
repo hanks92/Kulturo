@@ -32,7 +32,11 @@ class AIController extends AbstractController
         $this->entityManager = $entityManager;
         $this->deckController = $deckController;
         $this->flashcardController = $flashcardController;
-        $this->apiKey = $_ENV['OPENROUTER_API_KEY'];
+        $this->apiKey = $_ENV['DEEPSEEK_API_KEY'];
+
+        if (empty($this->apiKey)) {
+            throw new \RuntimeException('Clé API DeepSeek manquante dans .env');
+        }
     }
 
     #[Route('/ai', name: 'ai_form', methods: ['GET', 'POST'])]
@@ -45,7 +49,7 @@ class AIController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             return new StreamedResponse(function () use ($form) {
                 ob_implicit_flush(1);
-                echo "⏳ En attente de la réponse de l'IA...\n";
+                echo "⏳ En attente de la réponse de l'IA (DeepSeek)...\n";
                 flush();
 
                 $data = $form->getData();
@@ -53,41 +57,47 @@ class AIController extends AbstractController
                 $subject = $data['subject'];
                 $context = $data['context'] ?? '';
 
-                // 📝 Création du prompt pour l'IA
                 $prompt = "Génère un paquet de flashcards sur '$subject'. Contexte : '$context'. 
                 Réponds uniquement avec un JSON sous cette forme : 
                 [{\"recto\": \"...\", \"verso\": \"...\"}].";
 
                 try {
-                    // 🔹 Envoi de la requête à l'API OpenRouter
-                    $response = $this->httpClient->request('POST', 'https://openrouter.ai/api/v1/chat/completions', [
+                    $response = $this->httpClient->request('POST', 'https://api.deepseek.com/chat/completions', [
                         'headers' => [
                             'Authorization' => 'Bearer ' . $this->apiKey,
                             'Content-Type' => 'application/json',
                         ],
                         'json' => [
-                            'model' => 'google/gemini-2.0-pro-exp-02-05:free',
+                            'model' => 'deepseek-chat',
                             'messages' => [
                                 ["role" => "system", "content" => "Tu es un assistant qui génère des flashcards en JSON."],
                                 ["role" => "user", "content" => $prompt]
                             ],
                             'temperature' => 0.7,
-                            'max_tokens' => 3000
+                            'max_tokens' => 3000,
+                            'stream' => false
                         ],
                     ]);
 
-                    // ✅ Vérification si la requête est réussie
                     if ($response->getStatusCode() !== 200) {
-                        echo "❌ Erreur : L'API OpenRouter a retourné une erreur (HTTP " . $response->getStatusCode() . ")\n";
+                        echo "❌ Erreur : L'API DeepSeek a retourné une erreur (HTTP " . $response->getStatusCode() . ")\n";
                         flush();
                         return;
                     }
 
-                    // 🔍 Récupération de la réponse de l'IA
-                    $result = json_decode($response->getContent(), true);
+                    $contentRaw = $response->getContent();
+                    echo "🔍 Contenu brut reçu de l'IA :\n$contentRaw\n";
+                    flush();
 
-                    if (!isset($result['choices'][0]['message']['content'])) {
-                        echo "❌ Erreur : L'IA n'a pas retourné de contenu valide.\n";
+                    $result = json_decode($contentRaw, true);
+
+                    $content = $result['choices'][0]['message']['content']
+                        ?? $result['choices'][0]['content']
+                        ?? null;
+
+                    if (!$content) {
+                        echo "❌ Erreur : L'IA n'a pas retourné de contenu utilisable.\n";
+                        echo "📦 Réponse décodée : " . json_encode($result) . "\n";
                         flush();
                         return;
                     }
@@ -95,11 +105,8 @@ class AIController extends AbstractController
                     echo "✅ Réponse reçue !\n";
                     flush();
 
-                    $aiResponse = $result['choices'][0]['message']['content']; // Texte brut
-
-                    // ✅ Nettoyage et conversion de la réponse en JSON
-                    $aiResponse = trim($aiResponse); // Suppression des espaces inutiles
-                    $aiResponse = preg_replace('/^```json|```$/', '', $aiResponse); // Suppression des balises Markdown JSON
+                    $aiResponse = trim($content);
+                    $aiResponse = preg_replace('/^```json|```$/', '', $aiResponse);
                     $flashcardsArray = json_decode($aiResponse, true);
 
                     if (json_last_error() !== JSON_ERROR_NONE) {
@@ -108,12 +115,10 @@ class AIController extends AbstractController
                         return;
                     }
 
-                    // ✅ Création du deck
                     $deck = $this->deckController->createDeckEntity($title);
                     echo "✅ Deck créé avec succès !\n";
                     flush();
 
-                    // ✅ Création des flashcards
                     foreach ($flashcardsArray as $flashcardData) {
                         if (isset($flashcardData['recto'], $flashcardData['verso'])) {
                             $this->flashcardController->createFlashcard(
@@ -126,7 +131,9 @@ class AIController extends AbstractController
                         }
                     }
 
-                    echo "🎉 Toutes les flashcards ont été générées et enregistrées !\n";
+                    $redirectUrl = '/deck/' . $deck->getId() . '/flashcards';
+                    echo "🎉 Toutes les flashcards ont été générées et enregistrées ! Redirection dans un instant...\n";
+                    echo "<script>setTimeout(() => { window.location.href = '$redirectUrl'; }, 2000);</script>\n";
                     flush();
 
                 } catch (\Exception $e) {
@@ -138,7 +145,7 @@ class AIController extends AbstractController
 
         return $this->render('ai/index.html.twig', [
             'form' => $form->createView(),
-            'aiResponse' => $aiResponse, // Affichage brut de la réponse de l'IA
+            'aiResponse' => $aiResponse,
         ]);
     }
 }
