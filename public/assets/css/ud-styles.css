@@ -2621,4 +2621,8 @@ p {
   outline: 2px solid #007bff;
 }
 
+.rounded-custom {
+  border-radius: 30px; /* Ajuste à ta convenance */
+}
+
 /*# sourceMappingURL=ud-styles.css.map */
