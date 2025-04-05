@@ -1,14 +1,30 @@
 {% extends 'layouts/authenticated.html.twig' %}
 
-{% block title %}Révision terminée{% endblock %}
+{% block title %}Review Completed{% endblock %}
 
 {% block body %}
-<div style="text-align: center; margin-top: 2rem;">
-    <h1>🎉 Félicitations !</h1>
-    <p>{{ message }}</p>
-    <a href="{{ path('app_deck') }}"
-       class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition">
-        Retour à mes decks
-    </a>
+<div style="display: flex; align-items: center; justify-content: center; height: 80vh;">
+    <div style="text-align: center;">
+        <h1 style="font-size: 3rem; margin-bottom: 1rem;">🎉 Congratulations!</h1>
+        <p style="font-size: 2rem; margin-bottom: 2rem;">{{ message }}</p>
+        <a href="{{ path('app_deck') }}"
+           class="bg-gray-500 text-white px-6 py-3 rounded hover:bg-gray-600 transition">
+            Back to my decks
+        </a>
+    </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            confetti({
+                particleCount: 200,
+                spread: 120,
+                origin: { y: 0.6 }
+            });
+        });
+    </script>
 {% endblock %}

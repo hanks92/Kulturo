@@ -98,7 +98,7 @@ class ReviewController extends AbstractController
 
         if (!$revisions) {
             return $this->render('review/finished.html.twig', [
-                'message' => 'Toutes les cartes ont été révisées pour aujourd\'hui !',
+                'message' => 'All cards have been reviewed for today!',
                 'deck' => $deck,
             ]);
         }
@@ -113,12 +113,35 @@ class ReviewController extends AbstractController
         if ($deck->getOwner() !== $this->getUser()) {
             throw $this->createNotFoundException('Révision non autorisée.');
         }
-
+    
+        $predictedDueDates = [];
+    
+        foreach ([1, 2, 3, 4] as $rating) {
+            $simulation = $this->fsrsService->updateCard([
+                'card_id' => $revision->getFlashcard()->getId(),
+                'state' => $revision->getState(),
+                'step' => $revision->getStep(),
+                'stability' => $revision->getStability(),
+                'difficulty' => $revision->getDifficulty(),
+                'due' => $revision->getDueDate()?->format('Y-m-d\TH:i:s\Z'),
+                'last_review' => $revision->getLastReview()?->format('Y-m-d\TH:i:s\Z'),
+            ], $rating);
+    
+            if (isset($simulation['updated_card']['due'])) {
+                $dueDate = new \DateTime($simulation['updated_card']['due']);
+                $predictedDueDates[$rating] = $dueDate->format('d/m/Y');
+            } else {
+                $predictedDueDates[$rating] = 'N/A';
+            }
+        }
+    
         return $this->render('review/index.html.twig', [
             'revision' => $revision,
             'flashcard' => $revision->getFlashcard(),
+            'predictedDueDates' => $predictedDueDates,
         ]);
     }
+    
 
     #[Route('/review/submit/{id}', name: 'app_review_submit', methods: ['POST'])]
     public function submitReview(Revision $revision, Request $request, RevisionRepository $revisionRepository): Response
