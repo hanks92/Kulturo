@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -13,7 +14,7 @@ class AIType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            // Field for the deck title
+            // Titre du Deck
             ->add('title', TextType::class, [
                 'label' => 'Deck Title',
                 'constraints' => [
@@ -25,24 +26,26 @@ class AIType extends AbstractType
                     'placeholder' => 'e.g. Medieval History, Cell Biology...',
                 ],
             ])
-
-            ->add('subject', TextType::class, [
-                'label' => 'Flashcard Pack Subject',
+            // Prompt utilisateur (demande de détails à l'utilisateur)
+            ->add('prompt', TextareaType::class, [
+                'label' => 'Prompt for AI',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'The subject is required.',
+                        'message' => 'Please provide a prompt for the AI.',
                     ]),
                 ],
                 'attr' => [
-                    'placeholder' => 'e.g. French History, Quantum Physics...',
+                    'placeholder' => 'Describe precisely what you want the AI to generate...',
+                    'rows' => 5,
                 ],
             ])
-
-            ->add('context', TextType::class, [
-                'label' => 'Context or Domain',
+            // Ressources supplémentaires (optionnel)
+            ->add('resources', TextareaType::class, [
+                'label' => 'Additional Resources',
                 'required' => false,
                 'attr' => [
-                    'placeholder' => 'e.g. High School Exam Prep, TOEFL Practice...',
+                    'placeholder' => 'Provide links, references, or additional resources...',
+                    'rows' => 4,
                 ],
             ]);
     }

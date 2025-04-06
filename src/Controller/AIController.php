@@ -54,12 +54,10 @@ class AIController extends AbstractController
 
                 $data = $form->getData();
                 $title = $data['title'];
-                $subject = $data['subject'];
-                $context = $data['context'] ?? '';
+                $promptUser = $data['prompt'];
+                $resources = $data['resources'] ?? '';
 
-                $prompt = "Génère un paquet de flashcards sur '$subject'. Contexte : '$context'. 
-                Réponds uniquement avec un JSON sous cette forme : 
-                [{\"recto\": \"...\", \"verso\": \"...\"}].";
+                $prompt = "Génère un paquet de flashcards selon le prompt suivant : '$promptUser'. Ressources supplémentaires fournies par l'utilisateur : '$resources'. Réponds uniquement avec un JSON sous cette forme : [{\"recto\": \"...\", \"verso\": \"...\"}].";
 
                 try {
                     $response = $this->httpClient->request('POST', 'https://api.deepseek.com/chat/completions', [
@@ -86,8 +84,6 @@ class AIController extends AbstractController
                     }
 
                     $contentRaw = $response->getContent();
-                    echo "🔍 Contenu brut reçu de l'IA :\n$contentRaw\n";
-                    flush();
 
                     $result = json_decode($contentRaw, true);
 
@@ -97,7 +93,6 @@ class AIController extends AbstractController
 
                     if (!$content) {
                         echo "❌ Erreur : L'IA n'a pas retourné de contenu utilisable.\n";
-                        echo "📦 Réponse décodée : " . json_encode($result) . "\n";
                         flush();
                         return;
                     }
