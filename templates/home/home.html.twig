@@ -4,10 +4,55 @@
 
 {% block body %}
   <div id="game-container"></div>
+
+  <!-- Bouton de recentrage -->
+  <button id="recenter-btn" style="
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+    padding: 10px 15px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+  ">
+    🔄 Centrer
+  </button>
 {% endblock %}
 
 {% block javascripts %}
-    {{ parent() }}
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-    <script type="module" src="{{ asset('game/main.js') }}"></script>
+  {{ parent() }}
+  <!-- Phaser CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+  <!-- Ton script de jeu -->
+  <script type="module" src="{{ asset('game/main.js') }}"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #e6fce6;
+    }
+
+    #game-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+    }
+
+    canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+  </style>
 {% endblock %}
