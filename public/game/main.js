@@ -1,5 +1,5 @@
-const TILE_WIDTH = 1024;
-const TILE_HEIGHT = 512;
+const TILE_WIDTH = 612;
+const TILE_HEIGHT = 356;
 const GRID_WIDTH = 4;
 const GRID_HEIGHT = 4;
 
@@ -55,9 +55,6 @@ function create() {
   cam.centerOn(centerX, centerY);
   cam.setBounds(); // sans effet ici mais laissé pour compatibilité
 
-  // ❌ Drag désactivé
-  // ❌ Zoom désactivé
-
   // 🌱 Grille
   for (let y = 0; y < GRID_HEIGHT; y++) {
     for (let x = 0; x < GRID_WIDTH; x++) {
@@ -69,10 +66,13 @@ function create() {
         .setInteractive()
         .setData({ x, y, planted: false });
 
+      tile.setDepth(isoY); // 🌟 Important : la tuile a aussi une profondeur propre
+
       tile.on('pointerdown', () => {
         if (!tile.getData('planted')) {
           this.add.image(isoX, isoY - TILE_HEIGHT / 2, selectedPlant)
-            .setOrigin(0.5, 1);
+            .setOrigin(0.5, 1)
+            .setDepth(isoY); // ✅ plante positionnée correctement en profondeur
           tile.setData('planted', true);
         }
       });
