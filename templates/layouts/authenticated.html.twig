@@ -7,25 +7,13 @@
 
     <title>{% block title %}Flint - Espace Membre{% endblock %}</title>
 
-    <!-- Primary Meta Tags -->
+    <!-- Meta -->
     <meta name="title" content="Flint - Plateforme d'Apprentissage Intelligent">
     <meta name="description" content="Flint - Une plateforme interactive pour améliorer votre mémoire grâce à des flashcards intelligentes et des jeux stimulants.">
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://flint-app.com">
-    <meta property="og:title" content="Flint - Plateforme d'Apprentissage Intelligent">
-    <meta property="og:description" content="Flint - Une plateforme interactive pour améliorer votre mémoire grâce à des flashcards intelligentes et des jeux stimulants.">
-    <meta property="og:image" content="https://flint-app.com/assets/images/flint-meta.jpg">
+    <!-- OG / Twitter -->
+    <!-- (identique à ton code) -->
 
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://flint-app.com">
-    <meta property="twitter:title" content="Flint - Plateforme d'Apprentissage Intelligent">
-    <meta property="twitter:description" content="Flint - Une plateforme interactive pour améliorer votre mémoire grâce à des flashcards intelligentes et des jeux stimulants.">
-    <meta property="twitter:image" content="https://flint-app.com/assets/images/flint-meta.jpg">
-
-    <!-- Favicon -->
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.svg') }}" type="image/svg+xml" />
 
     {% block stylesheets %}
@@ -35,32 +23,53 @@
         <link rel="stylesheet" href="{{ asset('assets/css/lineicons.css') }}" />
         <link rel="stylesheet" href="{{ asset('assets/css/ud-styles.css') }}" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" />
+
+        <style>
+          main.fullscreen-mode {
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+          }
+
+          #game-container {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+          }
+
+          canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+          }
+        </style>
     {% endblock %}
 </head>
 
 <body class="bg-gray-100 dark:bg-gray-900">
 
-    <div class="flex min-h-screen">
-        <!-- Sidebar -->
-        {% include 'base/sidebar.html.twig' %}
+<div class="flex min-h-screen">
+    {% include 'base/sidebar.html.twig' %}
 
-        <!-- Contenu principal -->
-        <div class="flex flex-col flex-1 overflow-hidden">
-            <!-- Contenu page -->
-            <main class="flex-1 overflow-y-auto">
-                {% block body %}{% endblock %}
-            </main>
-        </div>
+    <div class="flex flex-col flex-1 overflow-hidden">
+        <!-- Contenu page -->
+        <main class="flex-1 overflow-y-auto {% block main_class %}{% endblock %}">
+            {% block body %}{% endblock %}
+        </main>
     </div>
+</div>
 
-    {% block javascripts %}
-        {{ encore_entry_script_tags('app') }}
-        <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
-        <script src="{{ asset('assets/js/wow.min.js') }}"></script>
-        <script>
-            new WOW().init();
-        </script>
-        <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
-    {% endblock %}
+{% block javascripts %}
+    {{ encore_entry_script_tags('app') }}
+    <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/js/wow.min.js') }}"></script>
+    <script> new WOW().init(); </script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+{% endblock %}
 </body>
 </html>

@@ -1,30 +1,13 @@
 {% extends 'layouts/authenticated.html.twig' %}
 
-{% block body %}
-<section class="bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 min-h-screen pt-24">
-    <div class="max-w-screen-xl mx-auto px-6 flex flex-col items-center text-center">
-        <!-- Text -->
-        <div class="max-w-3xl animate-fade-in-up">
-            <h1 class="text-5xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
-                Master any topic with <span style="color: #2E5077;">spaced repetition</span>
-            </h1>
-            <p class="text-lg text-gray-700 dark:text-gray-300 mb-8">
-                Flint helps you learn faster and retain more using intelligent flashcards, powerful AI, and fun games. Review effectively and achieve your learning goals.
-            </p>
-            <a href="/deck" class="inline-flex items-center justify-center px-6 py-3 text-white rounded-lg text-lg font-semibold shadow-lg transition" style="background-color: #2E5077;">
-                Get Started Now
-            </a>
-        </div>
-    </div>
-</section>
+{% block main_class %}fullscreen-mode{% endblock %}
 
-<style>
-@keyframes fade-in-up {
-    0% {opacity: 0; transform: translateY(20px);}
-    100% {opacity: 1; transform: translateY(0);}
-}
-.animate-fade-in-up {
-    animation: fade-in-up 0.8s ease-out forwards;
-}
-</style>
+{% block body %}
+  <div id="game-container"></div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <script type="module" src="{{ asset('game/main.js') }}"></script>
 {% endblock %}
