@@ -36,7 +36,7 @@ function create() {
   const gardenPixelWidth = (GRID_WIDTH + GRID_HEIGHT) * TILE_WIDTH / 2;
   const gardenPixelHeight = (GRID_WIDTH + GRID_HEIGHT) * TILE_HEIGHT / 2;
 
-  const margin = 200;
+  const margin = 1000;
   const sceneWidth = gardenPixelWidth + margin;
   const sceneHeight = gardenPixelHeight + margin;
 

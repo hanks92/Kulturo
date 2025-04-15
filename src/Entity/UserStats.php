@@ -1,0 +1,110 @@
+<?php
+
+namespace App\Entity;
+
+use App\Repository\UserStatsRepository;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity(repositoryClass: UserStatsRepository::class)]
+class UserStats
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    private ?User $appUser = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $streak = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $maxStreak = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $lastActivity = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $totalXp = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $cardsReviewed = null;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getAppUser(): ?User
+    {
+        return $this->appUser;
+    }
+
+    public function setAppUser(?User $appUser): static
+    {
+        $this->appUser = $appUser;
+
+        return $this;
+    }
+
+    public function getStreak(): ?int
+    {
+        return $this->streak;
+    }
+
+    public function setStreak(?int $streak): static
+    {
+        $this->streak = $streak;
+
+        return $this;
+    }
+
+    public function getMaxStreak(): ?int
+    {
+        return $this->maxStreak;
+    }
+
+    public function setMaxStreak(?int $maxStreak): static
+    {
+        $this->maxStreak = $maxStreak;
+
+        return $this;
+    }
+
+    public function getLastActivity(): ?\DateTimeImmutable
+    {
+        return $this->lastActivity;
+    }
+
+    public function setLastActivity(?\DateTimeImmutable $lastActivity): static
+    {
+        $this->lastActivity = $lastActivity;
+
+        return $this;
+    }
+
+    public function getTotalXp(): ?int
+    {
+        return $this->totalXp;
+    }
+
+    public function setTotalXp(?int $totalXp): static
+    {
+        $this->totalXp = $totalXp;
+
+        return $this;
+    }
+
+    public function getCardsReviewed(): ?int
+    {
+        return $this->cardsReviewed;
+    }
+
+    public function setCardsReviewed(?int $cardsReviewed): static
+    {
+        $this->cardsReviewed = $cardsReviewed;
+
+        return $this;
+    }
+}

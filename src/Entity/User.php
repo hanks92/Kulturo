@@ -54,10 +54,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Deck::class, mappedBy: 'owner')]
     private Collection $decks;
 
+    /**
+     * @var Collection<int, UserAchievement>
+     */
+    #[ORM\OneToMany(targetEntity: UserAchievement::class, mappedBy: 'appUser')]
+    private Collection $userAchievements;
+
     public function __construct()
     {
         $this->roles = ['ROLE_USER']; // Rôle par défaut
         $this->decks = new ArrayCollection();
+        $this->userAchievements = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -213,6 +220,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($deck->getOwner() === $this) {
                 $deck->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserAchievement>
+     */
+    public function getUserAchievements(): Collection
+    {
+        return $this->userAchievements;
+    }
+
+    public function addUserAchievement(UserAchievement $userAchievement): static
+    {
+        if (!$this->userAchievements->contains($userAchievement)) {
+            $this->userAchievements->add($userAchievement);
+            $userAchievement->setAppUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserAchievement(UserAchievement $userAchievement): static
+    {
+        if ($this->userAchievements->removeElement($userAchievement)) {
+            // set the owning side to null (unless already changed)
+            if ($userAchievement->getAppUser() === $this) {
+                $userAchievement->setAppUser(null);
             }
         }
 
