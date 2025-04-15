@@ -36,7 +36,7 @@ function create() {
   const gardenPixelWidth = (GRID_WIDTH + GRID_HEIGHT) * TILE_WIDTH / 2;
   const gardenPixelHeight = (GRID_WIDTH + GRID_HEIGHT) * TILE_HEIGHT / 2;
 
-  const margin = 2000;
+  const margin = 200;
   const sceneWidth = gardenPixelWidth + margin;
   const sceneHeight = gardenPixelHeight + margin;
 
@@ -51,8 +51,16 @@ function create() {
   this.centerX = centerX;
   this.centerY = centerY;
 
+  // 👇 Calcul du zoom dynamique pour que le jardin entier tienne dans l'écran
+  const availableWidth = window.innerWidth;
+  const availableHeight = window.innerHeight;
+
+  const zoomX = availableWidth / sceneWidth;
+  const zoomY = availableHeight / sceneHeight;
+  const autoZoom = Math.min(zoomX, zoomY);
+
   const cam = this.cameras.main;
-  cam.setZoom(0.3);
+  cam.setZoom(autoZoom);
   cam.centerOn(centerX, centerY);
   cam.setBounds();
 
@@ -91,11 +99,21 @@ function update() {}
 
 game = new Phaser.Game(config);
 
+// 👇 Ajuste le zoom à chaque redimensionnement
 window.addEventListener('resize', () => {
   game.scale.resize(window.innerWidth, window.innerHeight);
-  const scene = game.scene.scenes[0];
-  if (scene.centerX && scene.centerY) {
-    scene.cameras.main.centerOn(scene.centerX, scene.centerY);
-  }
-});
 
+  const scene = game.scene.scenes[0];
+  const gardenPixelWidth = (GRID_WIDTH + GRID_HEIGHT) * TILE_WIDTH / 2;
+  const gardenPixelHeight = (GRID_WIDTH + GRID_HEIGHT) * TILE_HEIGHT / 2;
+  const margin = 200;
+  const sceneWidth = gardenPixelWidth + margin;
+  const sceneHeight = gardenPixelHeight + margin;
+
+  const zoomX = window.innerWidth / sceneWidth;
+  const zoomY = window.innerHeight / sceneHeight;
+  const autoZoom = Math.min(zoomX, zoomY);
+
+  scene.cameras.main.setZoom(autoZoom);
+  scene.cameras.main.centerOn(scene.centerX, scene.centerY);
+});
