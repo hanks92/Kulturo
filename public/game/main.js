@@ -1,7 +1,7 @@
-const TILE_WIDTH = 612;
-const TILE_HEIGHT = 356;
-const GRID_WIDTH = 4;
-const GRID_HEIGHT = 4;
+const TILE_WIDTH = 850;
+const TILE_HEIGHT = 470;
+const GRID_WIDTH = 6;
+const GRID_HEIGHT = 6;
 
 let game;
 let selectedPlant = 'tree1';
@@ -28,6 +28,8 @@ function preload() {
   this.load.image('tree1', '/game/assets/tree/treelvl1.png');
   this.load.image('tree2', '/game/assets/tree/treelvl2.png');
   this.load.image('tree3', '/game/assets/tree/treelvl3.png');
+  this.load.image('tree4', '/game/assets/tree/treelvl4.png');
+  this.load.image('tree5', '/game/assets/tree/treelvl5.png');
 }
 
 function create() {
@@ -41,7 +43,6 @@ function create() {
   const originX = sceneWidth / 2 - gardenPixelWidth / 2;
   const originY = sceneHeight / 2 - gardenPixelHeight / 2;
 
-  // ✅ Centrage bas, caméra fixe
   const tileX = Math.floor(GRID_WIDTH / 2);
   const tileY = Math.floor(GRID_HEIGHT / 2);
   const centerX = (tileX - tileY) * TILE_WIDTH / 2 + originX;
@@ -53,9 +54,8 @@ function create() {
   const cam = this.cameras.main;
   cam.setZoom(0.3);
   cam.centerOn(centerX, centerY);
-  cam.setBounds(); // sans effet ici mais laissé pour compatibilité
+  cam.setBounds();
 
-  // 🌱 Grille
   for (let y = 0; y < GRID_HEIGHT; y++) {
     for (let x = 0; x < GRID_WIDTH; x++) {
       const isoX = (x - y) * TILE_WIDTH / 2 + originX;
@@ -63,31 +63,22 @@ function create() {
 
       const tile = this.add.image(isoX, isoY, 'grass')
         .setOrigin(0.5, 1)
-        .setInteractive()
+        .setInteractive({ pixelPerfect: true, useHandCursor: true })
         .setData({ x, y, planted: false });
 
-      tile.setDepth(isoY); // 🌟 Important : la tuile a aussi une profondeur propre
+      tile.setDepth(isoY);
 
       tile.on('pointerdown', () => {
         if (!tile.getData('planted')) {
           this.add.image(isoX, isoY - TILE_HEIGHT / 2, selectedPlant)
             .setOrigin(0.5, 1)
-            .setDepth(isoY); // ✅ plante positionnée correctement en profondeur
+            .setDepth(isoY);
           tile.setData('planted', true);
         }
       });
     }
   }
 
-  // 🔄 Bouton recentrer (optionnel mais actif)
-  const recenterBtn = document.getElementById('recenter-btn');
-  if (recenterBtn) {
-    recenterBtn.addEventListener('click', () => {
-      cam.pan(this.centerX, this.centerY, 300, 'Power2');
-    });
-  }
-
-  // 🌳 Choix de plante
   document.querySelectorAll('.plant-btn').forEach(button => {
     button.addEventListener('click', () => {
       selectedPlant = button.dataset.plant;
@@ -102,4 +93,9 @@ game = new Phaser.Game(config);
 
 window.addEventListener('resize', () => {
   game.scale.resize(window.innerWidth, window.innerHeight);
+  const scene = game.scene.scenes[0];
+  if (scene.centerX && scene.centerY) {
+    scene.cameras.main.centerOn(scene.centerX, scene.centerY);
+  }
 });
+
