@@ -35,7 +35,7 @@ class AchievementUnlocker
         }
 
         $userAchievement = new UserAchievement();
-        $userAchievement->setUser($user);
+        $userAchievement->setAppUser($user);
         $userAchievement->setAchievement($achievement);
         $userAchievement->setAchievedAt(new \DateTimeImmutable());
 

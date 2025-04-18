@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\UserStats;
 use App\Form\RegistrationFormType;
 use App\Security\EmailVerifier;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,11 +27,11 @@ class RegistrationController extends AbstractController
 
     #[Route('/register', name: 'app_register')]
     public function register(
-        Request $request, 
-        UserPasswordHasherInterface $userPasswordHasher, 
+        Request $request,
+        UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
-        UserAuthenticatorInterface $userAuthenticator, 
-        AppAuthenticator $authenticator 
+        UserAuthenticatorInterface $userAuthenticator,
+        AppAuthenticator $authenticator
     ): Response {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -55,11 +56,21 @@ class RegistrationController extends AbstractController
                 $user->setProfileImage($profileImage);
             }
 
-            // Persist the user in the database
+            // Initialisation des statistiques utilisateur
+            $stats = new UserStats();
+            $stats->setUser($user);
+            $stats->setStreak(0);
+            $stats->setMaxStreak(0);
+            $stats->setTotalXp(0);
+            $stats->setCardsReviewed(0);
+            $stats->setLastActivity(null);
+            $user->setStats($stats);
+
+            // Persistance de l'utilisateur (cascade persist pour stats)
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // Generate a signed URL and email it to the user
+            // Envoi de l’e-mail de confirmation
             $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
                 (new TemplatedEmail())
                     ->from(new Address('flint@flint.com', 'Bot'))
@@ -68,7 +79,7 @@ class RegistrationController extends AbstractController
                     ->htmlTemplate('registration/confirmation_email.html.twig')
             );
 
-            // Auto-login the user after registration
+            // Connexion automatique après l'inscription
             return $userAuthenticator->authenticateUser(
                 $user,
                 $authenticator,

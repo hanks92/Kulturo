@@ -48,6 +48,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $theme = 'light'; // Valeur par défaut
 
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: UserStats::class, cascade: ['persist', 'remove'])]
+    private ?UserStats $stats = null;
+
     /**
      * @var Collection<int, Deck>
      */
@@ -255,4 +258,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function getStats(): ?UserStats
+    {
+        return $this->stats;
+    }
+
+    public function setStats(?UserStats $stats): static
+    {
+        $this->stats = $stats;
+        return $this;
+    }
+
 }

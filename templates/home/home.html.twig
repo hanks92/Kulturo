@@ -4,6 +4,20 @@
 
 {% block body %}
   <div id="game-container"></div>
+
+  {# 🔥 Affichage des compteurs en haut de l'écran #}
+  <div id="hud">
+    <div class="hud-item">🔥 Streak: {{ app.user.getStats().getStreak() }}</div>
+    <div class="hud-item">💧 Eau: 50</div>
+    <div class="hud-item">⭐ XP: 120</div>
+  </div>
+
+  {# 🔥 Exposition des données si besoin dans JS #}
+  <script>
+    window.userStreak = {{ app.user.getStats().getStreak() }};
+    window.userXp = 120; // à lier plus tard à la BDD
+    window.userWater = 50; // à lier plus tard à la BDD
+  </script>
 {% endblock %}
 
 {% block javascripts %}
@@ -36,6 +50,28 @@
       display: block;
       width: 100% !important;
       height: 100% !important;
+    }
+
+    #hud {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+      z-index: 10000;
+      font-family: Arial, sans-serif;
+      pointer-events: none;
+    }
+
+    .hud-item {
+      font-size: 22px;
+      font-weight: bold;
+      color: #333;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 8px 14px;
+      border-radius: 8px;
     }
   </style>
 {% endblock %}

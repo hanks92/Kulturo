@@ -13,8 +13,9 @@ class UserStats
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    private ?User $appUser = null;
+    #[ORM\OneToOne(inversedBy: 'stats', targetEntity: User::class, cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $streak = null;
@@ -36,15 +37,14 @@ class UserStats
         return $this->id;
     }
 
-    public function getAppUser(): ?User
+    public function getUser(): ?User
     {
-        return $this->appUser;
+        return $this->user;
     }
 
-    public function setAppUser(?User $appUser): static
+    public function setUser(?User $user): static
     {
-        $this->appUser = $appUser;
-
+        $this->user = $user;
         return $this;
     }
 
@@ -56,7 +56,7 @@ class UserStats
     public function setStreak(?int $streak): static
     {
         $this->streak = $streak;
-
+        
         return $this;
     }
 

@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Psr\Log\LoggerInterface;
 use DateTime;
+use App\Service\StatsUpdater;
 use DateTimeZone;
 
 class ReviewController extends AbstractController
@@ -23,12 +24,14 @@ class ReviewController extends AbstractController
     private EntityManagerInterface $entityManager;
     private FSRSService $fsrsService;
     private LoggerInterface $logger;
+    private StatsUpdater $statsUpdater;
 
-    public function __construct(EntityManagerInterface $entityManager, FSRSService $fsrsService, LoggerInterface $logger)
+    public function __construct(EntityManagerInterface $entityManager, FSRSService $fsrsService, LoggerInterface $logger, StatsUpdater $statsUpdater)
     {
         $this->entityManager = $entityManager;
         $this->fsrsService = $fsrsService;
         $this->logger = $logger;
+        $this->statsUpdater = $statsUpdater;
     }
 
     #[Route('/deck/{id}/flashcard/create', name: 'flashcard_create')]
@@ -100,6 +103,7 @@ class ReviewController extends AbstractController
             return $this->render('review/finished.html.twig', [
                 'message' => 'All cards have been reviewed for today!',
                 'deck' => $deck,
+                'flameLit' => false,
             ]);
         }
 
@@ -189,6 +193,8 @@ class ReviewController extends AbstractController
         $this->entityManager->persist($reviewLog);
         $this->entityManager->persist($revision);
         $this->entityManager->flush();
+        $user = $this->getUser();
+        $flameLit = $this->statsUpdater->updateStreak($user);
 
         $nextRevisions = $revisionRepository->findDueFlashcardsByDeck($revision->getFlashcard()->getDeck(), new \DateTime());
 
@@ -198,6 +204,7 @@ class ReviewController extends AbstractController
 
         return $this->render('review/finished.html.twig', [
             'message' => 'Toutes les cartes ont été révisées pour aujourd\'hui !',
+            'flameLit' => $flameLit,
         ]);
     }
 }

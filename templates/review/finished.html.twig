@@ -7,6 +7,14 @@
     <div style="text-align: center;">
         <h1 style="font-size: 3rem; margin-bottom: 1rem;">🎉 Congratulations!</h1>
         <p style="font-size: 2rem; margin-bottom: 2rem;">{{ message }}</p>
+
+        {% if flameLit is defined and flameLit %}
+            <video id="flame-video" autoplay muted loop playsinline style="width: 80px; margin-top: 2rem;">
+                <source src="{{ asset('game/assets/achievement/flame.mp4') }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        {% endif %}
+
         <a href="{{ path('app_deck') }}"
            class="bg-gray-500 text-white px-6 py-3 rounded hover:bg-gray-600 transition">
             Back to my decks
@@ -25,6 +33,8 @@
                 spread: 120,
                 origin: { y: 0.6 }
             });
+
+            console.log('🔥 Page loaded – confetti active');
         });
     </script>
 {% endblock %}
