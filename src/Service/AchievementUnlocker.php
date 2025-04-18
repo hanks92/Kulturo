@@ -11,11 +11,19 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class AchievementUnlocker
 {
+    private EntityManagerInterface $em;
+    private AchievementRepository $achievementRepo;
+    private UserAchievementRepository $userAchievementRepo;
+
     public function __construct(
-        private EntityManagerInterface $em,
-        private AchievementRepository $achievementRepo,
-        private UserAchievementRepository $userAchievementRepo,
-    ) {}
+        EntityManagerInterface $em,
+        AchievementRepository $achievementRepo,
+        UserAchievementRepository $userAchievementRepo
+    ) {
+        $this->em = $em;
+        $this->achievementRepo = $achievementRepo;
+        $this->userAchievementRepo = $userAchievementRepo;
+    }
 
     public function unlock(User $user, string $achievementCode): bool
     {
@@ -26,7 +34,7 @@ class AchievementUnlocker
         }
 
         $already = $this->userAchievementRepo->findOneBy([
-            'user' => $user,
+            'appUser' => $user, // ✅ Clé corrigée ici
             'achievement' => $achievement
         ]);
 
@@ -53,9 +61,9 @@ class AchievementUnlocker
         $stats = $user->getStats();
 
         if (isset($rewards['xp'])) {
-            $stats->setTotalXp($stats->getTotalXp() + $rewards['xp']);
+            $stats->setTotalXp(($stats->getTotalXp() ?? 0) + $rewards['xp']);
         }
 
-        // Other reward types (trees, mushrooms, etc.) can go here
+        // TODO: gérer les arbres, champignons, bonus visuels, etc.
     }
 }

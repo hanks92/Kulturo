@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Psr\Log\LoggerInterface;
 use DateTime;
 use App\Service\StatsUpdater;
+use App\Service\AchievementUnlocker;
 use DateTimeZone;
 
 class ReviewController extends AbstractController
@@ -25,13 +26,15 @@ class ReviewController extends AbstractController
     private FSRSService $fsrsService;
     private LoggerInterface $logger;
     private StatsUpdater $statsUpdater;
+    private AchievementUnlocker $achievementUnlocker;
 
-    public function __construct(EntityManagerInterface $entityManager, FSRSService $fsrsService, LoggerInterface $logger, StatsUpdater $statsUpdater)
+    public function __construct(EntityManagerInterface $entityManager, FSRSService $fsrsService, LoggerInterface $logger, StatsUpdater $statsUpdater, AchievementUnlocker $achievementUnlocker)
     {
         $this->entityManager = $entityManager;
         $this->fsrsService = $fsrsService;
         $this->logger = $logger;
         $this->statsUpdater = $statsUpdater;
+        $this->achievementUnlocker = $achievementUnlocker;
     }
 
     #[Route('/deck/{id}/flashcard/create', name: 'flashcard_create')]
@@ -201,6 +204,8 @@ class ReviewController extends AbstractController
         if (!empty($nextRevisions)) {
             return $this->redirectToRoute('app_review_session', ['id' => $nextRevisions[0]->getId()]);
         }
+
+        $this->achievementUnlocker->unlock($user, 'session_complete');
 
         return $this->render('review/finished.html.twig', [
             'message' => 'Toutes les cartes ont été révisées pour aujourd\'hui !',
