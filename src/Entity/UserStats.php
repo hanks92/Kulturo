@@ -32,6 +32,9 @@ class UserStats
     #[ORM\Column(nullable: true)]
     private ?int $cardsReviewed = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $water = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -56,7 +59,6 @@ class UserStats
     public function setStreak(?int $streak): static
     {
         $this->streak = $streak;
-        
         return $this;
     }
 
@@ -68,7 +70,6 @@ class UserStats
     public function setMaxStreak(?int $maxStreak): static
     {
         $this->maxStreak = $maxStreak;
-
         return $this;
     }
 
@@ -80,7 +81,6 @@ class UserStats
     public function setLastActivity(?\DateTimeImmutable $lastActivity): static
     {
         $this->lastActivity = $lastActivity;
-
         return $this;
     }
 
@@ -92,7 +92,6 @@ class UserStats
     public function setTotalXp(?int $totalXp): static
     {
         $this->totalXp = $totalXp;
-
         return $this;
     }
 
@@ -104,7 +103,17 @@ class UserStats
     public function setCardsReviewed(?int $cardsReviewed): static
     {
         $this->cardsReviewed = $cardsReviewed;
+        return $this;
+    }
 
+    public function getWater(): ?int
+    {
+        return $this->water;
+    }
+
+    public function setWater(?int $water): static
+    {
+        $this->water = $water;
         return $this;
     }
 }

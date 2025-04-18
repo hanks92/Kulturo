@@ -5,18 +5,17 @@
 {% block body %}
   <div id="game-container"></div>
 
-  {# 🔥 Affichage des compteurs en haut de l'écran #}
+  {# 🎯 HUD avec valeurs dynamiques liées à la BDD #}
   <div id="hud">
-    <div class="hud-item">🔥 Streak: {{ app.user.getStats().getStreak() }}</div>
-    <div class="hud-item">💧 Eau: 50</div>
-    <div class="hud-item">⭐ XP: 120</div>
+    <div class="hud-item">🔥 Streak: {{ app.user.getStats().getStreak() ?? 0 }}</div>
+    <div class="hud-item">💧 Eau: {{ app.user.getStats().getWater() ?? 0 }}</div>
+    <div class="hud-item">⭐ XP: {{ app.user.getStats().getTotalXp() ?? 0 }}</div>
   </div>
 
-  {# 🔥 Exposition des données si besoin dans JS #}
   <script>
-    window.userStreak = {{ app.user.getStats().getStreak() }};
-    window.userXp = 120; // à lier plus tard à la BDD
-    window.userWater = 50; // à lier plus tard à la BDD
+    window.userStreak = {{ app.user.getStats().getStreak() ?? 0 }};
+    window.userWater = {{ app.user.getStats().getWater() ?? 0 }};
+    window.userXp = {{ app.user.getStats().getTotalXp() ?? 0 }};
   </script>
 {% endblock %}
 
