@@ -1,0 +1,116 @@
+{% extends 'layouts/authenticated.html.twig' %}
+
+{% block title %}Mes Succès{% endblock %}
+
+{% block body %}
+  <h1 class="mb-4">Mes Succès</h1>
+
+  <div class="achievement-grid">
+    {% for achievement in allAchievements %}
+      {% set unlocked = userAchievements[achievement.code] ?? null %}
+      <div class="achievement-card {{ unlocked ? 'unlocked' : 'locked' }}" data-description="{{ achievement.description }}">
+        <div class="achievement-left">
+          {{ achievement.name }}
+        </div>
+        <div class="achievement-right">
+          {% for key, reward in achievement.rewards %}
+            {{ key|capitalize }}: {{ reward }}
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div id="achievement-modal" class="d-none">
+    <div class="modal-content">
+      <span id="modal-close">&times;</span>
+      <p id="modal-text"></p>
+    </div>
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+
+  <style>
+    .achievement-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .achievement-card {
+      width: 80%;
+      max-width: 800px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 15px 20px;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .achievement-card.unlocked {
+      background-color: #dfffe0;
+      border-color: #6cb56f;
+      color: #222;
+    }
+
+    .achievement-card.locked {
+      background-color: #eaeaea;
+      color: #999;
+    }
+
+    #achievement-modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1050;
+    }
+
+    #achievement-modal.d-none {
+      display: none;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+    }
+
+    #modal-close {
+      position: absolute;
+      right: 15px;
+      top: 10px;
+      cursor: pointer;
+      font-size: 24px;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.achievement-card').forEach(card => {
+        card.addEventListener('click', () => {
+          document.getElementById('modal-text').textContent = card.dataset.description;
+          document.getElementById('achievement-modal').classList.remove('d-none');
+        });
+      });
+
+      document.getElementById('modal-close').addEventListener('click', () => {
+        document.getElementById('achievement-modal').classList.add('d-none');
+      });
+    });
+  </script>
+{% endblock %}
+
