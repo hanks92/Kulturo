@@ -91,7 +91,7 @@ class ReviewController extends AbstractController
     }
 
     #[Route('/review/start/{deckId}', name: 'app_review_start')]
-    public function start(int $deckId, RevisionRepository $revisionRepository): Response
+    public function start(int $deckId, RevisionRepository $revisionRepository, Request $request): Response
     {
         $deck = $this->entityManager->getRepository(Deck::class)->find($deckId);
 
@@ -102,11 +102,14 @@ class ReviewController extends AbstractController
         $today = new DateTime();
         $revisions = $revisionRepository->findDueFlashcardsByDeck($deck, $today);
 
+        $request->getSession()->set('reviewed_count', 0);
+
         if (!$revisions) {
             return $this->render('review/finished.html.twig', [
                 'message' => 'All cards have been reviewed for today!',
                 'deck' => $deck,
                 'flameLit' => false,
+                'cardsReviewedCount' => 0,
             ]);
         }
 
@@ -153,6 +156,10 @@ class ReviewController extends AbstractController
     #[Route('/review/submit/{id}', name: 'app_review_submit', methods: ['POST'])]
     public function submitReview(Revision $revision, Request $request, RevisionRepository $revisionRepository): Response
     {
+        $session = $request->getSession();
+        $currentCount = $session->get('reviewed_count', 0); // récupère le compteur actuel
+        $session->set('reviewed_count', $currentCount + 1); // ajoute +1        
+
         $response = $request->request->get('response');
 
         $ratingMapping = ['1' => 1, '2' => 2, '3' => 3, '4' => 4];
@@ -195,9 +202,19 @@ class ReviewController extends AbstractController
 
         $this->entityManager->persist($reviewLog);
         $this->entityManager->persist($revision);
-        $this->entityManager->flush();
+
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $flameLit = $this->statsUpdater->updateStreak($user);
+
+        // ✅ Ajouter 1 XP et 1 Eau à chaque soumission
+        $stats = $user->getStats();
+        $stats->setTotalXp(($stats->getTotalXp() ?? 0) + 1);
+        $stats->setWater(($stats->getWater() ?? 0) + 1);
+        $stats->setCardsReviewed(($stats->getCardsReviewed() ?? 0) + 1);
+        $this->entityManager->persist($stats);
+
+        $this->entityManager->flush();        
 
         $nextRevisions = $revisionRepository->findDueFlashcardsByDeck($revision->getFlashcard()->getDeck(), new \DateTime());
 
@@ -207,9 +224,24 @@ class ReviewController extends AbstractController
 
         $this->achievementUnlocker->unlock($user, 'session_complete');
 
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('app_review_finished', [
+            'flameLit' => $flameLit,
+            'cardsReviewedCount' => $session->get('reviewed_count', 0),
+        ]);
+    }
+
+    #[Route('/review/finished', name: 'app_review_finished', methods: ['GET'])]
+    public function finished(Request $request): Response
+    {
+        $flameLit = $request->query->get('flameLit');
+        $cardsReviewedCount = $request->query->get('cardsReviewedCount');
+
         return $this->render('review/finished.html.twig', [
             'message' => 'Toutes les cartes ont été révisées pour aujourd\'hui !',
             'flameLit' => $flameLit,
+            'cardsReviewedCount' => $cardsReviewedCount,
         ]);
     }
 }
