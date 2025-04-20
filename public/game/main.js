@@ -10,6 +10,8 @@ let watering = false;
 let wateringInterval;
 const plantStates = [];
 
+let currentWaterDrop = null; // 👈 goutte visuelle
+
 const config = {
   type: Phaser.AUTO,
   width: window.innerWidth,
@@ -34,6 +36,7 @@ function preload() {
   this.load.image('tree3', '/game/assets/tree/treelvl3.png');
   this.load.image('tree4', '/game/assets/tree/treelvl4.png');
   this.load.image('tree5', '/game/assets/tree/treelvl5.png');
+  this.load.image('waterDrop', '/game/assets/ground/waterDrop.png'); // 👈 goutte
 }
 
 function create() {
@@ -57,7 +60,6 @@ function create() {
 
   const availableWidth = window.innerWidth;
   const availableHeight = window.innerHeight;
-
   const zoomX = availableWidth / sceneWidth;
   const zoomY = availableHeight / sceneHeight;
   const autoZoom = Math.min(zoomX, zoomY);
@@ -100,15 +102,12 @@ function create() {
     }
   }
 
-  // 👇 Gestion du clic sur les boutons de plantation
   document.querySelectorAll('.plant-btn').forEach(button => {
     button.addEventListener('click', () => {
       selectedPlant = button.dataset.plant;
-      console.log('Plante sélectionnée :', selectedPlant);
     });
   });
 
-  // 👇 Affichage compteur d’eau
   this.waterText = this.add.text(20, 20, `Eau: ${waterAmount}`, {
     fontSize: '24px',
     fill: '#000'
@@ -118,11 +117,18 @@ function create() {
   this.input.on('pointerdown', (pointer) => {
     watering = true;
 
+    // Création immédiate de l'image goutte qui suivra la souris
+    if (!currentWaterDrop) {
+      currentWaterDrop = this.add.image(pointer.worldX, pointer.worldY, 'waterDrop')
+        .setOrigin(0.5)
+        .setScale(0.2)
+        .setDepth(9999);
+    }
+
     wateringInterval = setInterval(() => {
       if (!watering || waterAmount <= 0) return;
 
       const worldPoint = pointer.positionToCamera(this.cameras.main);
-
       const plant = plantStates.find(p => {
         const bounds = p.image.getBounds();
         return Phaser.Geom.Rectangle.Contains(bounds, worldPoint.x, worldPoint.y);
@@ -144,11 +150,21 @@ function create() {
   this.input.on('pointerup', () => {
     watering = false;
     clearInterval(wateringInterval);
+    if (currentWaterDrop) {
+      currentWaterDrop.destroy();
+      currentWaterDrop = null;
+    }
   });
 }
 
 function update() {
   this.waterText.setText(`Eau: ${waterAmount}`);
+
+  // 👇 Goutte suit la souris
+  if (watering && currentWaterDrop) {
+    const pointer = this.input.activePointer;
+    currentWaterDrop.setPosition(pointer.worldX, pointer.worldY);
+  }
 }
 
 game = new Phaser.Game(config);
