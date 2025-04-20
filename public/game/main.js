@@ -5,7 +5,7 @@ const GRID_HEIGHT = 6;
 
 let game;
 let selectedPlant = 'tree1';
-let waterAmount = 100;
+let waterAmount = window.userWater ?? 0; // 💧 synchro initiale
 let watering = false;
 let wateringInterval;
 const plantStates = [];
@@ -42,7 +42,6 @@ function preload() {
 function create() {
   const gardenPixelWidth = (GRID_WIDTH + GRID_HEIGHT) * TILE_WIDTH / 2;
   const gardenPixelHeight = (GRID_WIDTH + GRID_HEIGHT) * TILE_HEIGHT / 2;
-
   const margin = 1000;
   const sceneWidth = gardenPixelWidth + margin;
   const sceneHeight = gardenPixelHeight + margin;
@@ -58,10 +57,8 @@ function create() {
   this.centerX = centerX;
   this.centerY = centerY;
 
-  const availableWidth = window.innerWidth;
-  const availableHeight = window.innerHeight;
-  const zoomX = availableWidth / sceneWidth;
-  const zoomY = availableHeight / sceneHeight;
+  const zoomX = window.innerWidth / sceneWidth;
+  const zoomY = window.innerHeight / sceneHeight;
   const autoZoom = Math.min(zoomX, zoomY);
 
   const cam = this.cameras.main;
@@ -88,7 +85,6 @@ function create() {
             .setDepth(isoY)
             .setInteractive();
 
-          // BARRE DE PROGRESSION (grande taille)
           const barWidth = 300;
           const barHeight = 30;
           const barY = isoY - TILE_HEIGHT * 1.4;
@@ -150,9 +146,21 @@ function create() {
       });
 
       if (plant) {
+        // 🔻 Diminution de l'eau
         waterAmount--;
-        plant.waterReceived++;
+        window.userWater = waterAmount;
 
+        // MAJ dans HUD
+        document.querySelectorAll('.hud-item').forEach(el => {
+          if (el.textContent.includes('💧 Eau')) {
+            el.textContent = `💧 Eau: ${waterAmount}`;
+          }
+        });
+
+        // MAJ en base
+        syncWaterWithServer(waterAmount);
+
+        plant.waterReceived++;
         const nextLevel = plant.level + 1;
         const needed = nextLevel * 5;
         const ratio = Math.min(plant.waterReceived / needed, 1);
@@ -194,22 +202,31 @@ function update() {
   }
 }
 
+// 🔄 Envoi Ajax pour persister l’eau
+function syncWaterWithServer(newWaterValue) {
+  fetch('/api/user/update-water', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: JSON.stringify({ water: newWaterValue })
+  }).catch(err => console.error('Sync water error:', err));
+}
+
 game = new Phaser.Game(config);
 
 window.addEventListener('resize', () => {
   game.scale.resize(window.innerWidth, window.innerHeight);
-
   const scene = game.scene.scenes[0];
   const gardenPixelWidth = (GRID_WIDTH + GRID_HEIGHT) * TILE_WIDTH / 2;
   const gardenPixelHeight = (GRID_WIDTH + GRID_HEIGHT) * TILE_HEIGHT / 2;
   const margin = 200;
   const sceneWidth = gardenPixelWidth + margin;
   const sceneHeight = gardenPixelHeight + margin;
-
   const zoomX = window.innerWidth / sceneWidth;
   const zoomY = window.innerHeight / sceneHeight;
   const autoZoom = Math.min(zoomX, zoomY);
-
   scene.cameras.main.setZoom(autoZoom);
   scene.cameras.main.centerOn(scene.centerX, scene.centerY);
 });
