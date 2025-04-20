@@ -5,6 +5,10 @@ const GRID_HEIGHT = 6;
 
 let game;
 let selectedPlant = 'tree1';
+let waterAmount = 100;
+let watering = false;
+let wateringInterval;
+const plantStates = [];
 
 const config = {
   type: Phaser.AUTO,
@@ -51,7 +55,6 @@ function create() {
   this.centerX = centerX;
   this.centerY = centerY;
 
-  // 👇 Calcul du zoom dynamique pour que le jardin entier tienne dans l'écran
   const availableWidth = window.innerWidth;
   const availableHeight = window.innerHeight;
 
@@ -78,28 +81,78 @@ function create() {
 
       tile.on('pointerdown', () => {
         if (!tile.getData('planted')) {
-          this.add.image(isoX, isoY - TILE_HEIGHT / 2, selectedPlant)
+          const plantImage = this.add.image(isoX, isoY - TILE_HEIGHT / 2, selectedPlant)
             .setOrigin(0.5, 1)
-            .setDepth(isoY);
+            .setDepth(isoY)
+            .setInteractive();
+
+          plantStates.push({
+            x,
+            y,
+            level: 1,
+            waterReceived: 0,
+            image: plantImage
+          });
+
           tile.setData('planted', true);
         }
       });
     }
   }
 
+  // 👇 Gestion du clic sur les boutons de plantation
   document.querySelectorAll('.plant-btn').forEach(button => {
     button.addEventListener('click', () => {
       selectedPlant = button.dataset.plant;
       console.log('Plante sélectionnée :', selectedPlant);
     });
   });
+
+  // 👇 Affichage compteur d’eau
+  this.waterText = this.add.text(20, 20, `Eau: ${waterAmount}`, {
+    fontSize: '24px',
+    fill: '#000'
+  }).setScrollFactor(0);
+
+  // 👇 Arrosage
+  this.input.on('pointerdown', (pointer) => {
+    watering = true;
+
+    wateringInterval = setInterval(() => {
+      if (!watering || waterAmount <= 0) return;
+
+      const worldPoint = pointer.positionToCamera(this.cameras.main);
+
+      const plant = plantStates.find(p => {
+        const bounds = p.image.getBounds();
+        return Phaser.Geom.Rectangle.Contains(bounds, worldPoint.x, worldPoint.y);
+      });
+
+      if (plant) {
+        waterAmount--;
+        plant.waterReceived++;
+
+        const nextLevel = plant.level + 1;
+        if (plant.waterReceived >= nextLevel * 5 && nextLevel <= 5) {
+          plant.image.setTexture(`tree${nextLevel}`);
+          plant.level = nextLevel;
+        }
+      }
+    }, 200);
+  });
+
+  this.input.on('pointerup', () => {
+    watering = false;
+    clearInterval(wateringInterval);
+  });
 }
 
-function update() {}
+function update() {
+  this.waterText.setText(`Eau: ${waterAmount}`);
+}
 
 game = new Phaser.Game(config);
 
-// 👇 Ajuste le zoom à chaque redimensionnement
 window.addEventListener('resize', () => {
   game.scale.resize(window.innerWidth, window.innerHeight);
 
