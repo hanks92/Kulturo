@@ -10,7 +10,7 @@ let watering = false;
 let wateringInterval;
 const plantStates = [];
 
-let currentWaterDrop = null; // 👈 goutte visuelle
+let currentWaterDrop = null;
 
 const config = {
   type: Phaser.AUTO,
@@ -36,7 +36,7 @@ function preload() {
   this.load.image('tree3', '/game/assets/tree/treelvl3.png');
   this.load.image('tree4', '/game/assets/tree/treelvl4.png');
   this.load.image('tree5', '/game/assets/tree/treelvl5.png');
-  this.load.image('waterDrop', '/game/assets/ground/waterDrop.png'); // 👈 goutte
+  this.load.image('waterDrop', '/game/assets/ground/waterDrop.png');
 }
 
 function create() {
@@ -88,12 +88,29 @@ function create() {
             .setDepth(isoY)
             .setInteractive();
 
+          // BARRE DE PROGRESSION (grande taille)
+          const barWidth = 300;
+          const barHeight = 30;
+          const barY = isoY - TILE_HEIGHT * 1.4;
+
+          const progressBarBg = this.add.rectangle(isoX, barY, barWidth, barHeight, 0xaaaaaa)
+            .setOrigin(0.5)
+            .setDepth(isoY + 1)
+            .setVisible(false);
+
+          const progressBar = this.add.rectangle(isoX - barWidth / 2, barY, 0, barHeight, 0x00cc00)
+            .setOrigin(0, 0.5)
+            .setDepth(isoY + 2)
+            .setVisible(false);
+
           plantStates.push({
             x,
             y,
             level: 1,
             waterReceived: 0,
-            image: plantImage
+            image: plantImage,
+            progressBar,
+            progressBarBg
           });
 
           tile.setData('planted', true);
@@ -113,11 +130,9 @@ function create() {
     fill: '#000'
   }).setScrollFactor(0);
 
-  // 👇 Arrosage
   this.input.on('pointerdown', (pointer) => {
     watering = true;
 
-    // Création immédiate de l'image goutte qui suivra la souris
     if (!currentWaterDrop) {
       currentWaterDrop = this.add.image(pointer.worldX, pointer.worldY, 'waterDrop')
         .setOrigin(0.5)
@@ -139,9 +154,18 @@ function create() {
         plant.waterReceived++;
 
         const nextLevel = plant.level + 1;
-        if (plant.waterReceived >= nextLevel * 5 && nextLevel <= 5) {
+        const needed = nextLevel * 5;
+        const ratio = Math.min(plant.waterReceived / needed, 1);
+
+        plant.progressBar.width = 300 * ratio;
+        plant.progressBar.setVisible(true);
+        plant.progressBarBg.setVisible(true);
+
+        if (ratio === 1 && nextLevel <= 5) {
           plant.image.setTexture(`tree${nextLevel}`);
           plant.level = nextLevel;
+          plant.waterReceived = 0;
+          plant.progressBar.width = 0;
         }
       }
     }, 200);
@@ -154,13 +178,16 @@ function create() {
       currentWaterDrop.destroy();
       currentWaterDrop = null;
     }
+
+    plantStates.forEach(plant => {
+      if (plant.progressBar) plant.progressBar.setVisible(false);
+      if (plant.progressBarBg) plant.progressBarBg.setVisible(false);
+    });
   });
 }
 
 function update() {
   this.waterText.setText(`Eau: ${waterAmount}`);
-
-  // 👇 Goutte suit la souris
   if (watering && currentWaterDrop) {
     const pointer = this.input.activePointer;
     currentWaterDrop.setPosition(pointer.worldX, pointer.worldY);
