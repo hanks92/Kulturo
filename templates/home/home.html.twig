@@ -7,15 +7,21 @@
 
   {# 🎯 HUD avec valeurs dynamiques liées à la BDD #}
   <div id="hud">
-    <div class="hud-item">🔥 Streak: {{ app.user.getStats().getStreak() ?? 0 }}</div>
-    <div class="hud-item">💧 Eau: {{ app.user.getStats().getWater() ?? 0 }}</div>
-    <div class="hud-item">⭐ XP: {{ app.user.getStats().getTotalXp() ?? 0 }}</div>
+    <div class="hud-item">
+      🔥 Streak: {{ app.user.getStats() ? app.user.getStats().getStreak() : 0 }}
+    </div>
+    <div class="hud-item">
+      💧 Eau: {{ app.user.getStats() ? app.user.getStats().getWater() : 0 }}
+    </div>
+    <div class="hud-item">
+      ⭐ XP: {{ app.user.getStats() ? app.user.getStats().getTotalXp() : 0 }}
+    </div>
   </div>
 
   <script>
-    window.userStreak = {{ app.user.getStats().getStreak() ?? 0 }};
-    window.userWater = {{ app.user.getStats().getWater() ?? 0 }};
-    window.userXp = {{ app.user.getStats().getTotalXp() ?? 0 }};
+    window.userStreak = {{ app.user.getStats() ? app.user.getStats().getStreak() : 0 }};
+    window.userWater = {{ app.user.getStats() ? app.user.getStats().getWater() : 0 }};
+    window.userXp = {{ app.user.getStats() ? app.user.getStats().getTotalXp() : 0 }};
   </script>
 {% endblock %}
 

@@ -5,7 +5,8 @@ const GRID_HEIGHT = 6;
 
 let game;
 let selectedPlant = 'tree1';
-let waterAmount = window.userWater ?? 0; // 💧 synchro initiale
+let waterAmount = window.userWater ?? 0;
+let unsavedWater = 0;
 let watering = false;
 let wateringInterval;
 const plantStates = [];
@@ -146,19 +147,15 @@ function create() {
       });
 
       if (plant) {
-        // 🔻 Diminution de l'eau
         waterAmount--;
+        unsavedWater++;
         window.userWater = waterAmount;
 
-        // MAJ dans HUD
         document.querySelectorAll('.hud-item').forEach(el => {
           if (el.textContent.includes('💧 Eau')) {
             el.textContent = `💧 Eau: ${waterAmount}`;
           }
         });
-
-        // MAJ en base
-        syncWaterWithServer(waterAmount);
 
         plant.waterReceived++;
         const nextLevel = plant.level + 1;
@@ -204,7 +201,7 @@ function update() {
 
 // 🔄 Envoi Ajax pour persister l’eau
 function syncWaterWithServer(newWaterValue) {
-  fetch('/api/user/update-water', {
+  fetch('/api/game/update-water', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -213,6 +210,21 @@ function syncWaterWithServer(newWaterValue) {
     body: JSON.stringify({ water: newWaterValue })
   }).catch(err => console.error('Sync water error:', err));
 }
+
+// ⏲️ Sauvegarde périodique
+setInterval(() => {
+  if (unsavedWater > 0) {
+    syncWaterWithServer(waterAmount);
+    unsavedWater = 0;
+  }
+}, 5000);
+
+// 🧹 Sauvegarde à la fermeture
+window.addEventListener('beforeunload', () => {
+  if (unsavedWater > 0) {
+    navigator.sendBeacon('/api/game/update-water', JSON.stringify({ water: waterAmount }));
+  }
+});
 
 game = new Phaser.Game(config);
 
