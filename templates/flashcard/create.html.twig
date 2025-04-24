@@ -3,64 +3,92 @@
 {% block title %}Create a Flashcard{% endblock %}
 
 {% block body %}
-    <div style="margin-top: 4rem; display: flex; flex-direction: column; align-items: center; text-align: center; min-height: 80vh;">
+<div style="margin-top: 4rem; display: flex; flex-direction: column; align-items: center; text-align: center; min-height: 80vh;">
 
-        <h1 class="text-5xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
-            Add a new flashcard to <span style="color: #2E5077;">{{ deck.title }}</span>
-        </h1>
+    <h1 class="text-5xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
+        Add a new flashcard to <span style="color: #2E5077;">{{ deck.title }}</span>
+    </h1>
 
-        <div style="width: 100%; max-width: 600px; padding: 2rem; background-color: #ffffff; border: 1px solid #ddd; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: left;">
-            {{ form_start(form) }}
+    <div style="width: 100%; max-width: 600px; padding: 2rem; background-color: #ffffff; border: 1px solid #ddd; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: left;">
+        {{ form_start(form) }}
 
-                <div style="margin-bottom: 1.5rem;">
-                    {{ form_label(form.question, 'Question', { 'label_attr': { 'style': 'font-weight: bold; font-size: 1.1rem; display: block; margin-bottom: 0.5rem;' } }) }}
-                    {{ form_widget(form.question, { 'attr': { 'class': 'wysiwyg', 'style': 'width: 100%; padding: 0.75rem; font-size: 1rem; border-radius: 0.5rem; border: 1px solid #ccc;' } }) }}
-                    {{ form_errors(form.question) }}
-                </div>
-
-                <div style="margin-bottom: 1.5rem;">
-                    {{ form_label(form.answer, 'Answer', { 'label_attr': { 'style': 'font-weight: bold; font-size: 1.1rem; display: block; margin-bottom: 0.5rem;' } }) }}
-                    {{ form_widget(form.answer, { 'attr': { 'class': 'wysiwyg', 'style': 'width: 100%; height: 300px; font-size: 1rem; border-radius: 0.5rem; border: 1px solid #ccc;' } }) }}
-                    {{ form_errors(form.answer) }}
-                </div>
-
-                <button type="submit"
-                    style="width: 100%; background-color: #2E5077; color: white; border: none; padding: 1rem; border-radius: 0.75rem; font-size: 1.1rem; cursor: pointer;">
-                    Create Flashcard
-                </button>
-
-            {{ form_end(form) }}
-
-            <div style="margin-top: 1.5rem;">
-                <a href="{{ path('deck_show', { 'id': deck.id }) }}"
-                   style="display: inline-block; width: 100%; background-color: #4DA1A9; color: white; border: none; padding: 1rem; border-radius: 0.75rem; font-size: 1.1rem; text-align: center; text-decoration: none; cursor: pointer;">
-                    Back to Deck
-                </a>
+            <div style="margin-bottom: 1.5rem;">
+                {{ form_label(form.question, 'Question', { 'label_attr': { 'style': 'font-weight: bold; font-size: 1.1rem; display: block; margin-bottom: 0.5rem;' } }) }}
+                {{ form_widget(form.question, { 'attr': { 'class': 'wysiwyg', 'style': 'width: 100%; padding: 0.75rem; font-size: 1rem; border-radius: 0.5rem; border: 1px solid #ccc;' } }) }}
+                {{ form_errors(form.question) }}
             </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                {{ form_label(form.answer, 'Answer', { 'label_attr': { 'style': 'font-weight: bold; font-size: 1.1rem; display: block; margin-bottom: 0.5rem;' } }) }}
+                {{ form_widget(form.answer, { 'attr': { 'class': 'wysiwyg', 'style': 'width: 100%; height: 300px; font-size: 1rem; border-radius: 0.5rem; border: 1px solid #ccc;' } }) }}
+                {{ form_errors(form.answer) }}
+            </div>
+
+            <button type="submit"
+                style="width: 100%; background-color: #2E5077; color: white; border: none; padding: 1rem; border-radius: 0.75rem; font-size: 1.1rem; cursor: pointer;">
+                Create Flashcard
+            </button>
+
+        {{ form_end(form) }}
+
+        <div style="margin-top: 1.5rem;">
+            <a href="{{ path('deck_show', { 'id': deck.id }) }}"
+               style="display: inline-block; width: 100%; background-color: #4DA1A9; color: white; border: none; padding: 1rem; border-radius: 0.75rem; font-size: 1.1rem; text-align: center; text-decoration: none; cursor: pointer;">
+                Back to Deck
+            </a>
         </div>
     </div>
+</div>
 {% endblock %}
 
 {% block javascripts %}
-    {{ parent() }}
-    <script src="{{ asset('js/tinymce/tinymce.min.js') }}"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            tinymce.init({
-                selector: '.wysiwyg',
-                plugins: 'link image media code lists',
-                toolbar: 'undo redo | bold italic underline | bullist numlist | link image media | code',
-                menubar: false,
-                branding: false,
-                license_key: 'gpl',
-                height: 300,
-                setup: function (editor) {
-                    // 🔁 Synchronise TinyMCE → textarea au submit
-                    document.querySelector('form').addEventListener('submit', function () {
-                        editor.save();
-                    });
+{{ parent() }}
+<script src="{{ asset('js/tinymce/tinymce.min.js') }}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        tinymce.init({
+            selector: '.wysiwyg',
+            plugins: 'link image media code lists',
+            toolbar: 'undo redo | bold italic underline | bullist numlist | link image media | code',
+            menubar: false,
+            branding: false,
+            license_key: 'gpl',
+            height: 300,
+            images_upload_url: '/upload/image',
+            automatic_uploads: true,
+            images_upload_credentials: true,
+            file_picker_types: 'file media',
+            file_picker_callback: function (callback, value, meta) {
+                if (meta.filetype === 'media') {
+                    const input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    input.setAttribute('accept', 'audio/*');
+                    input.onchange = function () {
+                        const file = this.files[0];
+                        const formData = new FormData();
+                        formData.append('file', file);
+
+                        fetch('/upload/audio', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            callback(data.location);
+                        })
+                        .catch(() => {
+                            alert('Audio upload failed');
+                        });
+                    };
+                    input.click();
                 }
-            });
+            },
+            setup: function (editor) {
+                document.querySelector('form').addEventListener('submit', function () {
+                    tinymce.triggerSave();
+                });
+            }
         });
-    </script>
+    });
+</script>
 {% endblock %}
