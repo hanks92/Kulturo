@@ -55,6 +55,7 @@
                 justify-content: center;
                 font-size: 1.1rem;
                 background-color: #ffffff;
+                overflow: auto;
             }
 
             .card-back {
@@ -68,10 +69,10 @@
                 <div class="flip-container">
                     <div class="flipper">
                         <div class="card-face">
-                            {{ flashcard.question }}
+                            {{ flashcard.question|raw }}
                         </div>
                         <div class="card-face card-back">
-                            {{ flashcard.answer }}
+                            {{ flashcard.answer|raw }}
                         </div>
                     </div>
                 </div>

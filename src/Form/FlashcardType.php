@@ -16,6 +16,7 @@ class FlashcardType extends AbstractType
         $builder
             ->add('question', TextareaType::class, [
                 'label' => 'Question',
+                'required' => false,
                 'attr' => [
                     'class' => 'form-control wysiwyg',
                     'placeholder' => 'Enter the question'
@@ -23,6 +24,7 @@ class FlashcardType extends AbstractType
             ])
             ->add('answer', TextareaType::class, [
                 'label' => 'Answer',
+                'required' => false,
                 'attr' => [
                     'class' => 'form-control wysiwyg',
                     'placeholder' => 'Enter the answer'
