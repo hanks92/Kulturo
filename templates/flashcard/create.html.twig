@@ -20,7 +20,7 @@
 
                 <div style="margin-bottom: 1.5rem;">
                     {{ form_label(form.answer, 'Answer', { 'label_attr': { 'style': 'font-weight: bold; font-size: 1.1rem; display: block; margin-bottom: 0.5rem;' } }) }}
-                    {{ form_widget(form.answer, { 'attr': { 'style': 'width: 100%; padding: 0.75rem; font-size: 1rem; border-radius: 0.5rem; border: 1px solid #ccc;' } }) }}
+                    {{ form_widget(form.answer, { 'attr': { 'style': 'width: 100%; height: 300px; font-size: 1rem; border-radius: 0.5rem; border: 1px solid #ccc;' } }) }}
                     {{ form_errors(form.answer) }}
                 </div>
 
@@ -39,4 +39,22 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+<script src="{{ asset('js/tinymce/tinymce.min.js') }}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    tinymce.init({
+      selector: '.wysiwyg',
+      plugins: 'link image media code lists',
+      toolbar: 'undo redo | bold italic underline | bullist numlist | link image media | code',
+      menubar: false,
+      branding: false,       // ✅ supprime "Build with TinyMCE"
+      license_key: 'gpl',    // ✅ déclare la licence open source
+      height: 300
+    });
+  });
+</script>
 {% endblock %}
