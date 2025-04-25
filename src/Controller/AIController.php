@@ -79,7 +79,7 @@ class AIController extends AbstractController
                                 ["role" => "user", "content" => $prompt]
                             ],
                             'temperature' => 0.7,
-                            'max_tokens' => 3000,
+                            'max_tokens' => 6000,
                             'stream' => false
                         ],
                     ]);
