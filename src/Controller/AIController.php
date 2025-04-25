@@ -13,7 +13,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class AIController extends AbstractController
 {
@@ -22,7 +21,6 @@ class AIController extends AbstractController
     private DeckController $deckController;
     private FlashcardController $flashcardController;
     private string $apiKey;
-    private string $pexelsApiKey;
 
     public function __construct(
         HttpClientInterface $httpClient,
@@ -35,14 +33,9 @@ class AIController extends AbstractController
         $this->deckController = $deckController;
         $this->flashcardController = $flashcardController;
         $this->apiKey = $_ENV['DEEPSEEK_API_KEY'];
-        $this->pexelsApiKey = $_ENV['PEXELS_API_KEY'];
 
         if (empty($this->apiKey)) {
             throw new \RuntimeException('Clé API DeepSeek manquante dans .env');
-        }
-
-        if (empty($this->pexelsApiKey)) {
-            throw new \RuntimeException('Clé API Pexels manquante dans .env');
         }
     }
 
@@ -64,7 +57,7 @@ class AIController extends AbstractController
                 $promptUser = $data['prompt'];
                 $resources = $data['resources'] ?? '';
 
-                $prompt = "Generate a set of flashcards based on the following prompt: '$promptUser'. Additional resources provided by the user: '$resources'. Respond only with a JSON in the following format: [{\"recto\": \"...\", \"verso\": \"...\"}]. Never include links or images in the answers, only plain text.";
+                $prompt = "Generate a set of flashcards based on the following prompt: '$promptUser'. Additional resources: '$resources'. Respond only with a JSON array with this format: [{\"recto\": \"...\", \"verso\": \"...\", \"search_term\": \"...\"}]. 'search_term' must be a precise French Wikipedia page title that best matches the concept to find the best main image (e.g., 'Drapeau de la France', 'Tour Eiffel', 'Lion (animal)'). Never include links or HTML, only pure text.";
 
                 try {
                     $response = $this->httpClient->request('POST', 'https://api.deepseek.com/chat/completions', [
@@ -75,7 +68,7 @@ class AIController extends AbstractController
                         'json' => [
                             'model' => 'deepseek-chat',
                             'messages' => [
-                                ["role" => "system", "content" => "Tu es un assistant qui génère des flashcards en JSON."],
+                                ["role" => "system", "content" => "You are a helpful assistant that generates JSON-formatted flashcards."],
                                 ["role" => "user", "content" => $prompt]
                             ],
                             'temperature' => 0.7,
@@ -122,8 +115,9 @@ class AIController extends AbstractController
 
                     foreach ($flashcardsArray as $flashcardData) {
                         if (isset($flashcardData['recto'], $flashcardData['verso'])) {
-                            $imageUrl = $this->fetchImageFromWikipedia($flashcardData['recto'])
-                                ?? $this->fetchImageFromPexels($flashcardData['recto']);
+                            $searchTerm = $flashcardData['search_term'] ?? $flashcardData['recto'];
+                            $imageUrl = $this->fetchImageFromWikipedia($searchTerm);
+
 
                             $verso = $flashcardData['verso'];
                             if ($imageUrl) {
@@ -140,6 +134,7 @@ class AIController extends AbstractController
                             flush();
                         }
                     }
+
 
                     $redirectUrl = '/deck/' . $deck->getId() . '/flashcards';
                     echo "🎉 Toutes les flashcards ont été générées et enregistrées ! Redirection dans un instant...\n";
@@ -178,35 +173,14 @@ class AIController extends AbstractController
 
             foreach ($pages as $page) {
                 if (isset($page['original']['source'])) {
+                    echo "📷 Image Wikipédia trouvée pour '$term' : " . $page['original']['source'] . "\n";
+                    flush();
                     return $page['original']['source'];
                 }
             }
         } catch (\Exception $e) {
-            // Log ou fallback silencieux
-        }
-
-        return null;
-    }
-
-    private function fetchImageFromPexels(string $term): ?string
-    {
-        try {
-            $response = $this->httpClient->request('GET', 'https://api.pexels.com/v1/search', [
-                'headers' => [
-                    'Authorization' => $this->pexelsApiKey,
-                ],
-                'query' => [
-                    'query' => $term,
-                    'per_page' => 1,
-                ],
-            ]);
-
-            $data = $response->toArray();
-            if (!empty($data['photos'][0]['src']['medium'])) {
-                return $data['photos'][0]['src']['medium'];
-            }
-        } catch (\Exception $e) {
-            // Log ou fallback silencieux
+            echo "⚠️ Erreur lors de la récupération Wikipédia pour '$term' : " . $e->getMessage() . "\n";
+            flush();
         }
 
         return null;
