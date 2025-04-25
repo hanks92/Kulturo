@@ -47,48 +47,89 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         tinymce.init({
-            selector: '.wysiwyg',
-            plugins: 'link image media code lists',
-            toolbar: 'undo redo | bold italic underline | bullist numlist | link image media | code',
-            menubar: false,
-            branding: false,
-            license_key: 'gpl',
-            height: 300,
-            images_upload_url: '/upload/image',
-            automatic_uploads: true,
-            images_upload_credentials: true,
-            file_picker_types: 'file media',
-            file_picker_callback: function (callback, value, meta) {
-                if (meta.filetype === 'media') {
-                    const input = document.createElement('input');
-                    input.setAttribute('type', 'file');
-                    input.setAttribute('accept', 'audio/*');
-                    input.onchange = function () {
-                        const file = this.files[0];
-                        const formData = new FormData();
-                        formData.append('file', file);
+    selector: '.wysiwyg',
+    plugins: 'link charmap lists',
+    toolbar: 'undo redo | bold italic underline | bullist numlist | link imageUpload audioUpload charmap',
+    menubar: false,
+    branding: false,
+    license_key: 'gpl',
+    height: 300,
 
-                        fetch('/upload/audio', {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            callback(data.location);
-                        })
-                        .catch(() => {
-                            alert('Audio upload failed');
-                        });
-                    };
-                    input.click();
-                }
-            },
-            setup: function (editor) {
-                document.querySelector('form').addEventListener('submit', function () {
-                    tinymce.triggerSave();
-                });
+    setup: function (editor) {
+        // 🎵 Icône audio
+        editor.ui.registry.addIcon('musicnote', `
+            <svg width="24" height="24" viewBox="0 0 24 24">
+                <path d="M9 3v12.26A4 4 0 1 0 11 19V7h4V3H9z" fill="currentColor"/>
+            </svg>
+        `);
+
+        // 🖼️ Icône image
+        editor.ui.registry.addIcon('imageupload', `
+            <svg width="24" height="24" viewBox="0 0 24 24">
+                <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14l4-4 4 4 6-6z" fill="currentColor"/>
+            </svg>
+        `);
+
+        // 🎧 Bouton audio
+        editor.ui.registry.addButton('audioUpload', {
+            icon: 'musicnote',
+            tooltip: 'Insert audio',
+            onAction: function () {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'audio/*';
+                input.onchange = function () {
+                    const file = this.files[0];
+                    const formData = new FormData();
+                    formData.append('file', file, file.name);
+                    fetch('/upload/audio', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        editor.insertContent(`<audio controls src="${data.location}"></audio>`);
+                    })
+                    .catch(() => alert('Audio upload failed'));
+                };
+                input.click();
             }
         });
+
+        // 🖼️ Bouton image
+        editor.ui.registry.addButton('imageUpload', {
+            icon: 'imageupload',
+            tooltip: 'Insert image',
+            onAction: function () {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = function () {
+                    const file = this.files[0];
+                    const formData = new FormData();
+                    formData.append('file', file, file.name);
+                    fetch('/upload/image', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        editor.insertContent(`<img src="${data.location}" alt="" style="max-width: 100%;" />`);
+                    })
+                    .catch(() => alert('Image upload failed'));
+                };
+                input.click();
+            }
+        });
+
+        // 🔁 TinyMCE → textarea
+        document.querySelector('form').addEventListener('submit', () => {
+            tinymce.triggerSave();
+        });
+    }
+});
+
+
     });
 </script>
 {% endblock %}
