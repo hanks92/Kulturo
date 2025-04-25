@@ -116,15 +116,24 @@ class AIController extends AbstractController
 
                     foreach ($flashcardsArray as $flashcardData) {
                         if (isset($flashcardData['recto'], $flashcardData['verso'])) {
+                            $imageUrl = $this->fetchImageFromWikipedia($flashcardData['recto']);
+                    
+                            // Enrichir le verso avec l’image si disponible
+                            $verso = $flashcardData['verso'];
+                            if ($imageUrl) {
+                                $verso .= '<br/><img src="' . $imageUrl . '" alt="' . htmlspecialchars($flashcardData['recto']) . '" style="max-width:100%; height:auto;" />';
+                            }
+                    
                             $this->flashcardController->createFlashcard(
                                 $deck,
                                 $flashcardData['recto'],
-                                $flashcardData['verso']
+                                $verso
                             );
+                    
                             echo "✅ Flashcard ajoutée : " . $flashcardData['recto'] . "\n";
                             flush();
                         }
-                    }
+                    }                    
 
                     $redirectUrl = '/deck/' . $deck->getId() . '/flashcards';
                     echo "🎉 Toutes les flashcards ont été générées et enregistrées ! Redirection dans un instant...\n";
@@ -143,4 +152,32 @@ class AIController extends AbstractController
             'aiResponse' => $aiResponse,
         ]);
     }
+
+    private function fetchImageFromWikipedia(string $term): ?string
+        {
+            try {
+                $response = $this->httpClient->request('GET', 'https://fr.wikipedia.org/w/api.php', [
+                    'query' => [
+                        'action' => 'query',
+                        'format' => 'json',
+                        'titles' => $term,
+                        'prop' => 'pageimages',
+                        'pithumbsize' => 500,
+                    ],
+                ]);
+                $data = $response->toArray();
+                $pages = $data['query']['pages'] ?? [];
+
+                foreach ($pages as $page) {
+                    if (isset($page['thumbnail']['source'])) {
+                        return $page['thumbnail']['source'];
+                    }
+                }
+            } catch (\Exception $e) {
+                // Tu peux logger l'erreur ici si besoin
+            }
+
+            return null;
+        }
+
 }

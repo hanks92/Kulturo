@@ -15,10 +15,10 @@ class Flashcard
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $question = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $answer = null;
 
     #[ORM\ManyToOne(inversedBy: 'flashcards')]
@@ -98,7 +98,6 @@ class Flashcard
     public function removeRevision(Revision $revision): static
     {
         if ($this->revisions->removeElement($revision)) {
-            // set the owning side to null (unless already changed)
             if ($revision->getFlashcard() === $this) {
                 $revision->setFlashcard(null);
             }
