@@ -67,6 +67,55 @@ function create() {
   cam.centerOn(centerX, centerY);
   cam.setBounds();
 
+  // 👉 1. Charger les plantes existantes depuis le serveur
+  fetch('/api/game/load-garden')
+    .then(response => response.json())
+    .then(savedPlants => {
+      savedPlants.forEach(plantData => {
+        const x = plantData.x;
+        const y = plantData.y;
+        const type = plantData.type;
+        const level = plantData.level;
+        const waterReceived = plantData.waterReceived;
+
+        const isoX = (x - y) * TILE_WIDTH / 2 + originX;
+        const isoY = (x + y) * TILE_HEIGHT / 2 + originY;
+
+        const plantImage = this.add.image(isoX, isoY - TILE_HEIGHT / 2, type)
+          .setOrigin(0.5, 1)
+          .setDepth(isoY)
+          .setInteractive();
+
+        const barWidth = 300;
+        const barHeight = 30;
+        const barY = isoY - TILE_HEIGHT * 1.4;
+
+        const progressBarBg = this.add.rectangle(isoX, barY, barWidth, barHeight, 0xaaaaaa)
+          .setOrigin(0.5)
+          .setDepth(isoY + 1)
+          .setVisible(false);
+
+        const progressBar = this.add.rectangle(isoX - barWidth / 2, barY, 0, barHeight, 0x00cc00)
+          .setOrigin(0, 0.5)
+          .setDepth(isoY + 2)
+          .setVisible(false);
+
+        plantStates.push({
+          x,
+          y,
+          level,
+          waterReceived,
+          image: plantImage,
+          progressBar,
+          progressBarBg
+        });
+      });
+    })
+    .catch(error => {
+      console.error('Erreur lors du chargement du jardin:', error);
+    });
+
+  // 👉 2. Construire la grille de tuiles grass
   for (let y = 0; y < GRID_HEIGHT; y++) {
     for (let x = 0; x < GRID_WIDTH; x++) {
       const isoX = (x - y) * TILE_WIDTH / 2 + originX;
@@ -116,17 +165,20 @@ function create() {
     }
   }
 
+  // 👉 3. Sélection d'un type de plante en cliquant sur les boutons
   document.querySelectorAll('.plant-btn').forEach(button => {
     button.addEventListener('click', () => {
       selectedPlant = button.dataset.plant;
     });
   });
 
+  // 👉 4. Affichage du compteur d'eau
   this.waterText = this.add.text(20, 20, `Eau: ${waterAmount}`, {
     fontSize: '24px',
     fill: '#000'
   }).setScrollFactor(0);
 
+  // 👉 5. Gestion de l'arrosage
   this.input.on('pointerdown', (pointer) => {
     watering = true;
 
@@ -191,6 +243,7 @@ function create() {
   });
 }
 
+
 function update() {
   this.waterText.setText(`Eau: ${waterAmount}`);
   if (watering && currentWaterDrop) {
@@ -211,6 +264,27 @@ function syncWaterWithServer(newWaterValue) {
   }).catch(err => console.error('Sync water error:', err));
 }
 
+// 🔄 Envoi Ajax pour persister l'état des plantes
+function syncPlantsWithServer() {
+  const plantsData = plantStates.map(plant => ({
+    x: plant.x,
+    y: plant.y,
+    type: plant.image.texture.key, // très important d'envoyer le bon type d'arbre
+    level: plant.level,
+    waterReceived: plant.waterReceived,
+  }));
+
+  fetch('/api/game/update-plants', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: JSON.stringify({ plants: plantsData })
+  }).catch(err => console.error('Sync plants error:', err));
+}
+
+
 // ⏲️ Sauvegarde périodique
 setInterval(() => {
   if (unsavedWater > 0) {
@@ -219,11 +293,28 @@ setInterval(() => {
   }
 }, 5000);
 
+// ⏲️ Sauvegarde périodique de l'état des plantes
+setInterval(() => {
+  syncPlantsWithServer();
+}, 10000); // toutes les 10 secondes
+
+
 // 🧹 Sauvegarde à la fermeture
 window.addEventListener('beforeunload', () => {
   if (unsavedWater > 0) {
     navigator.sendBeacon('/api/game/update-water', JSON.stringify({ water: waterAmount }));
   }
+
+  // 🚀 Sauvegarde aussi les plantes en quittant
+  const plantsData = plantStates.map(plant => ({
+    x: plant.x,
+    y: plant.y,
+    type: plant.image.texture.key,
+    level: plant.level,
+    waterReceived: plant.waterReceived,
+  }));
+
+  navigator.sendBeacon('/api/game/update-plants', JSON.stringify({ plants: plantsData }));
 });
 
 game = new Phaser.Game(config);

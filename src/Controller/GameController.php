@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\GardenPlant;
 use App\Repository\UserStatsRepository;
+use App\Repository\GardenPlantRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -41,5 +43,63 @@ class GameController extends AbstractController
         $em->flush();
 
         return new JsonResponse(['success' => true, 'water' => $newWater]);
+    }
+
+    #[Route('/update-plants', name: 'update_plants', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function updatePlants(Request $request, EntityManagerInterface $em, GardenPlantRepository $gardenPlantRepository): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $plants = $data['plants'] ?? [];
+
+        if (!is_array($plants)) {
+            return new JsonResponse(['error' => 'Invalid plants data'], 400);
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        // Supprimer les anciennes plantes de l'utilisateur
+        $gardenPlantRepository->deleteAllByUser($user);
+
+        foreach ($plants as $plantData) {
+            if (!isset($plantData['x'], $plantData['y'], $plantData['type'], $plantData['level'], $plantData['waterReceived'])) {
+                continue;
+            }
+
+            $plant = new GardenPlant();
+            $plant->setUserApp($user); // ✅ Correction ici
+            $plant->setX($plantData['x']);
+            $plant->setY($plantData['y']);
+            $plant->setType($plantData['type']);
+            $plant->setLevel($plantData['level']);
+            $plant->setWaterReceived($plantData['waterReceived']);
+            $em->persist($plant);
+        }
+
+        $em->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    #[Route('/load-garden', name: 'load_garden', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function loadGarden(GardenPlantRepository $gardenPlantRepository): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        // ❗ Correction ici
+        $plants = $gardenPlantRepository->findBy(['userApp' => $user]);
+
+        $data = array_map(fn(GardenPlant $plant) => [
+            'x' => $plant->getX(),
+            'y' => $plant->getY(),
+            'type' => $plant->getType(),
+            'level' => $plant->getLevel(),
+            'waterReceived' => $plant->getWaterReceived(),
+        ], $plants);
+
+        return new JsonResponse($data);
     }
 }

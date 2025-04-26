@@ -63,11 +63,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: UserAchievement::class, mappedBy: 'appUser')]
     private Collection $userAchievements;
 
+    /**
+     * @var Collection<int, GardenPlant>
+     */
+    #[ORM\OneToMany(targetEntity: GardenPlant::class, mappedBy: 'userApp')]
+    private Collection $no;
+
     public function __construct()
     {
         $this->roles = ['ROLE_USER']; // Rôle par défaut
         $this->decks = new ArrayCollection();
         $this->userAchievements = new ArrayCollection();
+        $this->no = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -267,6 +274,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setStats(?UserStats $stats): static
     {
         $this->stats = $stats;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, GardenPlant>
+     */
+    public function getNo(): Collection
+    {
+        return $this->no;
+    }
+
+    public function addNo(GardenPlant $no): static
+    {
+        if (!$this->no->contains($no)) {
+            $this->no->add($no);
+            $no->setUserApp($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNo(GardenPlant $no): static
+    {
+        if ($this->no->removeElement($no)) {
+            // set the owning side to null (unless already changed)
+            if ($no->getUserApp() === $this) {
+                $no->setUserApp(null);
+            }
+        }
+
         return $this;
     }
 
