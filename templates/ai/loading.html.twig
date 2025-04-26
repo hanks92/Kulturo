@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Génération en cours...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+        }
+        .spinner {
+            margin: 0 auto 20px;
+            width: 60px;
+            height: 60px;
+            border: 8px solid #eee;
+            border-top: 8px solid #2E5077;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #loading-text {
+            font-size: 20px;
+            margin-top: 20px;
+            color: #2E5077;
+        }
+    </style>
+</head>
+<body>
+
+<div class="spinner"></div>
+<div id="loading-text">⏳ Génération de votre paquet en cours...</div>
+
+<script>
+    // Lance la vraie génération en AJAX
+    fetch("{{ path('ai_generate_backend') }}")
+        .then(response => response.json())
+        .then(data => {
+            if (data.redirectUrl) {
+                window.location.href = data.redirectUrl;
+            } else {
+                document.getElementById('loading-text').innerText = "❌ Erreur lors de la génération.";
+            }
+        })
+        .catch(error => {
+            document.getElementById('loading-text').innerText = "❌ Une erreur est survenue.";
+        });
+</script>
+
+</body>
+</html>

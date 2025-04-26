@@ -36,7 +36,7 @@
 
         {{ form_end(form) }}
 
-        {% if aiResponse is not null %}
+        {% if aiResponse is defined and aiResponse is not null %}
           <div class="mt-12 p-6 border border-gray-200 rounded-lg bg-gray-50">
             <h2 class="text-lg font-semibold text-dark mb-4">AI Response:</h2>
             <pre class="whitespace-pre-wrap text-sm text-gray-700">{{ aiResponse }}</pre>
