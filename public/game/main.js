@@ -10,6 +10,7 @@ let unsavedWater = 0;
 let watering = false;
 let wateringInterval;
 const plantStates = [];
+let userInventory = {};
 
 let currentWaterDrop = null;
 
@@ -69,51 +70,60 @@ function create() {
 
   // 👉 1. Charger les plantes existantes depuis le serveur
   fetch('/api/game/load-garden')
-    .then(response => response.json())
-    .then(savedPlants => {
-      savedPlants.forEach(plantData => {
-        const x = plantData.x;
-        const y = plantData.y;
-        const type = plantData.type;
-        const level = plantData.level;
-        const waterReceived = plantData.waterReceived;
+  .then(response => response.json())
+  .then(savedPlants => {
+    savedPlants.forEach(plantData => {
+      const x = plantData.x;
+      const y = plantData.y;
+      const type = plantData.type;
+      const level = plantData.level;
+      const waterReceived = plantData.waterReceived;
 
-        const isoX = (x - y) * TILE_WIDTH / 2 + originX;
-        const isoY = (x + y) * TILE_HEIGHT / 2 + originY;
+      const isoX = (x - y) * TILE_WIDTH / 2 + originX;
+      const isoY = (x + y) * TILE_HEIGHT / 2 + originY;
 
-        const plantImage = this.add.image(isoX, isoY - TILE_HEIGHT / 2, type)
-          .setOrigin(0.5, 1)
-          .setDepth(isoY)
-          .setInteractive();
+      const plantImage = this.add.image(isoX, isoY - TILE_HEIGHT / 2, type)
+        .setOrigin(0.5, 1)
+        .setDepth(isoY)
+        .setInteractive();
 
-        const barWidth = 300;
-        const barHeight = 30;
-        const barY = isoY - TILE_HEIGHT * 1.4;
+      const barWidth = 300;
+      const barHeight = 30;
+      const barY = isoY - TILE_HEIGHT * 1.4;
 
-        const progressBarBg = this.add.rectangle(isoX, barY, barWidth, barHeight, 0xaaaaaa)
-          .setOrigin(0.5)
-          .setDepth(isoY + 1)
-          .setVisible(false);
+      const progressBarBg = this.add.rectangle(isoX, barY, barWidth, barHeight, 0xaaaaaa)
+        .setOrigin(0.5)
+        .setDepth(isoY + 1)
+        .setVisible(false);
 
-        const progressBar = this.add.rectangle(isoX - barWidth / 2, barY, 0, barHeight, 0x00cc00)
-          .setOrigin(0, 0.5)
-          .setDepth(isoY + 2)
-          .setVisible(false);
+      const progressBar = this.add.rectangle(isoX - barWidth / 2, barY, 0, barHeight, 0x00cc00)
+        .setOrigin(0, 0.5)
+        .setDepth(isoY + 2)
+        .setVisible(false);
 
-        plantStates.push({
-          x,
-          y,
-          level,
-          waterReceived,
-          image: plantImage,
-          progressBar,
-          progressBarBg
-        });
+      plantStates.push({
+        x,
+        y,
+        level,
+        waterReceived,
+        image: plantImage,
+        progressBar,
+        progressBarBg
       });
-    })
-    .catch(error => {
-      console.error('Erreur lors du chargement du jardin:', error);
     });
+
+    // 👉 Ensuite charger l'inventaire utilisateur
+    return fetch('/api/game/inventory');
+  })
+  .then(response => response.json())
+  .then(inventory => {
+    console.log('✅ Inventaire reçu:', inventory); // <-- 🔥 ajoute ce log ici
+    userInventory = inventory;
+    updatePlantButtons(); // 🔄 mettre à jour les boutons avec le stock
+  })
+  .catch(error => {
+    console.error('❌ Erreur lors du chargement du jardin ou de l\'inventaire:', error);
+  });
 
   // 👉 2. Construire la grille de tuiles grass
   for (let y = 0; y < GRID_HEIGHT; y++) {
@@ -130,28 +140,37 @@ function create() {
 
       tile.on('pointerdown', () => {
         if (!tile.getData('planted')) {
-          const plantImage = this.add.image(isoX, isoY - TILE_HEIGHT / 2, selectedPlant)
+          const quantity = userInventory[selectedPlant] ?? 0;
+
+          if (quantity <= 0) {
+            console.log('❌ Pas assez de stock pour planter', selectedPlant);
+            return;
+          }
+
+          // ➡️ Créer l'image de la plante au bon endroit
+          const plantImage = this.add.image(tile.x, tile.y - TILE_HEIGHT / 2, selectedPlant)
             .setOrigin(0.5, 1)
-            .setDepth(isoY)
+            .setDepth(tile.y)
             .setInteractive();
 
           const barWidth = 300;
           const barHeight = 30;
-          const barY = isoY - TILE_HEIGHT * 1.4;
+          const barY = tile.y - TILE_HEIGHT * 1.4;
 
-          const progressBarBg = this.add.rectangle(isoX, barY, barWidth, barHeight, 0xaaaaaa)
+          const progressBarBg = this.add.rectangle(tile.x, barY, barWidth, barHeight, 0xaaaaaa)
             .setOrigin(0.5)
-            .setDepth(isoY + 1)
+            .setDepth(tile.y + 1)
             .setVisible(false);
 
-          const progressBar = this.add.rectangle(isoX - barWidth / 2, barY, 0, barHeight, 0x00cc00)
+          const progressBar = this.add.rectangle(tile.x - barWidth / 2, barY, 0, barHeight, 0x00cc00)
             .setOrigin(0, 0.5)
-            .setDepth(isoY + 2)
+            .setDepth(tile.y + 2)
             .setVisible(false);
 
+          // ➡️ Ajouter la nouvelle plante
           plantStates.push({
-            x,
-            y,
+            x: tile.getData('x'),
+            y: tile.getData('y'),
             level: 1,
             waterReceived: 0,
             image: plantImage,
@@ -160,8 +179,15 @@ function create() {
           });
 
           tile.setData('planted', true);
+
+          // ➡️ Décrémenter l'inventaire
+          if (userInventory[selectedPlant] !== undefined) {
+            userInventory[selectedPlant]--;
+            updatePlantButtons(); // 🔄 met à jour l'affichage du stock
+          }
         }
       });
+
     }
   }
 
@@ -318,6 +344,25 @@ window.addEventListener('beforeunload', () => {
 });
 
 game = new Phaser.Game(config);
+
+function updatePlantButtons() {
+  document.querySelectorAll('.plant-btn').forEach(button => {
+    const plantType = button.dataset.plant;
+    const quantity = userInventory[plantType] ?? 0;
+    const span = button.querySelector('.plant-qty');
+
+    if (span) {
+      if (quantity > 0) {
+        span.textContent = `(${quantity})`;
+        button.disabled = false;
+      } else {
+        span.textContent = `(Locked 🔒)`;
+        button.disabled = true;
+      }
+    }
+  });
+}
+
 
 window.addEventListener('resize', () => {
   game.scale.resize(window.innerWidth, window.innerHeight);

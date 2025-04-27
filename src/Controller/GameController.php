@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Repository\UserPlantInventoryRepository;
 
 #[Route('/api/game', name: 'api_game_')]
 class GameController extends AbstractController
@@ -102,4 +103,23 @@ class GameController extends AbstractController
 
         return new JsonResponse($data);
     }
+
+    #[Route('/inventory', name: 'inventory', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function getInventory(UserPlantInventoryRepository $inventoryRepository): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $inventory = $inventoryRepository->findBy(['userApp' => $user]);
+
+        $data = [];
+
+        foreach ($inventory as $item) {
+            $data[$item->getPlantType()] = $item->getQuantity();
+        }
+
+        return new JsonResponse($data);
+    }
+
 }

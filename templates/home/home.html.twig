@@ -18,6 +18,19 @@
     </div>
   </div>
 
+  {# 🪴 INVENTAIRE DE PLANTES bien positionné #}
+  <div id="inventory">
+    <div class="inventory-title">🌱 Inventaire</div>
+<button class="plant-btn" data-plant="tree1">
+  🌳 Arbre Normal <span class="plant-qty">(Loading...)</span>
+</button>
+<button class="plant-btn" data-plant="fireTree">
+  🔥 Arbre de Feu <span class="plant-qty">(Loading...)</span>
+</button>
+
+
+  </div>
+
   <script>
     window.userStreak = {{ app.user.getStats() ? app.user.getStats().getStreak() : 0 }};
     window.userWater = {{ app.user.getStats() ? app.user.getStats().getWater() : 0 }};
@@ -77,6 +90,59 @@
       background: rgba(255, 255, 255, 0.85);
       padding: 8px 14px;
       border-radius: 8px;
+    }
+
+    #inventory {
+      position: fixed;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-end;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 12px;
+      z-index: 10000;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      font-family: Arial, sans-serif;
+    }
+
+    .inventory-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #2c3e50;
+    }
+
+    .plant-btn {
+      font-size: 16px;
+      font-weight: bold;
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      width: 180px;
+      text-align: center;
+    }
+
+    .plant-btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .plant-qty {
+      margin-left: 8px;
+      font-weight: normal;
+      color: #eee;
+    }
+
+    .plant-btn:hover:not(:disabled) {
+      background-color: #45a049;
     }
   </style>
 {% endblock %}
