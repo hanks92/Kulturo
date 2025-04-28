@@ -1,46 +1,82 @@
 {% extends 'layouts/authenticated.html.twig' %}
 
-{% block title %}Devenir Premium - Kulturo{% endblock %}
+{% block title %}Go Premium - Kulturo{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <h1 class="text-center mb-4">🚀 Passez à Kulturo Premium</h1>
 
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h4 class="card-title text-center">Débloquez tout le pouvoir de Kulturo</h4>
-                    <p class="card-text text-center mt-3">
-                        En devenant <strong>Premium</strong>, vous bénéficiez de :
-                    </p>
-                    <ul class="list-group list-group-flush mb-3">
-                        <li class="list-group-item">✅ Génération automatique de flashcards par IA</li>
-                        <li class="list-group-item">✅ Accès aux bibliothèques Premium exclusives</li>
-                        <li class="list-group-item">✅ Support prioritaire et évolutions futures</li>
-                        <li class="list-group-item">✅ Et bien plus encore...</li>
-                    </ul>
-
-                    <div class="d-grid gap-2">
-                        <a href="{{ path('app_upgrade') }}" class="btn btn-primary btn-lg">
-                            Devenir Premium 🚀
-                        </a>
-                    </div>
-
-                    <p class="text-muted text-center mt-3">
-                        Seulement <strong>9,99€/mois</strong> – Résiliable à tout moment.
-                    </p>
-                </div>
-            </div>
-
-            <div class="text-center mt-4">
-                <a href="{{ path('app_home') }}" class="btn btn-link">
-                    ⬅️ Revenir à l'accueil
-                </a>
-            </div>
-
+<!-- ====== Pricing Section ====== -->
+<section id="pricing" class="ud-pricing pt-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="ud-section-title mx-auto text-center">
+          <span>Pricing</span>
+          <h2>Choose Your Premium Plan</h2>
+          <p>
+            Unlock the full power of Kulturo with premium features designed to make your learning smarter, faster, and more enjoyable.
+          </p>
         </div>
+      </div>
     </div>
-</div>
+
+    <div class="row g-0 align-items-center justify-content-center mt-4">
+      <!-- Monthly Plan -->
+      <div class="col-lg-4 col-md-6 col-sm-10">
+        <div class="ud-single-pricing wow fadeInUp" data-wow-delay=".1s">
+          <div class="ud-pricing-header">
+            <h3>MONTHLY</h3>
+            <h4>€6/month</h4>
+          </div>
+          <div class="ud-pricing-body">
+            <ul>
+              <li>AI-powered automatic deck creation</li>
+              <li>Add images and sounds to each flashcard</li>
+              <li>Mental Palace system for memorization</li>
+              <li>Enhanced features for the memory game</li>
+              <li>No ads — distraction-free learning</li>
+            </ul>
+          </div>
+          <div class="ud-pricing-footer">
+            <a href="{{ path('app_upgrade', { plan: 'monthly' }) }}" class="ud-main-btn ud-white-btn">
+              Choose Monthly
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Yearly Plan -->
+      <div class="col-lg-4 col-md-6 col-sm-10">
+        <div class="ud-single-pricing active last-item wow fadeInUp" data-wow-delay=".15s">
+          <span class="ud-popular-tag">BEST VALUE</span>
+          <div class="ud-pricing-header">
+            <h3>YEARLY</h3>
+            <h4>€54/year</h4>
+          </div>
+          <div class="ud-pricing-body">
+            <ul>
+              <li>Everything in Monthly plan</li>
+              <li>Save 25% compared to monthly plan</li>
+              <li>Early access to new features</li>
+              <li>Enhanced leaderboard and gamification</li>
+              <li>Priority premium support</li>
+            </ul>
+          </div>
+          <div class="ud-pricing-footer">
+            <a href="{{ path('app_upgrade', { plan: 'annually' }) }}" class="ud-main-btn ud-white-btn">
+              Choose Yearly
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-5">
+      <a href="{{ path('app_home') }}" class="ud-main-btn ud-link-btn">
+        Back to Home
+      </a>
+    </div>
+  </div>
+</section>
+<!-- ====== Pricing Section End ====== -->
+
 {% endblock %}
