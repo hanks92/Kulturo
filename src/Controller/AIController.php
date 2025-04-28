@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\Entity\User; // <-- Pour aider Intelephense
 
 class AIController extends AbstractController
 {
@@ -42,14 +43,19 @@ class AIController extends AbstractController
     #[Route('/ai', name: 'ai_form', methods: ['GET', 'POST'])]
     public function generateFlashcards(Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$user || !$user->isPremium()) {
+            $this->addFlash('error', 'Cette fonctionnalité est réservée aux membres Premium 🚀');
+            return $this->redirectToRoute('app_tarifs');
+        }
+
         $form = $this->createForm(AIType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Stocke les infos en session
             $request->getSession()->set('ai_generation_data', $form->getData());
-
-            // Redirige vers la page de chargement
             return $this->redirectToRoute('ai_loading_page');
         }
 
@@ -61,12 +67,30 @@ class AIController extends AbstractController
     #[Route('/ai/loading', name: 'ai_loading_page')]
     public function loading(): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$user || !$user->isPremium()) {
+            $this->addFlash('error', 'Cette fonctionnalité est réservée aux membres Premium 🚀');
+            return $this->redirectToRoute('app_tarifs');
+        }
+
         return $this->render('ai/loading.html.twig');
     }
 
     #[Route('/ai/generate/backend', name: 'ai_generate_backend')]
     public function generateFlashcardsBackend(Request $request): JsonResponse
     {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$user || !$user->isPremium()) {
+            return new JsonResponse([
+                'error' => 'Accès réservé aux membres Premium.',
+                'redirect' => $this->generateUrl('app_tarifs')
+            ], 403);
+        }
+
         $data = $request->getSession()->get('ai_generation_data');
 
         if (!$data) {
