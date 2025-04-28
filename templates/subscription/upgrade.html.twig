@@ -1,0 +1,46 @@
+{% extends 'layouts/authenticated.html.twig' %}
+
+{% block title %}Devenir Premium - Kulturo{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">🚀 Passez à Kulturo Premium</h1>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title text-center">Débloquez tout le pouvoir de Kulturo</h4>
+                    <p class="card-text text-center mt-3">
+                        En devenant <strong>Premium</strong>, vous bénéficiez de :
+                    </p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item">✅ Génération automatique de flashcards par IA</li>
+                        <li class="list-group-item">✅ Accès aux bibliothèques Premium exclusives</li>
+                        <li class="list-group-item">✅ Support prioritaire et évolutions futures</li>
+                        <li class="list-group-item">✅ Et bien plus encore...</li>
+                    </ul>
+
+                    <div class="d-grid gap-2">
+                        <a href="{{ path('app_upgrade') }}" class="btn btn-primary btn-lg">
+                            Devenir Premium 🚀
+                        </a>
+                    </div>
+
+                    <p class="text-muted text-center mt-3">
+                        Seulement <strong>9,99€/mois</strong> – Résiliable à tout moment.
+                    </p>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{{ path('app_home') }}" class="btn btn-link">
+                    ⬅️ Revenir à l'accueil
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

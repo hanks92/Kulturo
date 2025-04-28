@@ -69,6 +69,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: GardenPlant::class, mappedBy: 'userApp')]
     private Collection $no;
 
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private ?bool $isPremium = false;
+
+
     public function __construct()
     {
         $this->roles = ['ROLE_USER']; // Rôle par défaut
@@ -306,5 +310,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function isPremium(): ?bool
+    {
+        return $this->isPremium;
+    }
+
+    public function setIsPremium(?bool $isPremium): static
+    {
+        $this->isPremium = $isPremium;
+        return $this;
+    }
+
 
 }
