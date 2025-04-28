@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use App\Entity\User;
 
 class SubscriptionController extends AbstractController
@@ -55,12 +57,23 @@ class SubscriptionController extends AbstractController
 
     #[Route('/payment/success', name: 'payment_success')]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function success(EntityManagerInterface $entityManager): Response
+    public function success(EntityManagerInterface $entityManager, MailerInterface $mailer): Response
     {
         /** @var User $user */
         $user = $this->getUser();
         $user->setIsPremium(true);
         $entityManager->flush();
+
+        // Envoi d'un email de confirmation Premium en utilisant un template Twig
+        $email = (new Email())
+            ->from('noreply@kulturo.com')
+            ->to($user->getEmail())
+            ->subject('🎉 Welcome to Kulturo Premium!')
+            ->html(
+                $this->renderView('registration/confirmation_premium.html.twig')
+            );
+
+        $mailer->send($email);
 
         $this->addFlash('success', 'Félicitations, vous êtes maintenant Premium 🚀');
         return $this->redirectToRoute('app_home');
