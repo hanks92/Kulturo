@@ -16,6 +16,23 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
+        # 🔐 Authentification API (JWT)
+        login:
+            pattern: ^/api/login_check
+            stateless: true
+            json_login:
+                check_path: /api/login_check
+                username_path: username
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        # 🔐 Firewall pour les autres routes API
+        api:
+            pattern: ^/api/
+            stateless: true
+            jwt: ~
+
         main:
             lazy: true
             provider: app_user_provider
@@ -50,10 +67,12 @@ security:
     # Gestion des accès aux différentes parties du site
     access_control:
         # Routes accessibles sans connexion
-        - { path: ^/landing, roles: PUBLIC_ACCESS }   # Landing page
-        - { path: ^/login, roles: PUBLIC_ACCESS }     # Connexion
-        - { path: ^/register, roles: PUBLIC_ACCESS }  # Inscription
-        - { path: ^/logout, roles: PUBLIC_ACCESS }    # Déconnexion
+        - { path: ^/api/login_check, roles: PUBLIC_ACCESS }     # 🔐 Permet l'auth API
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }        # 🔐 Protège les autres routes API
+        - { path: ^/landing, roles: PUBLIC_ACCESS }             # Landing page
+        - { path: ^/login, roles: PUBLIC_ACCESS }               # Connexion
+        - { path: ^/register, roles: PUBLIC_ACCESS }            # Inscription
+        - { path: ^/logout, roles: PUBLIC_ACCESS }              # Déconnexion
 
         # Routes protégées : nécessitent d'être connecté
         - { path: ^/app, roles: ROLE_USER }

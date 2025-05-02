@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart'; // On ajoute notre écran de login
 import 'services/auth_service.dart'; // Pour futur usage si nécessaire
+import 'screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,7 +37,8 @@ class MyApp extends StatelessWidget {
       home: const LoginScreen(),
       routes: {
         // Redirection après login vers ton ancienne home page
-        '/home': (_) => const MyHomePage(title: 'Flutter Demo Home Page'),
+        '/home': (_) => const HomeScreen(),
+
       },
     );
   }

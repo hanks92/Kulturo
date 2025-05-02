@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'storage_service.dart';
 
 class AuthService {
-  final _storage = const FlutterSecureStorage();
-  final String _apiUrl = 'http://localhost:8000/api/login_check'; // adapte si besoin
+  final _storage = getTokenStorage();
+  final String _apiUrl = 'http://localhost:8000/api/login_check';
 
   Future<bool> login(String email, String password) async {
     final response = await http.post(
@@ -15,17 +15,17 @@ class AuthService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      await _storage.write(key: 'jwt', value: data['token']);
+      await _storage.save(data['token']);
       return true;
     }
     return false;
   }
 
   Future<void> logout() async {
-    await _storage.delete(key: 'jwt');
+    await _storage.delete();
   }
 
   Future<String?> getToken() async {
-    return await _storage.read(key: 'jwt');
+    return await _storage.read();
   }
 }

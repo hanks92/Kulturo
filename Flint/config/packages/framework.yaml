@@ -1,13 +1,18 @@
-# see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
     secret: '%env(APP_SECRET)%'
     #csrf_protection: true
 
     # Note that the session will be started ONLY if you read or write from it.
-    session: true
+    session:
+        handler_id: null
+        cookie_secure: auto  # 🔧 permet d'éviter la redirection HTTPS locale
 
     #esi: true
     #fragments: true
+
+    http_method_override: true
+    trusted_proxies: ~
+    trusted_hosts: ~
 
 when@test:
     framework:
