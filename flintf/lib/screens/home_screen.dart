@@ -6,16 +6,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AuthenticatedLayout( // 👈 const retiré ici
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Accueil')),
-        body: const Center(
-          child: Text(
-            'Bienvenue sur Kulturo !',
-            style: TextStyle(fontSize: 20),
-          ),
-        ),
-      ),
-    );
+    return const AuthenticatedLayout();
   }
 }
