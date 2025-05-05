@@ -82,6 +82,9 @@ security:
         # Catch-all pour toutes les autres routes
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
+        # API routes
+        - { path: ^/api/me, roles: IS_AUTHENTICATED_FULLY }
+
 when@test:
     security:
         password_hashers:

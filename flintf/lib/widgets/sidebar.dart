@@ -7,21 +7,38 @@ class Sidebar extends StatefulWidget {
   State<Sidebar> createState() => _SidebarState();
 }
 
-const _navBarItems = [
-  BottomNavigationBarItem(
+// Définir les éléments de navigation avec icônes, labels et avatars
+final List<BottomNavigationBarItem> _navBarItems = [
+  const BottomNavigationBarItem(
     icon: Icon(Icons.home_outlined),
     activeIcon: Icon(Icons.home_rounded),
     label: 'Home',
   ),
-  BottomNavigationBarItem(
+  const BottomNavigationBarItem(
     icon: Icon(Icons.layers_outlined),
     activeIcon: Icon(Icons.layers_rounded),
     label: 'Decks',
   ),
-  BottomNavigationBarItem(
+  const BottomNavigationBarItem(
     icon: Icon(Icons.smart_toy_outlined),
     activeIcon: Icon(Icons.smart_toy_rounded),
     label: 'AI',
+  ),
+  const BottomNavigationBarItem(
+    icon: Icon(Icons.emoji_events_outlined),
+    activeIcon: Icon(Icons.emoji_events),
+    label: 'Achievements',
+  ),
+  BottomNavigationBarItem(
+    icon: const CircleAvatar(
+      radius: 12,
+      backgroundImage: AssetImage('assets/profile_pictures/avataaars(15).png'), // Avatar local
+    ),
+    activeIcon: const CircleAvatar(
+      radius: 14,
+      backgroundImage: AssetImage('assets/profile_pictures/avataaars(15).png'),
+    ),
+    label: 'Profile',
   ),
 ];
 
@@ -32,6 +49,8 @@ class _SidebarState extends State<Sidebar> {
     Center(child: Text('Home Page')),
     Center(child: Text('Decks Page')),
     Center(child: Text('AI Page')),
+    Center(child: Text('Achievements Page')),
+    Center(child: Text('Profile Page')),
   ];
 
   @override
@@ -46,6 +65,7 @@ class _SidebarState extends State<Sidebar> {
               items: _navBarItems,
               currentIndex: _selectedIndex,
               onTap: (index) => setState(() => _selectedIndex = index),
+              type: BottomNavigationBarType.fixed,
             )
           : null,
       body: Row(
@@ -53,13 +73,14 @@ class _SidebarState extends State<Sidebar> {
           if (!isSmallScreen)
             NavigationRail(
               selectedIndex: _selectedIndex,
-              onDestinationSelected: (index) => setState(() => _selectedIndex = index),
+              onDestinationSelected: (index) =>
+                  setState(() => _selectedIndex = index),
               extended: isLargeScreen,
               destinations: _navBarItems
                   .map((item) => NavigationRailDestination(
                         icon: item.icon,
                         selectedIcon: item.activeIcon,
-                        label: Text(item.label!),
+                        label: Text(item.label ?? ''),
                       ))
                   .toList(),
             ),

@@ -77,6 +77,26 @@ flutter:
     - assets/logos/logo.png
     - assets/logos/logo-2.png
     - assets/avatars/avataaars.png
+    - assets/profile_pictures/avataaars.png
+    - assets/profile_pictures/avataaars(1).png
+    - assets/profile_pictures/avataaars(2).png
+    - assets/profile_pictures/avataaars(3).png
+    - assets/profile_pictures/avataaars(4).png
+    - assets/profile_pictures/avataaars(5).png
+    - assets/profile_pictures/avataaars(6).png
+    - assets/profile_pictures/avataaars(7).png
+    - assets/profile_pictures/avataaars(8).png
+    - assets/profile_pictures/avataaars(9).png
+    - assets/profile_pictures/avataaars(10).png
+    - assets/profile_pictures/avataaars(11).png
+    - assets/profile_pictures/avataaars(12).png
+    - assets/profile_pictures/avataaars(13).png
+    - assets/profile_pictures/avataaars(14).png
+    - assets/profile_pictures/avataaars(15).png
+    - assets/profile_pictures/avataaars(16).png
+    - assets/profile_pictures/avataaars(17).png
+    - assets/profile_pictures/avataaars(18).png
+    - assets/profile_pictures/avataaars(19).png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
