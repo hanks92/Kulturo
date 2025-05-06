@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/user.dart'; // Assure-toi que le chemin est correct
-import '../utils/profile_image.dart'; // Fonction utilitaire ajoutée
+import '../models/user.dart';
+import '../utils/profile_image.dart';
+import '../screens/deck_list_screen.dart'; // <-- Ajoute cette importation
 
 class Sidebar extends StatefulWidget {
   final User user;
@@ -15,14 +16,7 @@ class _SidebarState extends State<Sidebar> {
   int _selectedIndex = 0;
 
   late final List<BottomNavigationBarItem> _navBarItems;
-
-  final List<Widget> _pages = const [
-    Center(child: Text('Home Page')),
-    Center(child: Text('Decks Page')),
-    Center(child: Text('AI Page')),
-    Center(child: Text('Achievements Page')),
-    Center(child: Text('Profile Page')),
-  ];
+  late final List<Widget> _pages;
 
   @override
   void initState() {
@@ -63,6 +57,14 @@ class _SidebarState extends State<Sidebar> {
         ),
         label: 'Profile',
       ),
+    ];
+
+    _pages = [
+      const Center(child: Text('Home Page')),
+      const DeckListScreen(), // ✅ Ici tu remplaces par la vraie page
+      const Center(child: Text('AI Page')),
+      const Center(child: Text('Achievements Page')),
+      const Center(child: Text('Profile Page')),
     ];
   }
 
