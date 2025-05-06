@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart'; // Assure-toi que le chemin est correct
+import '../utils/profile_image.dart'; // Fonction utilitaire ajoutée
 
 class Sidebar extends StatefulWidget {
   final User user;
@@ -26,6 +27,10 @@ class _SidebarState extends State<Sidebar> {
   @override
   void initState() {
     super.initState();
+
+    final imagePath =
+        'assets/profile_pictures/${getProfileImage(widget.user.profileImage)}';
+
     _navBarItems = [
       const BottomNavigationBarItem(
         icon: Icon(Icons.home_outlined),
@@ -50,11 +55,11 @@ class _SidebarState extends State<Sidebar> {
       BottomNavigationBarItem(
         icon: CircleAvatar(
           radius: 12,
-          backgroundImage: AssetImage('assets/profile_pictures/${widget.user.profileImage}'),
+          backgroundImage: AssetImage(imagePath),
         ),
         activeIcon: CircleAvatar(
           radius: 14,
-          backgroundImage: AssetImage('assets/profile_pictures/${widget.user.profileImage}'),
+          backgroundImage: AssetImage(imagePath),
         ),
         label: 'Profile',
       ),
