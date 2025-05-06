@@ -1,49 +1,19 @@
 import 'package:flutter/material.dart';
+import '../models/user.dart'; // Assure-toi que le chemin est correct
 
 class Sidebar extends StatefulWidget {
-  const Sidebar({super.key});
+  final User user;
+
+  const Sidebar({super.key, required this.user});
 
   @override
   State<Sidebar> createState() => _SidebarState();
 }
 
-// Définir les éléments de navigation avec icônes, labels et avatars
-final List<BottomNavigationBarItem> _navBarItems = [
-  const BottomNavigationBarItem(
-    icon: Icon(Icons.home_outlined),
-    activeIcon: Icon(Icons.home_rounded),
-    label: 'Home',
-  ),
-  const BottomNavigationBarItem(
-    icon: Icon(Icons.layers_outlined),
-    activeIcon: Icon(Icons.layers_rounded),
-    label: 'Decks',
-  ),
-  const BottomNavigationBarItem(
-    icon: Icon(Icons.smart_toy_outlined),
-    activeIcon: Icon(Icons.smart_toy_rounded),
-    label: 'AI',
-  ),
-  const BottomNavigationBarItem(
-    icon: Icon(Icons.emoji_events_outlined),
-    activeIcon: Icon(Icons.emoji_events),
-    label: 'Achievements',
-  ),
-  BottomNavigationBarItem(
-    icon: const CircleAvatar(
-      radius: 12,
-      backgroundImage: AssetImage('assets/profile_pictures/avataaars(15).png'), // Avatar local
-    ),
-    activeIcon: const CircleAvatar(
-      radius: 14,
-      backgroundImage: AssetImage('assets/profile_pictures/avataaars(15).png'),
-    ),
-    label: 'Profile',
-  ),
-];
-
 class _SidebarState extends State<Sidebar> {
   int _selectedIndex = 0;
+
+  late final List<BottomNavigationBarItem> _navBarItems;
 
   final List<Widget> _pages = const [
     Center(child: Text('Home Page')),
@@ -52,6 +22,44 @@ class _SidebarState extends State<Sidebar> {
     Center(child: Text('Achievements Page')),
     Center(child: Text('Profile Page')),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _navBarItems = [
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.home_outlined),
+        activeIcon: Icon(Icons.home_rounded),
+        label: 'Home',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.layers_outlined),
+        activeIcon: Icon(Icons.layers_rounded),
+        label: 'Decks',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.smart_toy_outlined),
+        activeIcon: Icon(Icons.smart_toy_rounded),
+        label: 'AI',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.emoji_events_outlined),
+        activeIcon: Icon(Icons.emoji_events),
+        label: 'Achievements',
+      ),
+      BottomNavigationBarItem(
+        icon: CircleAvatar(
+          radius: 12,
+          backgroundImage: AssetImage('assets/profile_pictures/${widget.user.profileImage}'),
+        ),
+        activeIcon: CircleAvatar(
+          radius: 14,
+          backgroundImage: AssetImage('assets/profile_pictures/${widget.user.profileImage}'),
+        ),
+        label: 'Profile',
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

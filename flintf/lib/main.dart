@@ -35,11 +35,6 @@ class MyApp extends StatelessWidget {
       ),
       // On démarre avec LoginScreen au lieu de MyHomePage
       home: const LoginScreen(),
-      routes: {
-        // Redirection après login vers ton ancienne home page
-        '/home': (_) => const HomeScreen(),
-
-      },
     );
   }
 }

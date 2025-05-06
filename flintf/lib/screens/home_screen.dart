@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import '../layouts/authenticated_layout.dart';
+import '../models/user.dart';
+import '../widgets/sidebar.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final User user;
+
+  const HomeScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
-    return const AuthenticatedLayout();
+    return Sidebar(user: user);
   }
 }
