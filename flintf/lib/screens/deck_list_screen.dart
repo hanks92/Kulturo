@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import '../models/deck.dart';
 import '../services/deck_service.dart';
-import 'deck_detail_screen.dart'; // Assure-toi que ce fichier existe
+import 'deck_detail_screen.dart';
+import 'deck_create_screen.dart'; // 🔁 Nouvelle importation
 
 class DeckListScreen extends StatefulWidget {
   const DeckListScreen({super.key});
@@ -51,8 +52,18 @@ class _DeckListScreenState extends State<DeckListScreen> {
                   spacing: 10,
                   children: [
                     GFButton(
-                      onPressed: () {
-                        // Navigue vers création classique
+                      onPressed: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CreateDeckScreen(),
+                          ),
+                        );
+                        if (result == true) {
+                          setState(() {
+                            _decksFuture = _deckService.fetchDecks();
+                          });
+                        }
                       },
                       text: "Créer un deck",
                       color: const Color(0xFF4DA1A9),
