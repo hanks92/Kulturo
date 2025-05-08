@@ -5,9 +5,10 @@ import 'dart:convert';
 
 import '../models/deck.dart';
 import '../screens/review_screen.dart';
+import '../screens/flashcard_create_screen.dart';
 import '../services/auth_service.dart';
 
-const String baseUrl = 'http://localhost:8000'; // ✅ Centralisation de l'URL
+const String baseUrl = 'http://localhost:8000';
 
 class DeckDetailScreen extends StatelessWidget {
   final Deck deck;
@@ -95,7 +96,12 @@ class DeckDetailScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   GFButton(
                     onPressed: () {
-                      // Navigue vers création de flashcard
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => FlashcardCreateScreen(deck: deck),
+                        ),
+                      );
                     },
                     text: "Create Flashcard",
                     color: const Color(0xFF4DA1A9),
