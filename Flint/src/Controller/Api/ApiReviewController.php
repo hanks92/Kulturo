@@ -158,9 +158,17 @@ class ApiReviewController extends AbstractController
         $this->achievementUnlocker->unlock($user, 'session_complete');
         $this->entityManager->flush();
 
+        $nextId = null;
+        if (!empty($nextRevisions)) {
+            $next = $nextRevisions[0];
+            if ($next instanceof Revision) {
+                $nextId = $next->getId();
+            }
+        }
+
         return $this->json([
             'success' => true,
-            'nextRevisionId' => $nextRevisions[0]->getId() ?? null,
+            'nextRevisionId' => $nextId,
         ]);
     }
 }
