@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../utils/profile_image.dart';
-import '../screens/deck_list_screen.dart'; // <-- Ajoute cette importation
+import '../screens/deck_list_screen.dart';
+import '../screens/achievement_screen.dart';
 
 class Sidebar extends StatefulWidget {
   final User user;
@@ -61,9 +62,9 @@ class _SidebarState extends State<Sidebar> {
 
     _pages = [
       const Center(child: Text('Home Page')),
-      const DeckListScreen(), // ✅ Ici tu remplaces par la vraie page
+      const DeckListScreen(),
       const Center(child: Text('AI Page')),
-      const Center(child: Text('Achievements Page')),
+      const AchievementListScreen(),
       const Center(child: Text('Profile Page')),
     ];
   }
