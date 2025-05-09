@@ -6,6 +6,7 @@ import 'dart:convert';
 import '../models/deck.dart';
 import '../screens/review_screen.dart';
 import '../screens/flashcard_create_screen.dart';
+import '../screens/flashcard_list_screen.dart'; // ✅ Import ajouté
 import '../services/auth_service.dart';
 
 const String baseUrl = 'http://localhost:8000';
@@ -112,7 +113,12 @@ class DeckDetailScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   GFButton(
                     onPressed: () {
-                      // Navigue vers la liste des flashcards
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => FlashcardListScreen(deckId: deck.id),
+                        ),
+                      );
                     },
                     text: "View All Flashcards",
                     color: const Color(0xFF79D7BE),

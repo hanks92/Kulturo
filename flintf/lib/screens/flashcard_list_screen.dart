@@ -1,69 +1,76 @@
 import 'package:flutter/material.dart';
-import 'package:flip_card/flip_card.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class Flashcard {
-  final String recto;
-  final String verso;
+import '../models/flashcard.dart';
+import '../services/auth_service.dart';
 
-  Flashcard({required this.recto, required this.verso});
+class FlashcardListScreen extends StatefulWidget {
+  final int deckId;
+
+  const FlashcardListScreen({Key? key, required this.deckId}) : super(key: key);
+
+  @override
+  State<FlashcardListScreen> createState() => _FlashcardListScreenState();
 }
 
-class FlashcardListScreen extends StatelessWidget {
-  final List<Flashcard> flashcards;
+class _FlashcardListScreenState extends State<FlashcardListScreen> {
+  List<Flashcard> flashcards = [];
+  bool isLoading = true;
 
-  FlashcardListScreen({required this.flashcards});
+  @override
+  void initState() {
+    super.initState();
+    fetchFlashcards();
+  }
+
+  Future<void> fetchFlashcards() async {
+    final token = await AuthService().getToken();
+    final url = Uri.parse('http://localhost:8000/api/deck/${widget.deckId}/flashcards');
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        flashcards = data.map((item) => Flashcard.fromJson(item)).toList();
+        isLoading = false;
+      });
+    } else {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur: ${response.statusCode}')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Flashcards'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 3 / 2,
-          ),
-          itemCount: flashcards.length,
-          itemBuilder: (context, index) {
-            final flashcard = flashcards[index];
-            return FlipCard(
-              direction: FlipDirection.HORIZONTAL,
-              front: Card(
-                elevation: 4,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      flashcard.recto,
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+      appBar: AppBar(title: const Text('Flashcards')),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : flashcards.isEmpty
+              ? const Center(child: Text('Aucune flashcard trouvée.'))
+              : ListView.builder(
+                  itemCount: flashcards.length,
+                  itemBuilder: (context, index) {
+                    final card = flashcards[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: ListTile(
+                        title: Text(card.question),
+                        subtitle: Text(card.answer),
+                      ),
+                    );
+                  },
                 ),
-              ),
-              back: Card(
-                elevation: 4,
-                color: Colors.grey[200],
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      flashcard.verso,
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
     );
   }
 }
