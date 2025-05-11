@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'screens/login_screen.dart'; // On ajoute notre écran de login
 import 'services/auth_service.dart'; // Pour futur usage si nécessaire
 import 'screens/home_screen.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'; // Ajout pour la localisation
+import 'package:flutter_quill/flutter_quill.dart' show FlutterQuillLocalizations;
 
 void main() {
   runApp(const MyApp());
@@ -33,6 +35,19 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
+
+      // Ajout obligatoire pour la prise en charge de FlutterQuill
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        FlutterQuillLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('fr'), // Français
+        Locale('en'), // Anglais
+      ],
+
       // On démarre avec LoginScreen au lieu de MyHomePage
       home: const LoginScreen(),
     );

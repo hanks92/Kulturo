@@ -1,6 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
+import 'package:http/http.dart' as http;
 
 import '../models/deck.dart';
 import '../services/auth_service.dart';
@@ -16,18 +18,30 @@ class FlashcardCreateScreen extends StatefulWidget {
 
 class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _question = '';
-  String _answer = '';
+  late QuillController _questionController;
+  late QuillController _answerController;
+  final FocusNode _questionFocusNode = FocusNode();
+  final FocusNode _answerFocusNode = FocusNode();
   bool _isSubmitting = false;
 
-  Future<void> _submitForm() async {
-    final currentState = _formKey.currentState;
-    if (currentState == null || !currentState.validate()) return;
+  @override
+  void initState() {
+    super.initState();
+    _questionController = QuillController.basic();
+    _answerController = QuillController.basic();
+  }
 
-    currentState.save();
-    setState(() {
-      _isSubmitting = true;
-    });
+  @override
+  void dispose() {
+    _questionController.dispose();
+    _answerController.dispose();
+    _questionFocusNode.dispose();
+    _answerFocusNode.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submitForm() async {
+    setState(() => _isSubmitting = true);
 
     final authService = AuthService();
     final token = await authService.getToken();
@@ -36,11 +50,12 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Utilisateur non authentifié.")),
       );
-      setState(() {
-        _isSubmitting = false;
-      });
+      setState(() => _isSubmitting = false);
       return;
     }
+
+    final question = jsonEncode(_questionController.document.toDelta().toJson());
+    final answer = jsonEncode(_answerController.document.toDelta().toJson());
 
     final response = await http.post(
       Uri.parse('http://localhost:8000/api/deck/${widget.deck.id}/flashcard'),
@@ -48,24 +63,18 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
-      body: jsonEncode({
-        'question': _question,
-        'answer': _answer,
-      }),
+      body: jsonEncode({'question': question, 'answer': answer}),
     );
 
-    setState(() {
-      _isSubmitting = false;
-    });
+    setState(() => _isSubmitting = false);
 
     if (response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Flashcard créée avec succès.")),
       );
-      _formKey.currentState?.reset(); // On vide le formulaire
       setState(() {
-        _question = '';
-        _answer = '';
+        _questionController = QuillController.basic();
+        _answerController = QuillController.basic();
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -74,52 +83,70 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
     }
   }
 
+  Widget _buildEditor(String label, QuillController controller, FocusNode focusNode) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        QuillSimpleToolbar(
+          controller: controller,
+          config: QuillSimpleToolbarConfig(
+            embedButtons: FlutterQuillEmbeds.toolbarButtons(),
+            showClipboardPaste: true,
+            buttonOptions: QuillSimpleToolbarButtonOptions(
+              base: QuillToolbarBaseButtonOptions(
+                afterButtonPressed: () => focusNode.requestFocus(),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          height: 150,
+          decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+          child: QuillEditor(
+            controller: controller,
+            focusNode: focusNode,
+            scrollController: ScrollController(),
+            config: QuillEditorConfig(
+              placeholder: label,
+              padding: const EdgeInsets.all(8),
+              autoFocus: false,
+              expands: false,
+              embedBuilders: FlutterQuillEmbeds.editorBuilders(),
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Créer une flashcard'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: _isSubmitting
-            ? const Center(child: CircularProgressIndicator())
-            : Form(
+      appBar: AppBar(title: const Text('Créer une flashcard')),
+      body: _isSubmitting
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16),
+              child: Form(
                 key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      decoration: const InputDecoration(labelText: 'Question'),
-                      maxLines: 3,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer une question.';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) => _question = value ?? '',
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      decoration: const InputDecoration(labelText: 'Réponse'),
-                      maxLines: 5,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer une réponse.';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) => _answer = value ?? '',
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: _submitForm,
-                      child: const Text('Créer la flashcard'),
-                    ),
-                  ],
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _buildEditor("Question", _questionController, _questionFocusNode),
+                      _buildEditor("Réponse", _answerController, _answerFocusNode),
+                      ElevatedButton(
+                        onPressed: _submitForm,
+                        child: const Text("Créer la flashcard"),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-      ),
+            ),
     );
   }
 }
