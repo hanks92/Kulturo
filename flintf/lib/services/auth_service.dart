@@ -47,8 +47,8 @@ class AuthService {
     return false;
   }
 
-  /// Inscrit un nouvel utilisateur via l’API
-  Future<bool> register({
+  /// Inscrit un nouvel utilisateur via l’API, sauvegarde le token et retourne le User
+  Future<User?> register({
     required String email,
     required String username,
     required String password,
@@ -66,13 +66,17 @@ class AuthService {
     );
 
     if (response.statusCode == 201) {
-      print('✅ Utilisateur inscrit avec succès');
-      return true;
+      final data = jsonDecode(response.body);
+      final token = data['token'];
+      await _storage.save(token);
+
+      print('✅ Utilisateur inscrit avec succès. Token sauvegardé.');
+      return await getUser();
     }
 
     print('⛔ Échec de l’inscription: ${response.statusCode}');
     print(response.body);
-    return false;
+    return null;
   }
 
   /// Supprime le token JWT sauvegardé (logout).
