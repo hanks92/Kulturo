@@ -94,7 +94,7 @@ class _LoginFormState extends State<_LoginForm> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => HomeScreen(user: user), // ✅ Changement ici
+            builder: (_) => HomeScreen(user: user), // ✅ Redirection vers Home
           ),
         );
       } else {
@@ -195,6 +195,14 @@ class _LoginFormState extends State<_LoginForm> {
                   ),
                 ),
               ),
+            ),
+            _gap(),
+            // ✅ Ajout du lien d'inscription
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/register');
+              },
+              child: const Text("Pas encore de compte ? S'inscrire"),
             ),
           ],
         ),

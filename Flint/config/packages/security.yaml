@@ -66,23 +66,28 @@ security:
 
     # Gestion des accès aux différentes parties du site
     access_control:
-        # Routes accessibles sans connexion
-        - { path: ^/api/login_check, roles: PUBLIC_ACCESS }     # 🔐 Permet l'auth API
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }        # 🔐 Protège les autres routes API
-        - { path: ^/landing, roles: PUBLIC_ACCESS }             # Landing page
-        - { path: ^/login, roles: PUBLIC_ACCESS }               # Connexion
-        - { path: ^/register, roles: PUBLIC_ACCESS }            # Inscription
-        - { path: ^/logout, roles: PUBLIC_ACCESS }              # Déconnexion
+        # ✅ Autorise login et inscription API sans authentification
+        - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
+        - { path: ^/api/register, roles: PUBLIC_ACCESS }
 
-        # Routes protégées : nécessitent d'être connecté
+        # 🔐 Protège toutes les autres routes API
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+
+        # 🌐 Routes frontend publiques
+        - { path: ^/landing, roles: PUBLIC_ACCESS }
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/logout, roles: PUBLIC_ACCESS }
+
+        # 🔐 Routes utilisateur
         - { path: ^/app, roles: ROLE_USER }
         - { path: ^/settings, roles: ROLE_USER }
         - { path: ^/profile, roles: ROLE_USER }
 
-        # Catch-all pour toutes les autres routes
+        # 🔐 Catch-all pour les autres routes frontend
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
-        # API routes
+        # 🔐 API route utilisateur
         - { path: ^/api/me, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

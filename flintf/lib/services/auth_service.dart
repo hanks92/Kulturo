@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'storage_service.dart';
-import '../models/user.dart'; // Vérifie que ce chemin est bon
+import '../models/user.dart'; // Vérifie que ce chemin est correct
 
 class AuthService {
   final _storage = getTokenStorage();
   final String _apiLoginUrl = 'http://localhost:8000/api/login_check';
   final String _apiMeUrl = 'http://localhost:8000/api/me';
+  final String _apiRegisterUrl = 'http://localhost:8000/api/register';
 
   /// Authentifie l'utilisateur, sauvegarde le token JWT, puis vérifie qu'il est utilisable.
   Future<User?> loginAndFetchUser(String email, String password) async {
@@ -43,6 +44,34 @@ class AuthService {
     }
 
     print('⛔ Requête de login échouée: ${response.statusCode}');
+    return false;
+  }
+
+  /// Inscrit un nouvel utilisateur via l’API
+  Future<bool> register({
+    required String email,
+    required String username,
+    required String password,
+    String? profileImage,
+  }) async {
+    final response = await http.post(
+      Uri.parse(_apiRegisterUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'username': username,
+        'password': password,
+        'profileImage': profileImage,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      print('✅ Utilisateur inscrit avec succès');
+      return true;
+    }
+
+    print('⛔ Échec de l’inscription: ${response.statusCode}');
+    print(response.body);
     return false;
   }
 
