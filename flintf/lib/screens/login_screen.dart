@@ -94,7 +94,7 @@ class _LoginFormState extends State<_LoginForm> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => HomeScreen(user: user), // ✅ Redirection vers Home
+            builder: (_) => const HomeScreen(), // ✅ Redirection vers Home
           ),
         );
       } else {

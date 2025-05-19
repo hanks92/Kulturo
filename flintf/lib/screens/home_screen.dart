@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import '../models/user.dart';
-import '../widgets/sidebar.dart';
+import 'game_screen.dart'; // ✅ chemin relatif direct
 
 class HomeScreen extends StatelessWidget {
-  final User user;
-
-  const HomeScreen({super.key, required this.user});
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Sidebar(user: user);
+    return const GameScreen(); // ✅ on peut utiliser const car GameScreen est const
   }
 }

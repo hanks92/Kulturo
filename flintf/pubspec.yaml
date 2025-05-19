@@ -50,6 +50,7 @@ dependencies:
   flutter_html: ^3.0.0
   flutter_html_all: ^3.0.0
   flutter_svg: ^2.0.7
+  flame: ^1.28.1
 
 dev_dependencies:
   flutter_test:
@@ -102,6 +103,18 @@ flutter:
     - assets/profile_pictures/avataaars(17).png
     - assets/profile_pictures/avataaars(18).png
     - assets/profile_pictures/avataaars(19).png
+    - assets/images/ground/grass.png
+    - assets/images/ground/waterDrop.png
+    - assets/images/tree/treelvl1.png
+    - assets/images/tree/treelvl2.png
+    - assets/images/tree/treelvl3.png
+    - assets/images/tree/treelvl4.png
+    - assets/images/tree/treelvl5.png
+    - assets/images/fireTree/fireTreelvl1.png
+    - assets/images/fireTree/fireTreelvl2.png
+    - assets/images/fireTree/fireTreelvl3.png
+    - assets/images/achievement/flame.mp4
+    - assets/avatars/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
