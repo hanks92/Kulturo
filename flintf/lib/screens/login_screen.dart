@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../models/user.dart';
 import '../screens/home_screen.dart';
+import '../widgets/sidebar.dart';
+import '../screens/garden_screen.dart';
+
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -94,9 +97,13 @@ class _LoginFormState extends State<_LoginForm> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => const HomeScreen(), // ✅ Redirection vers Home
+            builder: (_) => Sidebar(
+              user: user,
+              child: GardenScreen(user: user),
+            ),
           ),
         );
+
       } else {
         setState(() => _error = 'Erreur lors de la récupération du profil');
       }

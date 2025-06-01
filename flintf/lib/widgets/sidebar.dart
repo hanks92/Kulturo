@@ -7,8 +7,9 @@ import '../screens/ai_screen.dart'; // ✅ Import de la page IA
 
 class Sidebar extends StatefulWidget {
   final User user;
+  final Widget? child; // ✅ Permet de surcharger le contenu principal
 
-  const Sidebar({super.key, required this.user});
+  const Sidebar({super.key, required this.user, this.child});
 
   @override
   State<Sidebar> createState() => _SidebarState();
@@ -64,7 +65,7 @@ class _SidebarState extends State<Sidebar> {
     _pages = [
       const Center(child: Text('Home Page')),
       const DeckListScreen(),
-      const AIScreen(), // ✅ Utilisation de la vraie page IA
+      const AIScreen(),
       const AchievementListScreen(),
       const Center(child: Text('Profile Page')),
     ];
@@ -102,7 +103,9 @@ class _SidebarState extends State<Sidebar> {
                   .toList(),
             ),
           const VerticalDivider(thickness: 1, width: 1),
-          Expanded(child: _pages[_selectedIndex]),
+          Expanded(
+            child: widget.child ?? _pages[_selectedIndex], // ✅ Support de contenu personnalisé
+          ),
         ],
       ),
     );
