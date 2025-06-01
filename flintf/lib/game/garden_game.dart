@@ -15,30 +15,38 @@ class GardenGame extends FlameGame {
 
     final origin = Vector2.zero();
 
-    // 📍 Tuile en haut [0,0] et en bas [5,5]
-    final topIso = gridToIso(0, 0, 0, 0);
-    final bottomIso = gridToIso(gridWidth - 1, gridHeight - 1, 0, 0);
-
-    // 📐 Dimensions en pixels du jardin (approximativement en Y)
-    final isoHeight = bottomIso.y - topIso.y;
-
     // 🎯 Marges souhaitées
     const paddingTop = 150.0;
     const paddingBottom = 100.0;
+    const paddingLeft = 100.0;
+    const paddingRight = 100.0;
 
-    // 📏 Zoom calculé pour que le jardin tienne entre les deux marges verticales
+    // 📍 Coordonnées isométriques des coins du jardin
+    final topIso = gridToIso(0, 0, 0, 0);
+    final bottomIso = gridToIso(gridWidth - 1, gridHeight - 1, 0, 0);
+    final leftIso = gridToIso(0, gridHeight - 1, 0, 0);
+    final rightIso = gridToIso(gridWidth - 1, 0, 0, 0);
+
+    // 📐 Dimensions du jardin en pixels
+    final isoHeight = bottomIso.y - topIso.y;
+    final isoWidth = rightIso.x - leftIso.x;
+
+    // 📏 Dimensions disponibles à l'écran
     final availableHeight = size.y - paddingTop - paddingBottom;
-    final zoom = availableHeight / isoHeight;
+    final availableWidth = size.x - paddingLeft - paddingRight;
 
-    // 🔍 Centre horizontalement (milieu de la grille)
+    // 🔍 Calcul du zoom optimal
+    final zoomY = availableHeight / isoHeight;
+    final zoomX = availableWidth / isoWidth;
+    final zoom = zoomX < zoomY ? zoomX : zoomY;
+
+    // 📌 Calcul du centrage horizontal et vertical
     final centerTileX = gridWidth ~/ 2;
     final centerTileY = gridHeight ~/ 2;
     final isoCenterX = (centerTileX - centerTileY) * tileWidth / 2;
-
-    // 🧮 Ajuste la position Y pour que la tuile du haut corresponde à paddingTop
-    final screenCenterY = size.y / 2;
     final adjustedIsoCenterY = topIso.y + isoHeight / 2;
 
+    // 🎥 Caméra avec zoom et centrage
     final camera = CameraComponent.withFixedResolution(
       world: world,
       width: size.x,
