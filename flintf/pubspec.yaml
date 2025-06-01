@@ -51,6 +51,7 @@ dependencies:
   flutter_html_all: ^3.0.0
   flutter_svg: ^2.0.7
   flame: ^1.28.1
+  flame_svg: ^1.11.11
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +81,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
 
   assets:
+    - assets/images/
     - assets/logos/logo.png
     - assets/logos/logo-2.png
     - assets/avatars/avataaars.png
@@ -103,18 +105,120 @@ flutter:
     - assets/profile_pictures/avataaars(17).png
     - assets/profile_pictures/avataaars(18).png
     - assets/profile_pictures/avataaars(19).png
-    - assets/images/ground/grass.png
-    - assets/images/ground/waterDrop.png
-    - assets/images/tree/treelvl1.png
-    - assets/images/tree/treelvl2.png
-    - assets/images/tree/treelvl3.png
-    - assets/images/tree/treelvl4.png
-    - assets/images/tree/treelvl5.png
-    - assets/images/fireTree/fireTreelvl1.png
-    - assets/images/fireTree/fireTreelvl2.png
-    - assets/images/fireTree/fireTreelvl3.png
     - assets/images/achievement/flame.mp4
     - assets/avatars/
+    - assets/images/svg/g1341.svg
+    - assets/images/svg/g1342.svg
+    - assets/images/svg/g1343.svg
+    - assets/images/svg/g1344.svg
+    - assets/images/svg/g1345.svg
+    - assets/images/svg/g1346.svg
+    - assets/images/svg/g1347.svg
+    - assets/images/svg/g1348.svg
+    - assets/images/svg/g1349.svg
+    - assets/images/svg/g1350.svg
+    - assets/images/svg/g1351.svg
+    - assets/images/svg/g1352.svg
+    - assets/images/svg/g1353.svg
+    - assets/images/svg/g1354.svg
+    - assets/images/svg/g1355.svg
+    - assets/images/svg/g1356.svg
+    - assets/images/svg/g1357.svg
+    - assets/images/svg/g1358.svg
+    - assets/images/svg/g1359.svg
+    - assets/images/svg/g1360.svg
+    - assets/images/svg/g1361.svg
+    - assets/images/svg/g1362.svg
+    - assets/images/svg/g1363.svg
+    - assets/images/svg/g1364.svg
+    - assets/images/svg/g1365.svg
+    - assets/images/svg/g1366.svg
+    - assets/images/svg/g1367.svg
+    - assets/images/svg/g1368.svg
+    - assets/images/svg/g1369.svg
+    - assets/images/svg/g1370.svg
+    - assets/images/svg/g1371.svg
+    - assets/images/svg/g1372.svg
+    - assets/images/svg/g1373.svg
+    - assets/images/svg/g1374.svg
+    - assets/images/svg/g1375.svg
+    - assets/images/svg/g1376.svg
+    - assets/images/svg/g1377.svg
+    - assets/images/svg/g1378.svg
+    - assets/images/svg/g1379.svg
+    - assets/images/svg/g1380.svg
+    - assets/images/svg/g1381.svg
+    - assets/images/svg/g1382.svg
+    - assets/images/svg/g1383.svg
+    - assets/images/svg/g1384.svg
+    - assets/images/svg/g1385.svg
+    - assets/images/svg/g1386.svg
+    - assets/images/svg/g1387.svg
+    - assets/images/svg/g1388.svg
+    - assets/images/svg/g1389.svg
+    - assets/images/svg/g1390.svg
+    - assets/images/svg/g1391.svg
+    - assets/images/svg/g1392.svg
+    - assets/images/svg/g1393.svg
+    - assets/images/svg/g1394.svg
+    - assets/images/svg/g1395.svg
+    - assets/images/svg/g1396.svg
+    - assets/images/svg/g1397.svg
+    - assets/images/svg/g1398.svg
+    - assets/images/svg/g1399.svg
+    - assets/images/svg/g1400.svg
+    - assets/images/svg/g1401.svg
+    - assets/images/svg/g1402.svg
+    - assets/images/svg/g1403.svg
+    - assets/images/svg/g1404.svg
+    - assets/images/svg/g1405.svg
+    - assets/images/svg/g1406.svg
+    - assets/images/svg/g1407.svg
+    - assets/images/svg/g1408.svg
+    - assets/images/svg/g1409.svg
+    - assets/images/svg/g1410.svg
+    - assets/images/svg/g1411.svg
+    - assets/images/svg/g1412.svg
+    - assets/images/svg/g1413.svg
+    - assets/images/svg/g1414.svg
+    - assets/images/svg/g1415.svg
+    - assets/images/svg/g1416.svg
+    - assets/images/svg/g1417.svg
+    - assets/images/svg/g1418.svg
+    - assets/images/svg/g1419.svg
+    - assets/images/svg/g1420.svg
+    - assets/images/svg/g1421.svg
+    - assets/images/svg/g1422.svg
+    - assets/images/svg/g1423.svg
+    - assets/images/svg/g1424.svg
+    - assets/images/svg/g1425.svg
+    - assets/images/svg/g1426.svg
+    - assets/images/svg/g1427.svg
+    - assets/images/svg/g1428.svg
+    - assets/images/svg/g1429.svg
+    - assets/images/svg/g1430.svg
+    - assets/images/svg/g1431.svg
+    - assets/images/svg/g1432.svg
+    - assets/images/svg/g1433.svg
+    - assets/images/svg/g1434.svg
+    - assets/images/svg/g1435.svg
+    - assets/images/svg/g1436.svg
+    - assets/images/svg/g1437.svg
+    - assets/images/svg/g1438.svg
+    - assets/images/svg/g1439.svg
+    - assets/images/svg/g1440.svg
+    - assets/images/svg/g1441.svg
+    - assets/images/svg/g1442.svg
+    - assets/images/svg/g1443.svg
+    - assets/images/svg/g1444.svg
+    - assets/images/svg/g1445.svg
+    - assets/images/svg/g1446.svg
+    - assets/images/svg/g1447.svg
+    - assets/images/svg/g1448.svg
+    - assets/images/svg/g1449.svg
+    - assets/images/svg/g1450.svg
+    - assets/images/svg/g1451.svg
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
