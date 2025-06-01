@@ -3,7 +3,9 @@ import '../models/user.dart';
 import '../utils/profile_image.dart';
 import '../screens/deck_list_screen.dart';
 import '../screens/achievement_screen.dart';
-import '../screens/ai_screen.dart'; // ✅ Import de la page IA
+import '../screens/ai_screen.dart';
+import '../screens/garden_screen.dart';
+
 
 class Sidebar extends StatefulWidget {
   final User user;
@@ -63,7 +65,7 @@ class _SidebarState extends State<Sidebar> {
     ];
 
     _pages = [
-      const Center(child: Text('Home Page')),
+      GardenScreen(user: widget.user),
       const DeckListScreen(),
       const AIScreen(),
       const AchievementListScreen(),

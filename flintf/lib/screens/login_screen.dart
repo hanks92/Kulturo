@@ -97,12 +97,10 @@ class _LoginFormState extends State<_LoginForm> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => Sidebar(
-              user: user,
-              child: GardenScreen(user: user),
-            ),
+            builder: (_) => Sidebar(user: user), // ✅ Laisse la Sidebar contrôler le contenu
           ),
         );
+
 
       } else {
         setState(() => _error = 'Erreur lors de la récupération du profil');
