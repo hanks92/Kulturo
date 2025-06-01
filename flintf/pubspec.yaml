@@ -52,10 +52,14 @@ dependencies:
   flutter_svg: ^2.0.7
   flame: ^1.28.1
   flame_svg: ^1.11.11
+  vector_graphics: ^1.1.18
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  vector_graphics_compiler: ^1.1.7
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -218,6 +222,118 @@ flutter:
     - assets/images/svg/g1449.svg
     - assets/images/svg/g1450.svg
     - assets/images/svg/g1451.svg
+
+    - assets/images/png/g1341.png
+    - assets/images/png/g1342.png
+    - assets/images/png/g1343.png
+    - assets/images/png/g1344.png
+    - assets/images/png/g1345.png
+    - assets/images/png/g1346.png
+    - assets/images/png/g1347.png
+    - assets/images/png/g1348.png
+    - assets/images/png/g1349.png
+    - assets/images/png/g1350.png
+    - assets/images/png/g1351.png
+    - assets/images/png/g1352.png
+    - assets/images/png/g1353.png
+    - assets/images/png/g1354.png
+    - assets/images/png/g1355.png
+    - assets/images/png/g1356.png
+    - assets/images/png/g1357.png
+    - assets/images/png/g1358.png
+    - assets/images/png/g1359.png
+    - assets/images/png/g1360.png
+    - assets/images/png/g1361.png
+    - assets/images/png/g1362.png
+    - assets/images/png/g1363.png
+    - assets/images/png/g1364.png
+    - assets/images/png/g1365.png
+    - assets/images/png/g1366.png
+    - assets/images/png/g1367.png
+    - assets/images/png/g1368.png
+    - assets/images/png/g1369.png
+    - assets/images/png/g1370.png
+    - assets/images/png/g1371.png
+    - assets/images/png/g1372.png
+    - assets/images/png/g1373.png
+    - assets/images/png/g1374.png
+    - assets/images/png/g1375.png
+    - assets/images/png/g1376.png
+    - assets/images/png/g1377.png
+    - assets/images/png/g1378.png
+    - assets/images/png/g1379.png
+    - assets/images/png/g1380.png
+    - assets/images/png/g1381.png
+    - assets/images/png/g1382.png
+    - assets/images/png/g1383.png
+    - assets/images/png/g1384.png
+    - assets/images/png/g1385.png
+    - assets/images/png/g1386.png
+    - assets/images/png/g1387.png
+    - assets/images/png/g1388.png
+    - assets/images/png/g1389.png
+    - assets/images/png/g1390.png
+    - assets/images/png/g1391.png
+    - assets/images/png/g1392.png
+    - assets/images/png/g1393.png
+    - assets/images/png/g1394.png
+    - assets/images/png/g1395.png
+    - assets/images/png/g1396.png
+    - assets/images/png/g1397.png
+    - assets/images/png/g1398.png
+    - assets/images/png/g1399.png
+    - assets/images/png/g1400.png
+    - assets/images/png/g1401.png
+    - assets/images/png/g1402.png
+    - assets/images/png/g1403.png
+    - assets/images/png/g1404.png
+    - assets/images/png/g1405.png
+    - assets/images/png/g1406.png
+    - assets/images/png/g1407.png
+    - assets/images/png/g1408.png
+    - assets/images/png/g1409.png
+    - assets/images/png/g1410.png
+    - assets/images/png/g1411.png
+    - assets/images/png/g1412.png
+    - assets/images/png/g1413.png
+    - assets/images/png/g1414.png
+    - assets/images/png/g1415.png
+    - assets/images/png/g1416.png
+    - assets/images/png/g1417.png
+    - assets/images/png/g1418.png
+    - assets/images/png/g1419.png
+    - assets/images/png/g1420.png
+    - assets/images/png/g1421.png
+    - assets/images/png/g1422.png
+    - assets/images/png/g1423.png
+    - assets/images/png/g1424.png
+    - assets/images/png/g1425.png
+    - assets/images/png/g1426.png
+    - assets/images/png/g1427.png
+    - assets/images/png/g1428.png
+    - assets/images/png/g1429.png
+    - assets/images/png/g1430.png
+    - assets/images/png/g1431.png
+    - assets/images/png/g1432.png
+    - assets/images/png/g1433.png
+    - assets/images/png/g1434.png
+    - assets/images/png/g1435.png
+    - assets/images/png/g1436.png
+    - assets/images/png/g1437.png
+    - assets/images/png/g1438.png
+    - assets/images/png/g1439.png
+    - assets/images/png/g1440.png
+    - assets/images/png/g1441.png
+    - assets/images/png/g1442.png
+    - assets/images/png/g1443.png
+    - assets/images/png/g1444.png
+    - assets/images/png/g1445.png
+    - assets/images/png/g1446.png
+    - assets/images/png/g1447.png
+    - assets/images/png/g1448.png
+    - assets/images/png/g1449.png
+    - assets/images/png/g1450.png
+    - assets/images/png/g1451.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
