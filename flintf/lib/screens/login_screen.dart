@@ -3,7 +3,6 @@ import '../services/auth_service.dart';
 import '../models/user.dart';
 import '../screens/home_screen.dart';
 import '../widgets/sidebar.dart';
-import '../screens/garden_screen.dart';
 
 
 class LoginScreen extends StatelessWidget {
