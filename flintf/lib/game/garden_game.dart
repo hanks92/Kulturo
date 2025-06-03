@@ -3,11 +3,14 @@ import 'package:flame/game.dart';
 
 const double tileWidth = 1024;
 const double tileHeight = 666;
-const double tileOverlap = 150; 
+const double tileOverlap = 150;
 
 class GardenGame extends FlameGame {
   static const int gridWidth = 6;
   static const int gridHeight = 6;
+
+  late Map<String, int> userInventory;
+  String selectedPlant = 'tree1';
 
   @override
   Future<void> onLoad() async {
@@ -65,6 +68,46 @@ class GardenGame extends FlameGame {
         ));
       }
     }
+  }
+
+  void loadInventory(Map<String, int> inventory) {
+    userInventory = inventory;
+  }
+
+  void selectPlant(String plantType) {
+    selectedPlant = plantType;
+  }
+
+  bool plantAt(int x, int y) {
+    final stock = userInventory[selectedPlant] ?? 0;
+    if (stock <= 0) return false;
+
+    userInventory[selectedPlant] = stock - 1;
+    final pos = gridToIso(x, y);
+
+    loadSprite('png/$selectedPlant.png').then((sprite) {
+      final comp = SpriteComponent(
+        sprite: sprite,
+        position: pos,
+        size: Vector2(tileWidth, tileHeight),
+        anchor: Anchor.bottomCenter,
+      );
+      add(comp);
+    });
+
+    return true;
+  }
+
+  List<Map<String, dynamic>> exportPlantedData() {
+    return [
+      {
+        'x': gridWidth ~/ 2,
+        'y': gridHeight ~/ 2,
+        'type': selectedPlant,
+        'level': 1,
+        'waterReceived': 0,
+      }
+    ];
   }
 
   Vector2 gridToIso(int x, int y) {
