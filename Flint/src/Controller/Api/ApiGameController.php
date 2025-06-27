@@ -1,4 +1,4 @@
-<?php
+<?php /*
 
 namespace App\Controller\Api;
 
@@ -117,3 +117,4 @@ class ApiGameController extends AbstractController
         return new JsonResponse(['success' => true]);
     }
 }
+*/
