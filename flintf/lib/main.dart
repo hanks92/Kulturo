@@ -5,7 +5,6 @@ import 'screens/home_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // Ajout pour la localisation
 import 'package:flutter_quill/flutter_quill.dart' show FlutterQuillLocalizations;
 import 'screens/register_screen.dart'; // Ajout de l'écran d'inscription
-import 'screens/game_screen.dart';
 
 
 void main() {
@@ -56,7 +55,6 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const LoginScreen(), // On démarre ici
         '/register': (context) => const RegisterScreen(), // Ajout écran inscription
-        '/game': (context) => const GameScreen(),
         // '/home': (context) => const HomeScreen(), ❌ Supprimé car nécessite un paramètre dynamique
       },
     );
