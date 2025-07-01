@@ -5,6 +5,7 @@ import '../screens/deck_list_screen.dart';
 import '../screens/achievement_screen.dart';
 import '../screens/ai_screen.dart';
 import '../screens/game_screen.dart';
+import '../screens/home_screen.dart';
 
 
 class Sidebar extends StatefulWidget {
@@ -65,7 +66,7 @@ class _SidebarState extends State<Sidebar> {
     ];
 
     _pages = [
-      const GameScreen(),
+      const HomeScreen(),
       const DeckListScreen(),
       const AIScreen(),
       const AchievementListScreen(),

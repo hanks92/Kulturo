@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'game_screen.dart'; // ✅ chemin relatif direct
+// Placeholder home page displayed after login.
+// The full game remains available through the '/game' route.
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const GameScreen(); // ✅ on peut utiliser const car GameScreen est const
+    // Display an empty scaffold for now while the game is hidden.
+    return const Scaffold(
+      body: SizedBox.expand(),
+    );
   }
 }
